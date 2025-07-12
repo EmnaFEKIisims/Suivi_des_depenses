@@ -1,0 +1,116 @@
+<div class="create-employee-container container my-5">
+  <h2 class="mb-4 text-primary text-center">Add New Employee</h2>
+
+  <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" novalidate>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label for="cin" class="form-label">CIN</label>
+        <input id="cin" type="text" formControlName="cin" class="form-control" [class.is-invalid]="employeeForm.get('cin')?.invalid && employeeForm.get('cin')?.touched" />
+        <div *ngIf="employeeForm.get('cin')?.invalid && employeeForm.get('cin')?.touched" class="invalid-feedback">
+          CIN is required (min 6 characters).
+        </div>
+      </div>
+
+      
+      <div class="col-md-8">
+        <label for="fullName" class="form-label">Full Name</label>
+        <input id="fullName" type="text" formControlName="fullName" class="form-control" [class.is-invalid]="employeeForm.get('fullName')?.invalid && employeeForm.get('fullName')?.touched" />
+        <div *ngIf="employeeForm.get('fullName')?.invalid && employeeForm.get('fullName')?.touched" class="invalid-feedback">
+          Full Name is required.
+        </div>
+      </div>
+
+      
+      <div class="col-md-6">
+        <label for="email" class="form-label">Email</label>
+        <input id="email" type="email" formControlName="email" class="form-control" [class.is-invalid]="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched" />
+        <div *ngIf="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched" class="invalid-feedback">
+          Valid Email is required.
+        </div>
+      </div>
+
+      
+      <div class="col-md-6">
+        <label for="phoneNumber" class="form-label">Phone Number</label>
+        <input id="phoneNumber" type="text" formControlName="phoneNumber" class="form-control" [class.is-invalid]="employeeForm.get('phoneNumber')?.invalid && employeeForm.get('phoneNumber')?.touched" />
+        <div *ngIf="employeeForm.get('phoneNumber')?.invalid && employeeForm.get('phoneNumber')?.touched" class="invalid-feedback">
+          Phone Number is required.
+        </div>
+      </div>
+
+      
+      <div class="col-md-12">
+        <label for="address" class="form-label">Address</label>
+        <input id="address" type="text" formControlName="address" class="form-control" />
+      </div>
+
+      
+      <div class="col-md-4">
+        <label for="gender" class="form-label">Gender</label>
+        <select id="gender" formControlName="gender" class="form-select" [class.is-invalid]="employeeForm.get('gender')?.invalid && employeeForm.get('gender')?.touched">
+          <option value="" disabled>Select Gender</option>
+          <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
+        </select>
+        <div *ngIf="employeeForm.get('gender')?.invalid && employeeForm.get('gender')?.touched" class="invalid-feedback">
+          Gender is required.
+        </div>
+      </div>
+
+      
+      <div class="col-md-4">
+        <label for="hireDate" class="form-label">Hire Date</label>
+        <input id="hireDate" type="date" formControlName="hireDate" class="form-control" [class.is-invalid]="employeeForm.get('hireDate')?.invalid && employeeForm.get('hireDate')?.touched" />
+        <div *ngIf="employeeForm.get('hireDate')?.invalid && employeeForm.get('hireDate')?.touched" class="invalid-feedback">
+          Hire Date is required.
+        </div>
+      </div>
+
+      
+      <div class="col-md-4">
+        <label for="department" class="form-label">Department</label>
+        <select id="department" formControlName="department" class="form-select" [class.is-invalid]="employeeForm.get('department')?.invalid && employeeForm.get('department')?.touched">
+          <option value="" disabled>Select Department</option>
+          <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+        </select>
+        <div *ngIf="employeeForm.get('department')?.invalid && employeeForm.get('department')?.touched" class="invalid-feedback">
+          Department is required.
+        </div>
+      </div>
+
+      
+      <div class="col-md-6">
+        <label for="occupation" class="form-label">Occupation</label>
+        <select id="occupation" formControlName="occupation" class="form-select" [disabled]="occupations.length === 0" [class.is-invalid]="employeeForm.get('occupation')?.invalid && employeeForm.get('occupation')?.touched">
+          <option value="" disabled>Select Occupation</option>
+          <option *ngFor="let occ of occupations" [value]="occ">{{ occ }}</option>
+        </select>
+        <div *ngIf="employeeForm.get('occupation')?.invalid && employeeForm.get('occupation')?.touched" class="invalid-feedback">
+          Occupation is required.
+        </div>
+      </div>
+
+      
+      <div class="col-md-6">
+        <label for="username" class="form-label">Username</label>
+        <input id="username" type="text" formControlName="username" class="form-control" [class.is-invalid]="employeeForm.get('username')?.invalid && employeeForm.get('username')?.touched" />
+        <div *ngIf="employeeForm.get('username')?.invalid && employeeForm.get('username')?.touched" class="invalid-feedback">
+          Username is required.
+        </div>
+      </div>
+
+      
+      <div class="col-md-6">
+        <label for="password" class="form-label">Password</label>
+        <input id="password" type="password" formControlName="password" class="form-control" [class.is-invalid]="employeeForm.get('password')?.invalid && employeeForm.get('password')?.touched" />
+        <div *ngIf="employeeForm.get('password')?.invalid && employeeForm.get('password')?.touched" class="invalid-feedback">
+          Password is required (min 6 characters).
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-primary px-5" [disabled]="employeeForm.invalid">Save</button>
+    </div>
+  </form>
+</div>
+
