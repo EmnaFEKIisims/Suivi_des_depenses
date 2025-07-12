@@ -3,6 +3,7 @@ package com.example.infrastructure.persistence;
 
 import com.example.core.employee.Employee;
 import com.example.core.employee.EmployeeRepoPort;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
@@ -57,6 +58,7 @@ public class EmployeeJpaAdapter implements EmployeeRepoPort {
     }
 
     @Override
+    @Transactional
     public void deleteEmployeeByCIN(String CIN) {
         employeeRepo.deleteByCIN(CIN);
     }
