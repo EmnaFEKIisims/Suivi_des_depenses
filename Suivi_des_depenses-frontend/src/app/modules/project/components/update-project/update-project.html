@@ -1,0 +1,135 @@
+<div class="project-form-container">
+  <h2>Update Project</h2>
+  
+  <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+    <!-- Error message display -->
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Basic Project Information -->
+    <div class="form-group">
+      <label for="name">Project Name</label>
+      <input type="text" id="name" formControlName="name" class="form-control">
+      <div *ngIf="projectForm.get('name')?.invalid && projectForm.get('name')?.touched" class="error-message">
+        Project name is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="clientName">Client Name</label>
+      <input type="text" id="clientName" formControlName="clientName" class="form-control">
+      <div *ngIf="projectForm.get('clientName')?.invalid && projectForm.get('clientName')?.touched" class="error-message">
+        Client name is required
+      </div>
+    </div>
+
+    <!-- Dates -->
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="startDate">Start Date</label>
+        <input type="date" id="startDate" formControlName="startDate" class="form-control">
+        <div *ngIf="projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched" class="error-message">
+          Start date is required
+        </div>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="endDate">End Date (Optional)</label>
+        <input type="date" id="endDate" formControlName="endDate" class="form-control">
+      </div>
+    </div>
+
+    <!-- Status and Priority -->
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="status">Status</label>
+        <select id="status" formControlName="status" class="form-control">
+          <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+        </select>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="priority">Priority</label>
+        <select id="priority" formControlName="priority" class="form-control">
+          <option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Budget and Progress -->
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="budget">Budget</label>
+        <input type="number" id="budget" formControlName="budget" class="form-control" min="0">
+        <div *ngIf="projectForm.get('budget')?.invalid && projectForm.get('budget')?.touched" class="error-message">
+          Valid budget is required (minimum 0)
+        </div>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="progress">Progress (%)</label>
+        <input type="number" id="progress" formControlName="progress" class="form-control" min="0" max="100">
+        <div *ngIf="projectForm.get('progress')?.invalid && projectForm.get('progress')?.touched" class="error-message">
+          Progress must be between 0 and 100
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" formControlName="description" class="form-control" rows="3"></textarea>
+    </div>
+
+    <!-- Project Leader -->
+    <div class="form-group">
+      <label for="projectLeaderCin">Project Leader</label>
+      <select id="projectLeaderCin" formControlName="projectLeaderCin" class="form-control">
+        <option value="">Select Project Leader</option>
+        <option *ngFor="let employee of employees" [value]="employee.cin">
+          {{ employee.fullName }} ({{ employee.cin }})
+        </option>
+      </select>
+      <div *ngIf="projectForm.get('projectLeaderCin')?.invalid && projectForm.get('projectLeaderCin')?.touched" class="error-message">
+        Project leader is required
+      </div>
+    </div> <!-- This closing div was missing -->
+
+    <!-- Team Members -->
+    <div class="form-group">
+      <label>Team Members</label>
+      <div formArrayName="teamMembersCins">
+        <div *ngFor="let member of teamMembersCins.controls; let i = index" class="team-member-row">
+          <div class="input-group">
+            <select [formControlName]="i" class="form-control">
+              <option value="">Select Team Member</option>
+              <option *ngFor="let employee of employees" [value]="employee.cin">
+                {{ employee.fullName }} ({{ employee.cin }})
+              </option>
+            </select>
+            <div class="input-group-append">
+              <button type="button" class="btn btn-danger" (click)="removeTeamMemberControl(i)" [disabled]="teamMembersCins.length <= 1">
+                Remove
+              </button>
+            </div>
+          </div>
+          <div *ngIf="teamMembersCins.at(i).invalid && teamMembersCins.at(i).touched" class="error-message">
+            Team member is required
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary add-member-btn" (click)="addTeamMemberControl()">
+        Add Team Member
+      </button>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="projectForm.invalid || isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        {{ isLoading ? 'Updating...' : 'Update Project' }}
+      </button>
+      <button type="button" class="btn btn-outline-secondary" (click)="router.navigate(['/projects'])">
+        Cancel
+      </button>
+    </div>
+  </form>
+</div>

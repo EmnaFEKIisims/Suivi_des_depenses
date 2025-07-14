@@ -1,0 +1,23 @@
+package com.example.infrastructure.persistence;
+
+import com.example.core.employee.Employee;
+import com.example.core.project.Project;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface ProjectRepo extends JpaRepository<Project, String> {
+
+
+    List<Project> findByStatus(String status);
+
+    List<Project> findByProjectLeaderId(Long id);
+
+    List<Project> findByClientNameContainingIgnoreCase(String clientName);
+
+    Optional<Project> findByIdProject(Long idProject);
+
+
+
+}

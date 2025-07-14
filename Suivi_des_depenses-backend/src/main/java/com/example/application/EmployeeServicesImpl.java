@@ -1,4 +1,4 @@
-package com.example.application.employee;
+package com.example.application;
 
 import com.example.core.employee.Employee;
 import com.example.core.employee.EmployeeRepoPort;
