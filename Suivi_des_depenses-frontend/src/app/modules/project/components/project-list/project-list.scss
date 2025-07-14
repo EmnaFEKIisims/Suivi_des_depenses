@@ -1,0 +1,28 @@
+.list-projects-container {
+  h2 {
+    font-weight: bold;
+  }
+
+  table {
+    th,
+    td {
+      vertical-align: middle;
+    }
+
+    th {
+      font-weight: 600;
+    }
+
+    i.bi {
+      font-size: 1.1rem;
+    }
+
+    .btn {
+      padding: 0.25rem 0.5rem;
+    }
+  }
+
+  .modal-content {
+    border-radius: 1rem;
+  }
+}

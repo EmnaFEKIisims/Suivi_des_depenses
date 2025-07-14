@@ -1,0 +1,143 @@
+<div class="create-project-container container my-5">
+  <h2 class="mb-4 text-primary text-center">Add New Project</h2>
+
+  <!-- Error Message Display -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" novalidate>
+    <div class="row g-3">
+      <!-- Project Name -->
+      <div class="col-md-6">
+        <label for="name" class="form-label">Project Name</label>
+        <input id="name" type="text" formControlName="name" class="form-control"
+          [class.is-invalid]="projectForm.get('name')?.invalid && projectForm.get('name')?.touched">
+        <div *ngIf="projectForm.get('name')?.invalid && projectForm.get('name')?.touched" class="invalid-feedback">
+          Project name is required
+        </div>
+      </div>
+
+      <!-- Client Name -->
+      <div class="col-md-6">
+        <label for="clientName" class="form-label">Client Name</label>
+        <input id="clientName" type="text" formControlName="clientName" class="form-control"
+          [class.is-invalid]="projectForm.get('clientName')?.invalid && projectForm.get('clientName')?.touched">
+        <div *ngIf="projectForm.get('clientName')?.invalid && projectForm.get('clientName')?.touched" class="invalid-feedback">
+          Client name is required
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="col-md-12">
+        <label for="description" class="form-label">Description</label>
+        <textarea id="description" formControlName="description" class="form-control" rows="3"></textarea>
+      </div>
+
+      <!-- Dates -->
+      <div class="col-md-6">
+        <label for="startDate" class="form-label">Start Date</label>
+        <input id="startDate" type="date" formControlName="startDate" class="form-control"
+          [class.is-invalid]="projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched">
+        <div *ngIf="projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched" class="invalid-feedback">
+          Start date is required
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label for="endDate" class="form-label">End Date</label>
+        <input id="endDate" type="date" formControlName="endDate" class="form-control">
+      </div>
+
+      <!-- Status and Priority -->
+      <div class="col-md-4">
+        <label for="status" class="form-label">Status</label>
+        <select id="status" formControlName="status" class="form-select"
+          [class.is-invalid]="projectForm.get('status')?.invalid && projectForm.get('status')?.touched">
+          <option value="" disabled>Select Status</option>
+          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+        </select>
+        <div *ngIf="projectForm.get('status')?.invalid && projectForm.get('status')?.touched" class="invalid-feedback">
+          Status is required
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <label for="priority" class="form-label">Priority</label>
+        <select id="priority" formControlName="priority" class="form-select"
+          [class.is-invalid]="projectForm.get('priority')?.invalid && projectForm.get('priority')?.touched">
+          <option value="" disabled>Select Priority</option>
+          <option *ngFor="let p of priorities" [value]="p">{{ p }}</option>
+        </select>
+        <div *ngIf="projectForm.get('priority')?.invalid && projectForm.get('priority')?.touched" class="invalid-feedback">
+          Priority is required
+        </div>
+      </div>
+
+      <!-- Budget -->
+      <div class="col-md-4">
+        <label for="budget" class="form-label">Budget</label>
+        <input id="budget" type="number" formControlName="budget" class="form-control"
+          [class.is-invalid]="projectForm.get('budget')?.invalid && projectForm.get('budget')?.touched">
+        <div *ngIf="projectForm.get('budget')?.invalid && projectForm.get('budget')?.touched" class="invalid-feedback">
+          Budget must be ≥ 0
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="col-md-6">
+        <label for="progress" class="form-label">Progress (%)</label>
+        <input id="progress" type="number" formControlName="progress" class="form-control"
+          [class.is-invalid]="projectForm.get('progress')?.invalid && projectForm.get('progress')?.touched">
+        <div *ngIf="projectForm.get('progress')?.invalid && projectForm.get('progress')?.touched" class="invalid-feedback">
+          Progress must be between 0-100
+        </div>
+      </div>
+
+      <!-- Project Leader -->
+      <div class="col-md-6">
+        <label for="projectLeaderCin" class="form-label">Project Leader</label>
+        <select id="projectLeaderCin" formControlName="projectLeaderCin" class="form-select"
+          [class.is-invalid]="projectForm.get('projectLeaderCin')?.invalid && projectForm.get('projectLeaderCin')?.touched">
+          <option value="" disabled selected>Select a leader</option>
+          <option *ngFor="let emp of employees" [value]="emp.cin">{{ emp.fullName }}</option>
+        </select>
+        <div *ngIf="projectForm.get('projectLeaderCin')?.invalid && projectForm.get('projectLeaderCin')?.touched" class="invalid-feedback">
+          Project leader is required
+        </div>
+      </div>
+
+      <!-- Team Members -->
+      <div class="col-md-12">
+        <label class="form-label">Team Members</label>
+        <div formArrayName="teamMembersCins">
+          <div *ngFor="let member of teamMembersCins.controls; let i = index" class="input-group mb-2">
+            <select class="form-select" [formControlName]="i">
+              <option value="" disabled>Select a member</option>
+              <option *ngFor="let emp of employees" [value]="emp.cin">{{ emp.fullName }}</option>
+            </select>
+            <button type="button" class="btn btn-outline-danger" 
+                    (click)="removeTeamMemberControl(i)"
+                    *ngIf="teamMembersCins.length > 1">
+              Remove
+            </button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-primary mt-2" (click)="addTeamMemberControl()">
+          + Add Team Member
+        </button>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-primary px-5" [disabled]="projectForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Create Project</span>
+        <span *ngIf="isLoading">
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+          Creating...
+        </span>
+      </button>
+    </div>
+  </form>
+</div>
