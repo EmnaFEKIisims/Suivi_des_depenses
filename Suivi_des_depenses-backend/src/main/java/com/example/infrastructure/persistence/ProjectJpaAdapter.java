@@ -32,21 +32,18 @@ public class ProjectJpaAdapter implements ProjectRepoPort {
     @Override
     public Project updateProject(Long id, Project project) {
 
-        String idProject = String.valueOf(id);
-
-        if (!projectRepository.existsById(idProject)) {
-            throw new RuntimeException("Project with id " + idProject + " not found");
+        if (!projectRepository.existsById(id)) {
+            throw new RuntimeException("Project with id " + id + " not found");
         }
 
-        project.setIdProject(idProject);
+        project.setIdProject(id);
         return projectRepository.save(project);
     }
 
     @Override
     @Transactional
     public void deleteProject(Long id) {
-        String idProject = String.valueOf(id);
-        projectRepository.deleteById(idProject);
+        projectRepository.deleteById(id);
     }
 
     @Override
@@ -55,8 +52,8 @@ public class ProjectJpaAdapter implements ProjectRepoPort {
     }
 
     @Override
-    public List<Project> getProjectByProjectLeaderId(Long id) {
-        return projectRepository.findByProjectLeaderId(id);
+    public List<Project> getProjectByProjectLeader_CIN(String cin) {
+        return projectRepository.findByProjectLeader_CIN(cin);
     }
 
     @Override
