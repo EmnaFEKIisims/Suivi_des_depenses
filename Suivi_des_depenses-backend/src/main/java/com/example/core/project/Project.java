@@ -51,14 +51,17 @@ public class Project {
     @ManyToMany
     @JoinTable(
             name = "project_employee",
-            joinColumns = @JoinColumn(name = "project_id"),
-            inverseJoinColumns = @JoinColumn(name = "employee_id")
+            joinColumns = @JoinColumn(name = "project_id", referencedColumnName = "idProject"),
+            inverseJoinColumns = @JoinColumn(name = "employee_cin", referencedColumnName = "CIN")
     )
     private List<Employee> teamMembers;
 
     @ManyToOne
-    @JoinColumn(name = "project_leader_id")
+    @JoinColumn(name = "project_leader_cin", referencedColumnName = "CIN")
     private Employee projectLeader;
 
 
+    public String getProjectLeaderCin() {
+        return projectLeader != null ? projectLeader.getCIN() : null;
+    }
 }

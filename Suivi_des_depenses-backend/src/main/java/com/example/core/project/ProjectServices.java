@@ -15,7 +15,7 @@ public interface ProjectServices {
 
     List<Project> getProjectByStatus(String status);
 
-    List<Project> getProjectByProjectLeaderId(Long id);
+    List<Project> getProjectByProjectLeader_CIN(String cin);
 
     List<Project> getProjectByClientNameContainingIgnoreCase(String clientName);
 

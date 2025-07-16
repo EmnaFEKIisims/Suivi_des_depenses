@@ -49,8 +49,11 @@
           <td>{{ project.priority }}</td>
           <td>{{ project.progress }}%</td>
           <td>{{ project.projectLeader.fullName || 'N/A' }}</td>
-          <td class="text-center">
+          <td class="actions-cell">
             <div class="action-buttons">
+              <button class="btn btn-sm btn-outline-primary me-2" (click)="viewDetails(project)" title="View Details">
+                <i class="bi bi-eye-fill"></i>
+              </button>
               <button class="btn btn-sm btn-outline-primary me-2" (click)="editProject(project.idProject)" title="Edit">
                 <i class="bi bi-pencil-fill"></i>
               </button>

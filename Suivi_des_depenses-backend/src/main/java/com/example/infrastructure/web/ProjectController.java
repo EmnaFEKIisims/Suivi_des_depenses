@@ -57,9 +57,9 @@ public class ProjectController {
     }
 
 
-    @GetMapping("/getProjectsByLeader/{leaderId}")
-    public List<Project> getProjectsByLeader(@PathVariable Long leaderId) {
-        return projectServices.getProjectByProjectLeaderId(leaderId);
+    @GetMapping("/getProjectsByLeader/{leaderCIN}")
+    public List<Project> getProjectsByLeader(@PathVariable String leaderId) {
+        return projectServices.getProjectByProjectLeader_CIN( leaderId);
     }
 
 

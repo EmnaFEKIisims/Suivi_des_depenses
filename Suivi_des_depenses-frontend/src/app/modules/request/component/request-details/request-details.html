@@ -1,0 +1,141 @@
+<div class="container my-5">
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger text-center">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Request Details Card -->
+  <div *ngIf="request && !isLoading" class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-0">Expense Request Details</h2>
+        <button class="btn btn-light" (click)="goBack()">
+          <i class="bi bi-arrow-left"></i> Back
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <h4 class="text-primary">General Information</h4>
+          <div class="table-responsive">
+            <table class="table table-borderless">
+              <tbody>
+                <tr>
+                  <th scope="row">Request ID</th>
+                  <td>{{ request.idRequest }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Status</th>
+                  <td>
+                    <span class="badge" [ngClass]="{
+                      'bg-secondary': request.status === 'DRAFT',
+                      'bg-primary': request.status === 'SUBMITTED',
+                      'bg-success': request.status === 'APPROVED',
+                      'bg-warning': request.status === 'REJECTED',
+                      'bg-info': request.status === 'PROCESSED'
+                    }">
+                      {{ request.status }}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">Employee</th>
+                  <td>{{ request.employee?.fullName || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Project</th>
+                  <td>{{ request.project?.name || 'N/A' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <h4 class="text-primary">Mission Details</h4>
+          <div class="table-responsive">
+            <table class="table table-borderless">
+              <tbody>
+                <tr>
+                  <th scope="row">Mission</th>
+                  <td>{{ request.mission }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Location</th>
+                  <td>{{ request.missionLocation }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Start Date</th>
+                  <td>{{ request.startDate | date }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Return Date</th>
+                  <td>{{ request.returnDate | date }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Reimbursement Method</th>
+                  <td>{{ request.reimbursementMethod }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expense Details -->
+      <div class="mb-4">
+        <h4 class="text-primary">Expense Details</h4>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Currency</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let detail of request.details">
+                <td>{{ detail.description }}</td>
+                <td>{{ detail.amount | currency:detail.currency }}</td>
+                <td>{{ detail.currencyDescription }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="table-active">
+                <th colspan="2">Total Amount</th>
+                <td>{{ getTotalAmount() }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex justify-content-end gap-2">
+        <button *ngIf="request.status === 'SUBMITTED'" 
+                class="btn btn-success" 
+                (click)="approveRequest()">
+          <i class="bi bi-check-circle"></i> Approve
+        </button>
+        <button *ngIf="request.status === 'SUBMITTED'" 
+                class="btn btn-danger" 
+                (click)="rejectRequest()">
+          <i class="bi bi-x-circle"></i> Reject
+        </button>
+        <button class="btn btn-primary" [routerLink]="['/requests/edit', request.idRequest]">
+          <i class="bi bi-pencil"></i> Edit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

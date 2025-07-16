@@ -13,9 +13,13 @@ public interface EmployeeRepoPort {
     Optional<Employee> findEmployeeByPhoneNumber(String phoneNumber);
     boolean existsByCIN(String CIN);
     boolean existsByUsername(String username);
-    boolean existsByEmail(String email);
-    void deleteEmployeeByCIN(String CIN);
     Employee updateEmployee(Employee employee);
+    Optional<Employee> findTopByOrderByReferenceDesc();
+    Optional<Employee> findByReference(String reference);
+    List<Employee> findByStatus(String status);
+    public List<Department> getAllDepartments();
+    public List<String> getOccupationsByDepartment(Department department);
+    List<Employee> findEmployeesByDepartment(Department department);
 
 
 }

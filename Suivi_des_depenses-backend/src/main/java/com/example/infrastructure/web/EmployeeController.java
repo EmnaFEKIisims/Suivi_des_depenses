@@ -3,8 +3,10 @@ package com.example.infrastructure.web;
 import com.example.core.employee.Employee;
 import com.example.core.employee.EmployeeServices;
 import org.springframework.http.ResponseEntity;
+import com.example.core.employee.Department;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -34,11 +36,6 @@ public class EmployeeController {
         return ResponseEntity.ok(updatedEmployee);
     }
 
-    @DeleteMapping("/deleteEmployee/{CIN}")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable String CIN) {
-        employeeServices.deleteEmployee(CIN);
-        return ResponseEntity.noContent().build();
-    }
 
     @GetMapping("/getEmployeeByCIN/{CIN}")
     public ResponseEntity<Employee> getEmployeeByCIN(@PathVariable String CIN) {
@@ -66,4 +63,49 @@ public class EmployeeController {
         List<Employee> employees = employeeServices.getAllEmployees();
         return ResponseEntity.ok(employees);
     }
+
+
+    @GetMapping("/getEmployeesByStatus/{status}")
+    public List<Employee> getEmployeesByStatus(@PathVariable String status) {
+        return employeeServices.getEmployeesByStatus(status);
+    }
+
+
+    @GetMapping("/departments")
+    public List<Department> getDepartments() {
+        return employeeServices.getAllDepartments();
+    }
+
+    @GetMapping("/departments/{department}/occupations")
+    public List<String> getOccupationsByDepartment(@PathVariable Department department) {
+        return employeeServices.getOccupationsByDepartment(department);
+    }
+
+
+
+
+
+    // Récupérer un employé par sa référence
+    @GetMapping("/reference/{reference}")
+    public ResponseEntity<Employee> getEmployeeByReference(@PathVariable String reference) {
+        Optional<Employee> employeeOpt = employeeServices.getEmployeeByReference(reference);
+        return employeeOpt.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
+    @GetMapping("/department/{departmentName}")
+    public ResponseEntity<List<Employee>> getEmployeesByDepartment(@PathVariable String departmentName) {
+        Department department;
+        try {
+            department = Department.valueOf(departmentName.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<Employee> employees = employeeServices.getEmployeesByDepartment(department);
+        return ResponseEntity.ok(employees);
+    }
+
+
 }

@@ -6,11 +6,28 @@ import java.util.Optional;
 public interface EmployeeServices {
 
     Employee addEmployee(Employee employee);
+
     Employee updateEmployee(Employee employee);
-    void deleteEmployee(String cin);
-    Optional<Employee> getEmployeeByCIN(String cin);
-    Optional<Employee> getEmployeeByUserName(String username);
-    Optional<Employee> getEmployeeByPhoneNumber(String phoneNumber);
+
     List<Employee> getAllEmployees();
+
+    Optional<Employee> getEmployeeByCIN(String cin);
+
+    Optional<Employee> getEmployeeByUserName(String username);
+
+    Optional<Employee> getEmployeeByPhoneNumber(String phoneNumber);
+
+
+    Optional<Employee> getTopEmployeeByReferenceDesc();
+
+    Optional<Employee> getEmployeeByReference(String reference);
+
+    List<Employee> getEmployeesByStatus(String status);
+
+    List<Department> getAllDepartments();
+
+    List<String> getOccupationsByDepartment(Department department);
+
+    List<Employee> getEmployeesByDepartment(Department department);
 
 }

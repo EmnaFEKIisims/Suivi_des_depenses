@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Gender, Department } from '../../models/employee.model';
+import { Router } from '@angular/router';
+import { EmployeeService } from '../../employee-service';
+import { Gender, Department, Employee } from '../../models/employee.model';
 import { OCCUPATIONS_BY_DEPARTMENT } from '../../models/occupations-by-department.ts';
-
 
 @Component({
   selector: 'app-create-employee',
@@ -11,13 +12,19 @@ import { OCCUPATIONS_BY_DEPARTMENT } from '../../models/occupations-by-departmen
   styleUrl: './create-employee.scss'
 })
 export class CreateEmployee implements OnInit {
-  employeeForm!: FormGroup;
 
+  employeeForm!: FormGroup;
   genders = Object.values(Gender);
   departments = Object.values(Department);
   occupations: string[] = [];
+  isLoading = false;
+  errorMessage: string = '';
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private employeeService: EmployeeService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.employeeForm = this.fb.group({
@@ -34,23 +41,35 @@ export class CreateEmployee implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
-    
     this.occupations = [];
 
-    
+    // Dynamically update occupations based on department
     this.employeeForm.get('department')?.valueChanges.subscribe((dept: Department) => {
-  this.occupations = dept ? OCCUPATIONS_BY_DEPARTMENT[dept] || [] : [];
-  this.employeeForm.get('occupation')?.setValue('');
+      this.occupations = dept ? OCCUPATIONS_BY_DEPARTMENT[dept] || [] : [];
+      this.employeeForm.get('occupation')?.setValue('');
     });
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.employeeForm.invalid) {
       this.employeeForm.markAllAsTouched();
       return;
     }
-    const newEmployee = this.employeeForm.value;
-    console.log('Employee to create:', newEmployee);
-    
+
+    const newEmployee: Employee = this.employeeForm.value;
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.employeeService.createEmployee(newEmployee).subscribe({
+      next: () => {
+        alert('✅ Employee created successfully!');
+        this.router.navigate(['/employees']);
+      },
+      error: (err) => {
+        console.error('❌ Error creating employee:', err);
+        this.errorMessage = 'Failed to create employee. Please try again.';
+        this.isLoading = false;
+      }
+    });
   }
 }

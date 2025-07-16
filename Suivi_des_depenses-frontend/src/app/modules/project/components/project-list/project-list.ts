@@ -72,5 +72,11 @@ export class ProjectList implements OnInit {
 
 
 
+  viewDetails(project: Project): void {
+  this.router.navigate(['/projects', project.idProject]);
+}
+
+
+
 
 }
