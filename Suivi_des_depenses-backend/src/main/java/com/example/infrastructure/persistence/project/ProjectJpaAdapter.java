@@ -1,4 +1,4 @@
-package com.example.infrastructure.persistence;
+package com.example.infrastructure.persistence.project;
 
 import com.example.core.project.Project;
 import com.example.core.project.ProjectRepoPort;

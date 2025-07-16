@@ -1,4 +1,4 @@
-package com.example.infrastructure.persistence;
+package com.example.infrastructure.persistence.employee;
 
 import com.example.core.employee.Department;
 import com.example.core.employee.Employee;

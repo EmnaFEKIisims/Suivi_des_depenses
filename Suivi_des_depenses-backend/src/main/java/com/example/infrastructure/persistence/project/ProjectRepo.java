@@ -1,6 +1,5 @@
-package com.example.infrastructure.persistence;
+package com.example.infrastructure.persistence.project;
 
-import com.example.core.employee.Employee;
 import com.example.core.project.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 

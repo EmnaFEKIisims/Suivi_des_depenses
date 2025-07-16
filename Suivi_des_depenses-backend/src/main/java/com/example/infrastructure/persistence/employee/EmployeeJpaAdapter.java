@@ -1,4 +1,4 @@
-package com.example.infrastructure.persistence;
+package com.example.infrastructure.persistence.employee;
 
 
 import com.example.core.employee.Employee;
@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import com.example.core.employee.Department;
 import java.util.Map;
-import java.util.List;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 @Component
 public class EmployeeJpaAdapter implements EmployeeRepoPort {

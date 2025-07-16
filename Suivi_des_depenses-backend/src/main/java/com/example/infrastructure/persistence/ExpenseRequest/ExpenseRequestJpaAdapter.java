@@ -1,10 +1,9 @@
-package com.example.infrastructure.persistence;
+package com.example.infrastructure.persistence.ExpenseRequest;
 
 import com.example.core.expenseRequest.*;
 import com.example.core.expenseRequest.ExpenseRequestRepoPort;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
