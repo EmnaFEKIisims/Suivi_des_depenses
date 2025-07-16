@@ -1,8 +1,10 @@
 package com.example.infrastructure.persistence;
 
+import com.example.core.employee.Department;
 import com.example.core.employee.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface EmployeeRepo extends JpaRepository<Employee, Long> {
@@ -12,6 +14,10 @@ public interface EmployeeRepo extends JpaRepository<Employee, Long> {
     boolean existsByCIN(String CIN);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
-    void deleteByCIN(String CIN);
+    Optional<Employee> findByReference(String reference);
+    Optional<Employee> findTopByOrderByReferenceDesc();
+    List<Employee> findByStatus(String status);
+    List<Employee> findByDepartment(Department department);
+
 
 }
