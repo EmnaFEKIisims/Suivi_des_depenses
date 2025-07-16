@@ -1,0 +1,255 @@
+<div class="create-request-container container my-5">
+  <h2 class="mb-4 text-primary text-center">Create New Expense Request</h2>
+
+  <!-- Error Alert -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" novalidate>
+    <div class="row g-3">
+      
+      <!-- CIN Input -->
+      <div class="col-md-6">
+        <label for="cinInput" class="form-label">Employee CIN</label>
+        <div class="input-group">
+          <input 
+            id="cinInput" 
+            type="text" 
+            formControlName="cinInput" 
+            class="form-control" 
+            [class.is-invalid]="requestForm.get('cinInput')?.invalid && requestForm.get('cinInput')?.touched"
+          />
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            (click)="fetchEmployeeByCin()" 
+            [disabled]="!requestForm.get('cinInput')?.valid"
+          >
+            Search
+          </button>
+          <div *ngIf="requestForm.get('cinInput')?.invalid && requestForm.get('cinInput')?.touched" class="invalid-feedback">
+            CIN is required
+          </div>
+        </div>
+      </div>
+
+      <!-- Employee Display -->
+      <div class="col-md-6">
+        <label class="form-label">Employee</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          [value]="requestForm.get('employee')?.value?.fullName || 'Not selected'" 
+          readonly
+        />
+      </div>
+
+      <!-- Project Selection -->
+      <div class="col-md-6">
+        <label for="projectId" class="form-label">Project</label>
+        <select 
+          id="projectId" 
+          formControlName="projectId" 
+          class="form-select"
+          [class.is-invalid]="requestForm.get('projectId')?.invalid && requestForm.get('projectId')?.touched"
+        >
+          <option value="" disabled>Select Project</option>
+          <option *ngFor="let project of projects" [value]="project.idProject">
+            {{ project.name }}
+          </option>
+        </select>
+        <div *ngIf="requestForm.get('projectId')?.invalid && requestForm.get('projectId')?.touched" class="invalid-feedback">
+          Project is required
+        </div>
+      </div>
+
+      <!-- Mission Details -->
+      <div class="col-md-6">
+        <label for="mission" class="form-label">Mission</label>
+        <input 
+          id="mission" 
+          type="text" 
+          formControlName="mission" 
+          class="form-control"
+          [class.is-invalid]="requestForm.get('mission')?.invalid && requestForm.get('mission')?.touched"
+        />
+        <div *ngIf="requestForm.get('mission')?.invalid && requestForm.get('mission')?.touched" class="invalid-feedback">
+          Mission is required
+        </div>
+      </div>
+
+      <!-- Dates -->
+      <div class="col-md-6">
+        <label for="startDate" class="form-label">Start Date</label>
+        <input 
+          id="startDate" 
+          type="date" 
+          formControlName="startDate" 
+          class="form-control"
+          [class.is-invalid]="requestForm.get('startDate')?.invalid && requestForm.get('startDate')?.touched"
+        />
+      </div>
+
+      <div class="col-md-6">
+        <label for="returnDate" class="form-label">Return Date</label>
+        <input 
+          id="returnDate" 
+          type="date" 
+          formControlName="returnDate" 
+          class="form-control"
+          [class.is-invalid]="requestForm.get('returnDate')?.invalid && requestForm.get('returnDate')?.touched"
+        />
+      </div>
+
+      <!-- Location -->
+      <div class="col-md-6">
+        <label for="missionLocation" class="form-label">Location</label>
+        <input 
+          id="missionLocation" 
+          type="text" 
+          formControlName="missionLocation" 
+          class="form-control"
+          [class.is-invalid]="requestForm.get('missionLocation')?.invalid && requestForm.get('missionLocation')?.touched"
+        />
+        <div *ngIf="requestForm.get('missionLocation')?.invalid && requestForm.get('missionLocation')?.touched" class="invalid-feedback">
+          Location is required
+        </div>
+      </div>
+
+      <!-- Reimbursement Method -->
+      <div class="col-md-6">
+        <label class="form-label">Reimbursement Method</label>
+        <div class="form-check">
+          <input 
+            type="radio" 
+            id="cash" 
+            class="form-check-input" 
+            formControlName="reimbursementMethod" 
+            value="CASH_DESK"
+          />
+          <label for="cash" class="form-check-label">Cash Desk</label>
+        </div>
+        <div class="form-check">
+          <input 
+            type="radio" 
+            id="ava" 
+            class="form-check-input" 
+            formControlName="reimbursementMethod" 
+            value="AVA"
+          />
+          <label for="ava" class="form-check-label">AVA</label>
+        </div>
+      </div>
+
+      <!-- Expense Details Table -->
+      <div class="col-12 mt-4">
+        <h4>Expense Details</h4>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Currency</th>
+                <th>Currency Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="expenseDetails">
+              <tr *ngFor="let detail of expenseDetails.controls; let i = index" [formGroupName]="i">
+                <td>
+                  <input 
+                    type="text" 
+                    formControlName="description" 
+                    class="form-control"
+                    [class.is-invalid]="detail.get('description')?.invalid && detail.get('description')?.touched"
+                  />
+                </td>
+                <td>
+                  <input 
+                    type="number" 
+                    formControlName="amount" 
+                    class="form-control"
+                    [class.is-invalid]="detail.get('amount')?.invalid && detail.get('amount')?.touched"
+                  />
+                </td>
+                <td>
+                  <select 
+                    formControlName="currency" 
+                    class="form-select"
+                    [disabled]="isCurrencyDisabled(detail.get('currency')?.value)"
+                  >
+                    <option value="" disabled>Select Currency</option>
+                    <option 
+                      *ngFor="let curr of currencies" 
+                      [value]="curr.code"
+                      [disabled]="isCurrencyDisabled(curr.code)"
+                    >
+                      {{ curr.code }}
+                    </option>
+                  </select>
+                </td>
+                <td>
+                  <input 
+                    type="text" 
+                    [value]="getCurrencyDescription(detail.get('currency')?.value)" 
+                    class="form-control" 
+                    readonly
+                  />
+                </td>
+                <td>
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-danger btn-sm" 
+                    (click)="removeExpenseDetail(i)"
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Currency Limit Error Message -->
+        <div *ngIf="errorMessage" class="alert alert-danger mt-2">
+          {{ errorMessage }}
+        </div>
+        
+        <button 
+          type="button" 
+          class="btn btn-outline-primary mt-2" 
+          (click)="addExpenseDetail()"
+        >
+          Add Expense
+        </button>
+      </div>
+
+      <!-- Totals Display -->
+      <div class="col-12 mt-3">
+        <h5>Total Amounts</h5>
+        <div *ngIf="getCurrencyKeys().length > 0" class="alert alert-info">
+          <div *ngFor="let currency of getCurrencyKeys()">
+            {{ currency }} {{ totalByCurrency[currency] | number:'1.2-2' }}
+          </div>
+        </div>
+        <div *ngIf="getCurrencyKeys().length === 0" class="alert alert-warning">
+          No expenses added
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="col-12 text-center mt-4">
+        <button 
+          type="submit" 
+          class="btn btn-primary px-5" 
+          [disabled]="requestForm.invalid || isLoading"
+        >
+          <span *ngIf="!isLoading">Submit Request</span>
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm"></span>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
