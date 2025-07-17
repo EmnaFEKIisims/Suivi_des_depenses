@@ -32,6 +32,9 @@ public class ExpenseRequest {
     @Column(name = "idRequest", nullable = false, unique = true)
     private Long idRequest;
 
+    @Column(name = "reference", nullable = false, unique = true)
+    private String reference;
+
     @ManyToOne
     @JoinColumn(name = "employee_cin", referencedColumnName = "CIN", nullable = false)
     private Employee employee;
@@ -68,7 +71,7 @@ public class ExpenseRequest {
 
     @Transient
     @JsonIgnore
-    private Map<String, Double> amountByCurrency;
+    private Map<Currency, Double> amountByCurrency;
 
 
     @JsonProperty("totalAmounts")
@@ -77,7 +80,7 @@ public class ExpenseRequest {
             calculateTotals();
         }
         return amountByCurrency.entrySet().stream()
-                .map(e -> e.getKey() + " " + e.getValue())
+                .map(e -> e.getKey().name() + " " + e.getValue())
                 .collect(Collectors.joining(", "));
     }
 
@@ -85,7 +88,7 @@ public class ExpenseRequest {
         this.amountByCurrency = new HashMap<>();
         if (this.details != null) {
             for (ExpenseDetails detail : this.details) {
-                String currency = detail.getCurrency();
+                Currency currency = detail.getCurrency();
                 Double amount = detail.getAmount();
                 amountByCurrency.merge(currency, amount, Double::sum);
             }

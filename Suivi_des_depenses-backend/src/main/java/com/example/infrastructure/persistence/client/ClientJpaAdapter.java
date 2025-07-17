@@ -53,6 +53,13 @@ public class ClientJpaAdapter implements ClientRepoPort {
     @Override
     public Client updateClient(Client client) {
         return clientRepo.save(client);
+
+    }
+
+
+    @Override
+    public Optional<Client> getLastClientByReference() {
+        return clientRepo.findTopByReferenceStartingWithOrderByReferenceDesc("Cl");
     }
 
 

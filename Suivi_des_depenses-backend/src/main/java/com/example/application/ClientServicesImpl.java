@@ -21,6 +21,7 @@ public class ClientServicesImpl implements ClientServices {
 
     @Override
     public Client createClient(Client client) {
+
         return clientRepoPort.saveClient(client);
     }
 
@@ -56,6 +57,18 @@ public class ClientServicesImpl implements ClientServices {
     @Override
     public Client updateClient(Client client) {
         return clientRepoPort.updateClient(client);
+    }
+
+
+    public String generateClientReference() {
+        Optional<Client> lastClientOpt = clientRepoPort.getLastClientByReference();
+        if (lastClientOpt.isPresent()) {
+            String lastReference = lastClientOpt.get().getReference();
+            int lastNumber = Integer.parseInt(lastReference.substring(2)); // skip "Cl"
+            return "Cl" + (lastNumber + 1);
+        } else {
+            return "Cl1000";
+        }
     }
 
 }

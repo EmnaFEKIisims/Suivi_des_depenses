@@ -19,11 +19,9 @@ public interface ClientRepo extends JpaRepository<Client, Long> {
 
     List<Client> findByAddress(String address);
 
-    boolean existsByReference(String reference);
-
-    boolean existsByName(String name);
-
     List<Client> findByNameContainingIgnoreCase(String name);
+
+    Optional<Client> findTopByReferenceStartingWithOrderByReferenceDesc(String prefix);
 
 
 

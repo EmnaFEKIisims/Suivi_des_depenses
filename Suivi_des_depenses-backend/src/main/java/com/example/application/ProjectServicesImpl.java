@@ -1,5 +1,6 @@
 package com.example.application;
 
+import com.example.core.client.Client;
 import com.example.core.project.Project;
 import com.example.core.project.ProjectRepoPort;
 import com.example.core.project.ProjectServices;
@@ -30,20 +31,25 @@ public class ProjectServicesImpl implements ProjectServices {
     @Override
     public Project createProject(Project project) {
         try {
-            // Create new project instance and copy basic fields
+
             Project newProject = new Project();
+            newProject.setReference(project.getReference());
             newProject.setName(project.getName());
             newProject.setDescription(project.getDescription());
             newProject.setStartDate(project.getStartDate());
             newProject.setEndDate(project.getEndDate());
             newProject.setStatus(project.getStatus());
             newProject.setBudget(project.getBudget());
-            newProject.setClientName(project.getClientName());
             newProject.setPriority(project.getPriority());
             newProject.setProgress(project.getProgress());
 
-            // First save without relationships
+
             Project savedProject = projectRepoPort.createProject(newProject);
+
+
+            if (project.getClient() != null) {
+                savedProject.setClient(project.getClient());
+            }
 
             // Then set relationships if they exist
             if (project.getProjectLeader() != null) {
@@ -74,11 +80,14 @@ public class ProjectServicesImpl implements ProjectServices {
         existing.setEndDate(project.getEndDate());
         existing.setStatus(project.getStatus());
         existing.setBudget(project.getBudget());
-        existing.setClientName(project.getClientName());
         existing.setPriority(project.getPriority());
         existing.setProgress(project.getProgress());
 
-        // Handle relationships carefully
+        if (project.getClient() != null) {
+            existing.setClient(project.getClient());
+        }
+
+
         if (project.getProjectLeader() != null) {
             existing.setProjectLeader(project.getProjectLeader());
         }
@@ -90,10 +99,7 @@ public class ProjectServicesImpl implements ProjectServices {
         return projectRepoPort.updateProject(id, existing);
     }
 
-    @Override
-    public void deleteProject(Long id) {
-        projectRepoPort.deleteProject(id);
-    }
+
 
     @Override
     public List<Project> getProjectByStatus(String status) {
@@ -113,4 +119,32 @@ public class ProjectServicesImpl implements ProjectServices {
     public Optional<Project> getProjectByIdProject(Long idProject) {
         return projectRepoPort.getProjectByIdProject(idProject);
     }
+
+
+    @Override
+    public List<Project> getProjectsByClient(Client client) {
+        return projectRepoPort.findByClient(client);
+    }
+
+    @Override
+    public Optional<Project> getProjectByReference(String reference) {
+        return projectRepoPort.findByReference(reference);
+    }
+
+
+
+
+    @Override
+    public String generateProjectReference() {
+        Optional<Project> last = projectRepoPort.getLastProjectByReference();
+        if (last.isPresent()) {
+            String lastRef = last.get().getReference();
+            int number = Integer.parseInt(lastRef.substring(2));
+            return "PR" + (number + 1);
+        } else {
+            return "PR1000";
+        }
+    }
+
+
 }

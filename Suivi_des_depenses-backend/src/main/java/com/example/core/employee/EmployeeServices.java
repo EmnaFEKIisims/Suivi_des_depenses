@@ -30,4 +30,6 @@ public interface EmployeeServices {
 
     List<Employee> getEmployeesByDepartment(Department department);
 
+    String generateReference();
+
 }

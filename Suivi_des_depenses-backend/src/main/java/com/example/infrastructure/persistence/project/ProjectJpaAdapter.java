@@ -1,5 +1,6 @@
 package com.example.infrastructure.persistence.project;
 
+import com.example.core.client.Client;
 import com.example.core.project.Project;
 import com.example.core.project.ProjectRepoPort;
 import jakarta.transaction.Transactional;
@@ -40,11 +41,6 @@ public class ProjectJpaAdapter implements ProjectRepoPort {
         return projectRepository.save(project);
     }
 
-    @Override
-    @Transactional
-    public void deleteProject(Long id) {
-        projectRepository.deleteById(id);
-    }
 
     @Override
     public List<Project> getProjectByStatus(String status) {
@@ -65,4 +61,26 @@ public class ProjectJpaAdapter implements ProjectRepoPort {
     public Optional<Project> getProjectByIdProject(Long idProject) {
         return projectRepository.findByIdProject(idProject);
     }
+
+
+
+    @Override
+    public List<Project> findByClient(Client client) {
+        return projectRepository.findByClient(client);
+    }
+
+    @Override
+    public Optional<Project> findByReference(String reference) {
+        return projectRepository.findByReference(reference);
+    }
+
+
+    @Override
+    public Optional<Project> getLastProjectByReference() {
+        return projectRepository.findTopByReferenceStartingWithOrderByReferenceDesc("PR");
+    }
+
+
+
+
 }

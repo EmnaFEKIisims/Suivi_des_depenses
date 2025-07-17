@@ -15,8 +15,6 @@ public class EmployeeServicesImpl implements EmployeeServices {
 
     @Override
     public Employee addEmployee(Employee employee) {
-        String newReference = generateReference();
-        employee.setReference(newReference);
         employee.setStatus(EmployeeStatus.ACTIVE);
         employee.setExitDate(null);
         return employeeRepoPort.saveEmployee(employee);
@@ -58,7 +56,9 @@ public class EmployeeServicesImpl implements EmployeeServices {
 
 
 
-    private String generateReference() {
+
+    @Override
+    public String generateReference() {
         Optional<Employee> lastEmployee = employeeRepoPort.findTopByOrderByReferenceDesc();
         int nextNumber = 1001;
         if (lastEmployee.isPresent()) {

@@ -9,7 +9,6 @@ public interface ExpenseRequestRepoPort {
     ExpenseRequest saveRequest(ExpenseRequest request);
     Optional<ExpenseRequest> findRequestById(Long id);
     List<ExpenseRequest> findAllRequests();
-    void deleteRequestById(Long id);
 
     ExpenseDetails saveDetail(ExpenseDetails detail);
     Optional<ExpenseDetails> findDetailById(Long id);
@@ -23,8 +22,11 @@ public interface ExpenseRequestRepoPort {
     void updateRequestStatus(Long requestId, ExpenseStatus newStatus);
     void updateDetailAmount(Long detailId, Double newAmount);
 
-    Map<String, Double> sumAmountsByCurrencyForRequest(Long requestId);
+    Map<Currency, Double> sumAmountsByCurrencyForRequest(Long requestId);
     Double sumAllAmountsByEmployeeAndStatus(String employeeCin, ExpenseStatus status);
     List<ExpenseDetails> findDetailsByRequestIdAndCurrency(Long requestId, String currency);
+    List<ExpenseRequest> findRequestsByCurrency(Currency currency);
+    Optional<ExpenseRequest> findTopByOrderByReferenceDesc();
+     String generateReference();
 
 }

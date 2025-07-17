@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/clients")
+@CrossOrigin(origins = "http://localhost:4200")
 public class ClientController {
 
 
@@ -63,6 +64,14 @@ public class ClientController {
     public ResponseEntity<Client> updateClient(@RequestBody Client client) {
         Client updatedClient = clientServices.updateClient(client);
         return ResponseEntity.ok(updatedClient);
+    }
+
+
+
+    @GetMapping("/generate-reference")
+    public ResponseEntity<String> generateReference() {
+        String reference = clientServices.generateClientReference();
+        return ResponseEntity.ok(reference);
     }
 
 

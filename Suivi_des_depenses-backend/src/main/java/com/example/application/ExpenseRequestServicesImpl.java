@@ -38,11 +38,7 @@ public class ExpenseRequestServicesImpl implements ExpenseRequestServices {
         return requestRepoPort.saveRequest(existing);
     }
 
-    @Override
-    @Transactional
-    public void deleteExpenseRequest(Long id) {
-        requestRepoPort.deleteRequestById(id);
-    }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -92,14 +88,14 @@ public class ExpenseRequestServicesImpl implements ExpenseRequestServices {
     // ============= Business Logic =============
     @Override
     @Transactional(readOnly = true)
-    public Map<String, Double> calculateTotalAmountsByCurrency(Long requestId) {
+    public Map<Currency, Double> calculateTotalAmountsByCurrency(Long requestId) {
         return requestRepoPort.sumAmountsByCurrencyForRequest(requestId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public void validateCurrencyLimit(Long requestId, int maxCurrencies) throws BusinessException {
-        Map<String, Double> amountsByCurrency = calculateTotalAmountsByCurrency(requestId);
+        Map<Currency, Double> amountsByCurrency = calculateTotalAmountsByCurrency(requestId);
         if (amountsByCurrency.size() > maxCurrencies) {
             throw new BusinessException("Maximum " + maxCurrencies + " currencies allowed per request");
         }
@@ -159,6 +155,15 @@ public class ExpenseRequestServicesImpl implements ExpenseRequestServices {
         return requestRepoPort.findByStatus(status);
     }
 
+    @Override
+    public List<ExpenseRequest> getRequestsByCurrency(Currency currency) {
+        return requestRepoPort.findRequestsByCurrency(currency);
+    }
+
+    @Override
+    public String generateReference() {
+        return requestRepoPort.generateReference();
+    }
 
 
 

@@ -23,8 +23,9 @@ public class ExpenseDetails {
     @Column(nullable = false)
     private Double amount;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String currency; // USD, EUR, TND...
+    private Currency currency;
 
     @Column(name = "currency_description")
     private String currencyDescription;
@@ -33,5 +34,10 @@ public class ExpenseDetails {
     @JoinColumn(name = "expense_request_id")
     @JsonBackReference
     private ExpenseRequest expenseRequest;
+
+
+    public String getCurrencyDescription() {
+        return currency != null ? currency.getDescription() : null;
+    }
 
 }

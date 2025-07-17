@@ -1,8 +1,10 @@
 package com.example.infrastructure.web;
 
+import com.example.core.client.Client;
 import com.example.core.project.Project;
 import com.example.core.project.ProjectServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,10 +47,6 @@ public class ProjectController {
     }
 
 
-    @DeleteMapping("/deleteProject/{id}")
-    public void deleteProject(@PathVariable Long id) {
-        projectServices.deleteProject(id);
-    }
 
 
     @GetMapping("/getProjectsByStatus/{status}")
@@ -67,4 +65,34 @@ public class ProjectController {
     public List<Project> getProjectsByClientName(@RequestParam String name) {
         return projectServices.getProjectByClientNameContainingIgnoreCase(name);
     }
+
+
+
+    @GetMapping("/getProjectsByClient/{clientId}")
+    public ResponseEntity<List<Project>> getProjectsByClient(@PathVariable Long clientId) {
+        Client client = new Client();
+        client.setIdClient(clientId);
+        List<Project> projects = projectServices.getProjectsByClient(client);
+        return ResponseEntity.ok(projects);
+    }
+
+    @GetMapping("/getProjectsByReference/{reference}")
+    public ResponseEntity<Project> getProjectByReference(@PathVariable String reference) {
+        return projectServices.getProjectByReference(reference)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
+    @GetMapping("/generate-reference")
+    public ResponseEntity<String> generateReference() {
+        String reference = projectServices.generateProjectReference();
+        return ResponseEntity.ok(reference);
+    }
+
+
+
+
+
+
 }

@@ -38,11 +38,7 @@ public class ExpenseRequestJpaAdapter implements ExpenseRequestRepoPort {
         return (List<ExpenseRequest>) requestRepository.findAll();
     }
 
-    @Override
-    @Transactional
-    public void deleteRequestById(Long id) {
-        requestRepository.deleteById(id);
-    }
+
 
     // ============= ExpenseDetails Operations =============
     @Override
@@ -116,7 +112,7 @@ public class ExpenseRequestJpaAdapter implements ExpenseRequestRepoPort {
     // ============= Aggregation Methods =============
     @Override
     @Transactional(readOnly = true)
-    public Map<String, Double> sumAmountsByCurrencyForRequest(Long requestId) {
+    public Map<Currency, Double> sumAmountsByCurrencyForRequest(Long requestId) {
         return detailsRepository.findByExpenseRequestIdRequest(requestId)
                 .stream()
                 .collect(Collectors.groupingBy(
@@ -135,6 +131,27 @@ public class ExpenseRequestJpaAdapter implements ExpenseRequestRepoPort {
                 .sum();
     }
 
+    @Override
+    public List<ExpenseRequest> findRequestsByCurrency(Currency currency) {
+        return requestRepository.findByCurrency(currency);
+    }
+
+    @Override
+    public Optional<ExpenseRequest> findTopByOrderByReferenceDesc() {
+        return requestRepository.findTopByOrderByReferenceDesc();
+    }
+
+    @Override
+    public String generateReference() {
+        Optional<ExpenseRequest> lastRequest = findTopByOrderByReferenceDesc();
+        if (lastRequest.isPresent()) {
+            String lastRef = lastRequest.get().getReference();
+            int lastNumber = Integer.parseInt(lastRef.replace("Rqs", ""));
+            return "Rqs" + (lastNumber + 1);
+        } else {
+            return "Rqs1000";
+        }
+    }
 
 
 

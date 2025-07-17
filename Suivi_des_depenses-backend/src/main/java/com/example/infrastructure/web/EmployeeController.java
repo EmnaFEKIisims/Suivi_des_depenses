@@ -71,7 +71,7 @@ public class EmployeeController {
     }
 
 
-    @GetMapping("/departments")
+    @GetMapping("/getDepartments")
     public List<Department> getDepartments() {
         return employeeServices.getAllDepartments();
     }
@@ -85,8 +85,8 @@ public class EmployeeController {
 
 
 
-    // Récupérer un employé par sa référence
-    @GetMapping("/reference/{reference}")
+
+    @GetMapping("/getEmployeeByReference/{reference}")
     public ResponseEntity<Employee> getEmployeeByReference(@PathVariable String reference) {
         Optional<Employee> employeeOpt = employeeServices.getEmployeeByReference(reference);
         return employeeOpt.map(ResponseEntity::ok)
@@ -94,7 +94,7 @@ public class EmployeeController {
     }
 
 
-    @GetMapping("/department/{departmentName}")
+    @GetMapping("/getEmployeesByDepartment/{departmentName}")
     public ResponseEntity<List<Employee>> getEmployeesByDepartment(@PathVariable String departmentName) {
         Department department;
         try {
@@ -105,6 +105,14 @@ public class EmployeeController {
 
         List<Employee> employees = employeeServices.getEmployeesByDepartment(department);
         return ResponseEntity.ok(employees);
+    }
+
+
+
+    @GetMapping("/generate-reference")
+    public ResponseEntity<String> generateReference() {
+        String reference = employeeServices.generateReference();
+        return ResponseEntity.ok(reference);
     }
 
 

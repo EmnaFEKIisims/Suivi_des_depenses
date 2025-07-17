@@ -21,4 +21,8 @@ public interface ClientRepoPort {
 
     List<Client> findClientsByAddress(String address);
 
+    Optional<Client> getLastClientByReference();
+
+
+
 }

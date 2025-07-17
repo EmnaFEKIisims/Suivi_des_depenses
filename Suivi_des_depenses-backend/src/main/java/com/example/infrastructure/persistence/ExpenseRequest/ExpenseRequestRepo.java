@@ -1,5 +1,6 @@
 package com.example.infrastructure.persistence.ExpenseRequest;
 
+import com.example.core.expenseRequest.Currency;
 import com.example.core.expenseRequest.ExpenseRequest;
 import com.example.core.expenseRequest.ExpenseStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ExpenseRequestRepo extends JpaRepository<ExpenseRequest, Long> {
 
@@ -23,6 +25,13 @@ public interface ExpenseRequestRepo extends JpaRepository<ExpenseRequest, Long> 
     List<ExpenseRequest> findByEmployeeCinAndStatus(
             @Param("cin") String cin,
             @Param("status") ExpenseStatus status);
+
+    @Query("SELECT DISTINCT er FROM ExpenseRequest er JOIN er.details d WHERE d.currency = :currency")
+    List<ExpenseRequest> findByCurrency(@Param("currency") Currency currency);
+
+
+    Optional<ExpenseRequest> findTopByOrderByReferenceDesc();
+
 
 
 }
