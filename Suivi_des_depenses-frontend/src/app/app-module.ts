@@ -8,9 +8,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ProjectModule } from './modules/project/project-module';
 import { RequestModule } from './modules/request/request-module';
+import { Home } from './modules/home/home';
 
 @NgModule({
-  declarations: [App],
+  declarations: [App, Home],
   imports: [
     BrowserModule,
     AppRoutingModule,

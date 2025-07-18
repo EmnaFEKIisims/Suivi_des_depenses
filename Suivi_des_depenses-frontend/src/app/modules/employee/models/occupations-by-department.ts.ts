@@ -2,53 +2,53 @@ import { Department } from './employee.model';
 
 export const OCCUPATIONS_BY_DEPARTMENT: Record<Department, string[]> = {
   [Department.IT]: [
-    'Développeur FullStack',
-    'Administrateur Systèmes',
-    'Technicien Support',
-    'Chef de Projet IT',
-    'Ingénieur Réseau' ,
+    'FullStack Developer',
+    'System Administrator',
+    'Support Technician', 
+    'IT Project Manager', 
+    'Network Engineer', 
     'Software Engineer'
   ],
-  [Department.MAINTENANCE]: [
-    'Technicien de Maintenance',
-    'Ingénieur Maintenance',
-    'Responsable Maintenance',
-    'Planificateur Maintenance',
-    'Agent de Maintenance Électrique'
+  [Department.Maintenance]: [
+    'Maintenance Technician', 
+    'Maintenance Engineer', 
+    'Maintenance Manager', 
+    'Maintenance Planner', 
+    'Electrical Maintenance Agent'
   ],
-  [Department.COMMERCIAL]: [
-    'Responsable Commercial',
-    'Chargé de Clientèle',
-    'Ingénieur Commercial',
-    'Représentant des Ventes',
-    'Assistant Commercial'
+  [Department.Commercial]: [
+    'Sales Manager', 
+    'Client Representative', 
+    'Sales Engineer', 
+    'Sales Representative', 
+    'Sales Assistant'
   ],
-  [Department.COMPTABILITE]: [
-    'Comptable',
-    'Chef Comptable',
-    'Contrôleur de Gestion',
-    'Assistant Comptable',
-    'Auditeur Financier'
+  [Department.Accounting]: [
+    'Accountant', 
+    'Chief Accountant', 
+    'Management Controller', 
+    'Accounting Assistant', 
+    'Financial Auditor'
   ],
-  [Department.RH]: [
-    'Chargé de Recrutement',
-    'Responsable RH',
-    'Gestionnaire Paie',
-    'Assistant RH',
-    'Formateur Interne'
+  [Department.HR]: [
+    'Recruitment Officer', 
+    'HR Manager', 
+    'Payroll Manager', 
+    'HR Assistant', 
+    'Internal Trainer'
   ],
-  [Department.PRODUCTION]: [
-    'Opérateur de Production',
-    'Chef d’Équipe',
-    'Responsable de Ligne',
-    'Ingénieur Production',
-    'Planificateur de Production'
+  [Department.Production]: [
+    'Production Operator', 
+    'Team Leader', 
+    'Line Manager', 
+    'Production Engineer',
+    'Production Planner'
   ],
-  [Department.BATIMENT_INFRASTRUCTURE]: [
-    'Chef de Chantier',
-    'Ingénieur Bâtiment',
-    'Technicien Infrastructure',
-    'Responsable des Installations',
-    'Coordinateur de Travaux'
+  [Department.Building_Infrastructure]: [
+    'Site Manager', 
+    'Construction Engineer', 
+    'Infrastructure Technician', 
+    'Installation Manager', 
+    'Works Coordinator'
   ]
 };

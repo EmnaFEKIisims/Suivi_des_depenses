@@ -1,116 +1,200 @@
-<div class="create-employee-container container my-5">
-  <h2 class="mb-4 text-primary text-center">Add New Employee</h2>
-
-  <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" novalidate>
-    <div class="row g-3">
-      <div class="col-md-4">
-        <label for="cin" class="form-label">CIN</label>
-        <input id="cin" type="text" formControlName="cin" class="form-control" [class.is-invalid]="employeeForm.get('cin')?.invalid && employeeForm.get('cin')?.touched" />
-        <div *ngIf="employeeForm.get('cin')?.invalid && employeeForm.get('cin')?.touched" class="invalid-feedback">
-          CIN is required (min 6 characters).
+<div class="container mt-4">
+  <!-- Alerts Section - Top Center Position -->
+  <div class="alert-container">
+    <div *ngIf="showSuccessAlert" class="alert alert-success alert-dismissible fade show custom-alert" role="alert">
+      <div class="alert-content">
+        <i class="bi bi-check-circle-fill alert-icon"></i>
+        <div>
+          <strong>Success!</strong> Employee created successfully.
         </div>
       </div>
-
-      
-      <div class="col-md-8">
-        <label for="fullName" class="form-label">Full Name</label>
-        <input id="fullName" type="text" formControlName="fullName" class="form-control" [class.is-invalid]="employeeForm.get('fullName')?.invalid && employeeForm.get('fullName')?.touched" />
-        <div *ngIf="employeeForm.get('fullName')?.invalid && employeeForm.get('fullName')?.touched" class="invalid-feedback">
-          Full Name is required.
-        </div>
-      </div>
-
-      
-      <div class="col-md-6">
-        <label for="email" class="form-label">Email</label>
-        <input id="email" type="email" formControlName="email" class="form-control" [class.is-invalid]="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched" />
-        <div *ngIf="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched" class="invalid-feedback">
-          Valid Email is required.
-        </div>
-      </div>
-
-      
-      <div class="col-md-6">
-        <label for="phoneNumber" class="form-label">Phone Number</label>
-        <input id="phoneNumber" type="text" formControlName="phoneNumber" class="form-control" [class.is-invalid]="employeeForm.get('phoneNumber')?.invalid && employeeForm.get('phoneNumber')?.touched" />
-        <div *ngIf="employeeForm.get('phoneNumber')?.invalid && employeeForm.get('phoneNumber')?.touched" class="invalid-feedback">
-          Phone Number is required.
-        </div>
-      </div>
-
-      
-      <div class="col-md-12">
-        <label for="address" class="form-label">Address</label>
-        <input id="address" type="text" formControlName="address" class="form-control" />
-      </div>
-
-      
-      <div class="col-md-4">
-        <label for="gender" class="form-label">Gender</label>
-        <select id="gender" formControlName="gender" class="form-select" [class.is-invalid]="employeeForm.get('gender')?.invalid && employeeForm.get('gender')?.touched">
-          <option value="" disabled>Select Gender</option>
-          <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
-        </select>
-        <div *ngIf="employeeForm.get('gender')?.invalid && employeeForm.get('gender')?.touched" class="invalid-feedback">
-          Gender is required.
-        </div>
-      </div>
-
-      
-      <div class="col-md-4">
-        <label for="hireDate" class="form-label">Hire Date</label>
-        <input id="hireDate" type="date" formControlName="hireDate" class="form-control" [class.is-invalid]="employeeForm.get('hireDate')?.invalid && employeeForm.get('hireDate')?.touched" />
-        <div *ngIf="employeeForm.get('hireDate')?.invalid && employeeForm.get('hireDate')?.touched" class="invalid-feedback">
-          Hire Date is required.
-        </div>
-      </div>
-
-      
-      <div class="col-md-4">
-        <label for="department" class="form-label">Department</label>
-        <select id="department" formControlName="department" class="form-select" [class.is-invalid]="employeeForm.get('department')?.invalid && employeeForm.get('department')?.touched">
-          <option value="" disabled>Select Department</option>
-          <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
-        </select>
-        <div *ngIf="employeeForm.get('department')?.invalid && employeeForm.get('department')?.touched" class="invalid-feedback">
-          Department is required.
-        </div>
-      </div>
-
-      
-      <div class="col-md-6">
-        <label for="occupation" class="form-label">Occupation</label>
-        <select id="occupation" formControlName="occupation" class="form-select" [disabled]="occupations.length === 0" [class.is-invalid]="employeeForm.get('occupation')?.invalid && employeeForm.get('occupation')?.touched">
-          <option value="" disabled>Select Occupation</option>
-          <option *ngFor="let occ of occupations" [value]="occ">{{ occ }}</option>
-        </select>
-        <div *ngIf="employeeForm.get('occupation')?.invalid && employeeForm.get('occupation')?.touched" class="invalid-feedback">
-          Occupation is required.
-        </div>
-      </div>
-
-      
-      <div class="col-md-6">
-        <label for="username" class="form-label">Username</label>
-        <input id="username" type="text" formControlName="username" class="form-control" [class.is-invalid]="employeeForm.get('username')?.invalid && employeeForm.get('username')?.touched" />
-        <div *ngIf="employeeForm.get('username')?.invalid && employeeForm.get('username')?.touched" class="invalid-feedback">
-          Username is required.
-        </div>
-      </div>
-
-      
-      <div class="col-md-6">
-        <label for="password" class="form-label">Password</label>
-        <input id="password" type="password" formControlName="password" class="form-control" [class.is-invalid]="employeeForm.get('password')?.invalid && employeeForm.get('password')?.touched" />
-        <div *ngIf="employeeForm.get('password')?.invalid && employeeForm.get('password')?.touched" class="invalid-feedback">
-          Password is required (min 6 characters).
-        </div>
-      </div>
+      <button type="button" class="btn-close" (click)="showSuccessAlert = false" aria-label="Close"></button>
     </div>
 
-    <div class="text-center mt-4">
-      <button type="submit" class="btn btn-primary px-5" [disabled]="employeeForm.invalid">Save</button>
+    <div *ngIf="showErrorAlert" class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
+      <div class="alert-content">
+        <i class="bi bi-exclamation-triangle-fill alert-icon"></i>
+        <div>
+          <strong>Error!</strong> {{ errorMessage || 'Failed to create employee.' }}
+        </div>
+      </div>
+      <button type="button" class="btn-close" (click)="showErrorAlert = false" aria-label="Close"></button>
     </div>
-  </form>
+  </div>
+
+  <!-- Navigation Buttons -->
+  <div class="d-flex justify-content-between mb-4">
+    <button class="btn btn-outline-secondary" (click)="navigateTo('/employees')">
+      <i class="bi bi-arrow-left"></i> Back to Employees
+    </button>
+    <button class="btn btn-outline-primary" (click)="navigateTo('')">
+      <i class="bi bi-house"></i> Home
+    </button>
+  </div>
+
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0">Create New Employee</h3>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()">
+        <div class="row g-3">
+          <!-- First Row: Reference + Status -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="reference" class="form-label">Reference</label>
+              <input type="text" class="form-control bg-light" id="reference" formControlName="reference" readonly>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="status" class="form-label">Status</label>
+              <input type="text" class="form-control bg-light" id="status" formControlName="status" readonly>
+            </div>
+          </div>
+
+          <!-- Second Row: CIN + Full Name -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="cin" class="form-label">CIN*</label>
+              <input type="text" class="form-control" id="cin" formControlName="cin" 
+                     [class.is-invalid]="employeeForm.get('cin')?.invalid && employeeForm.get('cin')?.touched">
+              <div class="invalid-feedback">CIN is required</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="fullName" class="form-label">Full Name*</label>
+              <input type="text" class="form-control" id="fullName" formControlName="fullName"
+                     [class.is-invalid]="employeeForm.get('fullName')?.invalid && employeeForm.get('fullName')?.touched">
+              <div class="invalid-feedback">Full name is required</div>
+            </div>
+          </div>
+
+          <!-- Third Row: Gender + Birth Date -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="gender" class="form-label">Gender*</label>
+              <select class="form-select" id="gender" formControlName="gender"
+                      [class.is-invalid]="employeeForm.get('gender')?.invalid && employeeForm.get('gender')?.touched">
+                <option value="">Select Gender</option>
+                <option *ngFor="let gender of genders" [value]="gender">{{gender}}</option>
+              </select>
+              <div class="invalid-feedback">Gender is required</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="birthDate" class="form-label">Birth Date*</label>
+              <input type="date" class="form-control" id="birthDate" formControlName="birthDate"
+                     [class.is-invalid]="employeeForm.get('birthDate')?.invalid && employeeForm.get('birthDate')?.touched">
+              <div class="invalid-feedback">Birth date is required</div>
+            </div>
+          </div>
+
+          <!-- Fourth Row: Department + Occupation -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="department" class="form-label">Department*</label>
+              <select class="form-select" id="department" formControlName="department"
+                      [class.is-invalid]="employeeForm.get('department')?.invalid && employeeForm.get('department')?.touched">
+                <option value="">Select Department</option>
+                <option *ngFor="let dept of departments" [value]="dept">{{dept}}</option>
+              </select>
+              <div class="invalid-feedback">Department is required</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="occupation" class="form-label">Occupation*</label>
+              <select class="form-select" id="occupation" formControlName="occupation"
+                      [disabled]="!employeeForm.get('department')?.value"
+                      [class.is-invalid]="employeeForm.get('occupation')?.invalid && employeeForm.get('occupation')?.touched">
+                <option value="">Select Occupation</option>
+                <option *ngFor="let occupation of occupations" [value]="occupation">{{occupation}}</option>
+              </select>
+              <div class="invalid-feedback">Occupation is required</div>
+            </div>
+          </div>
+
+          <!-- Fifth Row: Email + Phone -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email*</label>
+              <input type="email" class="form-control" id="email" formControlName="email"
+                     [class.is-invalid]="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched">
+              <div class="invalid-feedback">Valid email is required</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="phoneNumber" class="form-label">Phone Number*</label>
+              <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber"
+                     [class.is-invalid]="employeeForm.get('phoneNumber')?.invalid && employeeForm.get('phoneNumber')?.touched">
+              <div class="invalid-feedback">Phone number is required</div>
+            </div>
+          </div>
+
+          <!-- Sixth Row: Hire Date + Exit Date -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="hireDate" class="form-label">Hire Date*</label>
+              <input type="date" class="form-control" id="hireDate" formControlName="hireDate"
+                     [class.is-invalid]="employeeForm.get('hireDate')?.invalid && employeeForm.get('hireDate')?.touched">
+              <div class="invalid-feedback">Hire date is required</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="exitDate" class="form-label">Exit Date</label>
+              <input type="date" class="form-control" id="exitDate" formControlName="exitDate" [disabled]="true">
+            </div>
+          </div>
+
+          <!-- Seventh Row: Address (full width) -->
+          <div class="col-12">
+            <div class="mb-3">
+              <label for="address" class="form-label">Address*</label>
+              <input type="text" class="form-control" id="address" formControlName="address"
+                     [class.is-invalid]="employeeForm.get('address')?.invalid && employeeForm.get('address')?.touched">
+              <div class="invalid-feedback">Address is required</div>
+            </div>
+          </div>
+
+          <!-- Eighth Row: Username + Password -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="username" class="form-label">Username*</label>
+              <input type="text" class="form-control" id="username" formControlName="username"
+                     [class.is-invalid]="employeeForm.get('username')?.invalid && employeeForm.get('username')?.touched">
+              <div class="invalid-feedback">Username is required</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="password" class="form-label">Password*</label>
+              <div class="input-group">
+                <input [type]="showPassword ? 'text' : 'password'" class="form-control" id="password" formControlName="password"
+                       [class.is-invalid]="employeeForm.get('password')?.invalid && employeeForm.get('password')?.touched">
+                <button class="btn btn-outline-secondary" type="button" (click)="togglePasswordVisibility()">
+                  <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
+                </button>
+              </div>
+              <div class="invalid-feedback">Password is required</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end mt-4 gap-2">
+          <button type="button" class="btn btn-outline-secondary" (click)="navigateTo('/employees')">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="employeeForm.invalid">
+            Create Employee
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
-

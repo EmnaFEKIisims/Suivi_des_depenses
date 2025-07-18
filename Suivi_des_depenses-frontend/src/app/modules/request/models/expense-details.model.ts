@@ -2,9 +2,9 @@ export interface ExpenseDetails {
   id?: number;
   description: string;
   amount: number;
-  currency: string; // USD, EUR, TND...
+  currency: string; 
   currencyDescription?: string;
-  expenseRequestId?: number; // Pour la liaison avec la requête
+  expenseRequestId?: number; 
 }
 
 
@@ -44,7 +44,6 @@ export const CURRENCY_LIST = [
   { code: 'IDR', description: 'Indonesian Rupiah' },
   { code: 'HUF', description: 'Hungarian Forint' },
   { code: 'CZK', description: 'Czech Koruna' },
-  { code: 'ILS', description: 'Israeli New Shekel' },
   { code: 'PHP', description: 'Philippine Peso' },
   { code: 'CLP', description: 'Chilean Peso' },
   { code: 'PKR', description: 'Pakistani Rupee' },

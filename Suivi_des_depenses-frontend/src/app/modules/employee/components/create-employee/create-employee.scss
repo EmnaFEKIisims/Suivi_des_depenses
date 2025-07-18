@@ -1,41 +1,96 @@
-.create-employee-container {
-  max-width: 900px;
-  background: #fff;
-  padding: 2rem;
+/* Alert Styling */
+.alert-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050;
+  width: 100%;
+  max-width: 600px;
+  padding: 0 15px;
+}
+
+.custom-alert {
   border-radius: 8px;
-  box-shadow: 0 0 15px rgb(0 0 0 / 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border: none;
+  animation: slideIn 0.3s ease-out forwards;
+  opacity: 0;
+  margin-bottom: 1rem;
 
-  h2 {
-    font-weight: 700;
+  .alert-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-grow: 1;
   }
 
-  .form-label {
-    font-weight: 600;
+  .alert-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
   }
 
-  .form-control,
-  .form-select {
-    border-radius: 5px;
-    transition: border-color 0.3s ease;
+  .btn-close {
+    padding: 0.5rem;
+    background-size: 0.75rem;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    margin-left: 0.75rem;
+    flex-shrink: 0;
 
-    &:focus {
-      border-color: #0d6efd;
-      box-shadow: 0 0 6px #0d6efd66;
+    &:hover {
+      opacity: 1;
     }
+  }
 
-    &.is-invalid {
-      border-color: #dc3545;
-      box-shadow: none;
+  &.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border-left: 4px solid #198754;
+
+    .alert-icon {
+      color: #198754;
     }
   }
 
-  button.btn-primary {
-    font-weight: 600;
-    font-size: 1.1rem;
-    border-radius: 6px;
+  &.alert-danger {
+    background-color: #f8d7da;
+    color: #842029;
+    border-left: 4px solid #dc3545;
+
+    .alert-icon {
+      color: #dc3545;
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .alert-container {
+    top: 10px;
+    padding: 0 10px;
   }
 
-  .invalid-feedback {
-    font-size: 0.9rem;
+  .custom-alert {
+    padding: 0.75rem 1rem;
+    
+    .alert-content {
+      gap: 0.5rem;
+    }
   }
 }

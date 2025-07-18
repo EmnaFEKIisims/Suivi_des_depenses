@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EmployeeService } from '../../employee-service';
 import { Employee } from '../../models/employee.model';
-import { Department, Gender } from '../../models/employee.model';
+import { Department, Gender , Status } from '../../models/employee.model';
 import { OCCUPATIONS_BY_DEPARTMENT } from '../../models/occupations-by-department.ts';
 
 @Component({
@@ -13,32 +13,36 @@ import { OCCUPATIONS_BY_DEPARTMENT } from '../../models/occupations-by-departmen
   styleUrl: './update-employee.scss'
 })
 export class UpdateEmployee implements OnInit {
-   employeeForm!: FormGroup;
+    employeeForm!: FormGroup;
   occupations: string[] = [];
-  cin!: string;
-  isLoading = false;
-  errorMessage = '';
-
-  readonly genders = Object.values(Gender);
-  readonly departments = Object.values(Department);
+  departments = Object.values(Department);
+  genders = Object.values(Gender);
+  statuses = Object.values(Status);
+  showPassword = false;
+  showSuccessAlert = false;
+  showErrorAlert = false;
+  alertMessage = '';
+  employeeCin: string = '';
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private employeeService: EmployeeService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private employeeService: EmployeeService
+  ) { }
 
   ngOnInit(): void {
-    this.cin = this.route.snapshot.paramMap.get('cin')!;
+    this.employeeCin = this.route.snapshot.paramMap.get('CIN') || '';
     this.initForm();
-    this.loadEmployee();
+    this.loadEmployeeData();
   }
 
   initForm(): void {
     this.employeeForm = this.fb.group({
-      cin: [{ value: '', disabled: true }],
+      cin: ['', Validators.required],
+      reference: ['', Validators.required],
       fullName: ['', Validators.required],
+      birthDate: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', Validators.required],
       address: ['', Validators.required],
@@ -46,42 +50,82 @@ export class UpdateEmployee implements OnInit {
       hireDate: ['', Validators.required],
       department: ['', Validators.required],
       occupation: ['', Validators.required],
+      status: ['', Validators.required],
+      exitDate: [''],
       username: ['', Validators.required],
       password: ['', Validators.required]
     });
 
-    // Update occupations dynamically
     this.employeeForm.get('department')?.valueChanges.subscribe(dept => {
-      this.occupations = OCCUPATIONS_BY_DEPARTMENT[dept as Department] || [];
+      const department = dept as Department;
+      this.occupations = OCCUPATIONS_BY_DEPARTMENT[department] || [];
       this.employeeForm.get('occupation')?.setValue('');
     });
   }
 
-  loadEmployee(): void {
-    this.isLoading = true;
-    this.employeeService.getEmployeeByCIN(this.cin).subscribe({
-      next: (employee: Employee) => {
+  loadEmployeeData(): void {
+    this.employeeService.getEmployeeByCIN(this.employeeCin).subscribe({
+      next: (employee) => {
         this.employeeForm.patchValue(employee);
         this.occupations = OCCUPATIONS_BY_DEPARTMENT[employee.department as Department] || [];
-        this.isLoading = false;
       },
-      error: () => {
-        this.errorMessage = 'Failed to load employee.';
-        this.isLoading = false;
+      error: (err) => {
+        console.error('Error loading employee data:', err);
+        this.showAlert('Failed to load employee data', 'error');
       }
     });
   }
 
+  onStatusChange(): void {
+    if (this.employeeForm.get('status')?.value === 'Inactif') {
+      this.employeeForm.get('exitDate')?.setValidators([Validators.required]);
+    } else {
+      this.employeeForm.get('exitDate')?.clearValidators();
+      this.employeeForm.get('exitDate')?.setValue(null);
+    }
+    this.employeeForm.get('exitDate')?.updateValueAndValidity();
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  showAlert(message: string, type: 'success' | 'error'): void {
+    this.alertMessage = message;
+    if (type === 'success') {
+      this.showSuccessAlert = true;
+      setTimeout(() => this.showSuccessAlert = false, 3000);
+    } else {
+      this.showErrorAlert = true;
+      setTimeout(() => this.showErrorAlert = false, 3000);
+    }
+  }
+
   onSubmit(): void {
-    if (this.employeeForm.invalid) return;
+    if (this.employeeForm.valid) {
+      const employeeData = this.employeeForm.value;
+      // If status is Actif, set exitDate to null
+      if (employeeData.status === 'Actif') {
+        employeeData.exitDate = null;
+      }
 
-    const updatedEmployee: Employee = {
-      ...this.employeeForm.getRawValue(), // includes disabled CIN
-    };
+      this.employeeService.updateEmployee(this.employeeCin, employeeData).subscribe({
+        next: () => {
+          this.showAlert('Employee updated successfully!', 'success');
+          setTimeout(() => this.router.navigate(['/employees']), 2000);
+        },
+        error: (err) => {
+          console.error('Error updating employee:', err);
+          this.showAlert('Failed to update employee', 'error');
+        }
+      });
+    } else {
+      this.employeeForm.markAllAsTouched();
+      this.showAlert('Please fill all required fields correctly', 'error');
+    }
+  }
 
-    this.employeeService.updateEmployee(this.cin, updatedEmployee).subscribe({
-      next: () => this.router.navigate(['/employees']),
-      error: () => this.errorMessage = 'Update failed. Please try again.'
-    });
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
   }
 }

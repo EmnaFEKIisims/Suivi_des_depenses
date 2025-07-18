@@ -11,14 +11,18 @@ import { CreateRequest } from './modules/request/component/create-request/create
 import { UpdateRequest } from './modules/request/component/update-request/update-request';
 import { RequestDetails } from './modules/request/component/request-details/request-details';
 import { ProjectDetails } from './modules/project/components/project-details/project-details';
+import { EmployeeDetails } from './modules/employee/components/employee-details/employee-details';
+import { Home } from './modules/home/home';
 
 
 
 const routes: Routes = [
-  { path: '', component: CreateEmployee },
+  { path: '', component: Home },
+  { path: 'home', component: Home },
   { path: 'employees', component: EmployeeList },
-  { path: 'update-employee/:cin', component: UpdateEmployee },
+  { path: 'update-employee/:CIN', component: UpdateEmployee },
   { path: 'add-employee', component: CreateEmployee },
+  { path: 'employees/details/:reference', component: EmployeeDetails },
   { path: 'projects', component: ProjectList },
   { path: 'add-project', component: CreateProjectComponent }, 
   { path: 'projects/edit/:id', component: UpdateProject }, 
@@ -26,7 +30,7 @@ const routes: Routes = [
   { path: 'requests', component: RequestList },
   { path: 'requests/add', component: CreateRequest },        
   { path: 'requests/edit/:id', component: UpdateRequest },    
-  { path: 'requests/:id', component: RequestDetails }         
+  { path: 'requests/:id', component: RequestDetails }          
 ];
 
 @NgModule({
