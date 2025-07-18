@@ -2,9 +2,14 @@ package com.example.infrastructure.web;
 
 import com.example.core.employee.Employee;
 import com.example.core.employee.EmployeeServices;
+import com.example.core.employee.EmployeeStatus;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import com.example.core.employee.Department;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,8 +50,8 @@ public class EmployeeController {
     }
 
     @GetMapping("/getEmployeeByUsername/{username}")
-    public ResponseEntity<Employee> getEmployeeByUsername(@PathVariable String username) {
-        return employeeServices.getEmployeeByUserName(username)
+    public ResponseEntity<Employee> getEmployeeByFullName(@PathVariable String fullName) {
+        return employeeServices.getEmployeeByFullName(fullName)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -67,8 +72,15 @@ public class EmployeeController {
 
     @GetMapping("/getEmployeesByStatus/{status}")
     public List<Employee> getEmployeesByStatus(@PathVariable String status) {
-        return employeeServices.getEmployeesByStatus(status);
+        EmployeeStatus employeeStatus;
+        try {
+            employeeStatus = EmployeeStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status value: " + status);
+        }
+        return employeeServices.getEmployeesByStatus(employeeStatus);
     }
+
 
 
     @GetMapping("/getDepartments")
@@ -98,7 +110,10 @@ public class EmployeeController {
     public ResponseEntity<List<Employee>> getEmployeesByDepartment(@PathVariable String departmentName) {
         Department department;
         try {
-            department = Department.valueOf(departmentName.toUpperCase());
+            department = Arrays.stream(Department.values())
+                    .filter(d -> d.name().equalsIgnoreCase(departmentName))
+                    .findFirst()
+                    .orElseThrow(IllegalArgumentException::new);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }

@@ -36,7 +36,6 @@ public enum Currency {
     IDR("Indonesian Rupiah"),
     HUF("Hungarian Forint"),
     CZK("Czech Koruna"),
-    ILS("Israeli New Shekel"),
     PHP("Philippine Peso"),
     CLP("Chilean Peso"),
     PKR("Pakistani Rupee"),
