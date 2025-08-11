@@ -1,10 +1,11 @@
 import { Component , OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators , FormControl  } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ExpenseRequestService } from '../../expense-request-service';
 import { ProjectService } from '../../../project/project-service';
 import { ExpenseRequest, ExpenseStatus, ReimbursementMethod } from '../../models/expense-request.model';
 import { Project } from '../../../project/models/project.model';
+import { Employee } from '../../../employee/models/employee.model';
 import { CURRENCY_LIST } from '../../models/expense-details.model';
 import { EmployeeService } from '../../../employee/employee-service';
 
@@ -17,203 +18,311 @@ import { EmployeeService } from '../../../employee/employee-service';
 })
 export class UpdateRequest implements OnInit {
 
-requestForm: FormGroup;
-  requestId!: number;
-  projects: Project[] = [];
+   requestForm!: FormGroup;
+  request!: ExpenseRequest;
+
   currencies = CURRENCY_LIST;
-  isLoading = false;
-  errorMessage: string = '';
-  totalByCurrency: { [key: string]: number } = {};
+  totalAmounts: { [key: string]: number } = {};
   usedCurrencies: string[] = [];
+
+  showSuccessAlert = false;
+  showErrorAlert = false;
+  alertMessage = '';
+  errorMessage = '';
+
+  reimbursementMethods = Object.values(ReimbursementMethod);
+  expenseStatuses = Object.values(ExpenseStatus);
+
+  formattedTotals = '';
 
   constructor(
     private fb: FormBuilder,
-    private expenseRequestService: ExpenseRequestService,
-    private projectService: ProjectService,
-    private employeeService: EmployeeService,
+    private route: ActivatedRoute,
     private router: Router,
-    private route: ActivatedRoute
-  ) {
-    this.requestForm = this.fb.group({
-      employee: [null, Validators.required],
-      projectId: ['', Validators.required],
-      startDate: ['', Validators.required],
-      returnDate: ['', Validators.required],
-      mission: ['', Validators.required],
-      missionLocation: ['', Validators.required],
-      reimbursementMethod: [ReimbursementMethod.CASH_DESK, Validators.required],
-      expenseDetails: this.fb.array([]),
-      status: [ExpenseStatus.DRAFT]
-    });
-  }
+    private requestService: ExpenseRequestService
+  ) {}
 
   ngOnInit(): void {
-    this.requestId = +this.route.snapshot.paramMap.get('id')!;
-    this.loadProjects();
-    this.loadRequest();
-  }
+    this.requestForm = this.fb.group({
+      reference: ['', Validators.required],
+      mission: ['', Validators.required],
+      missionLocation: ['', Validators.required],
+      startDate: ['', Validators.required],
+      returnDate: ['', Validators.required],
+      reimbursementMethod: [''],
+      details: this.fb.array([])
+    });
 
-  loadProjects(): void {
-    this.isLoading = true;
-    this.projectService.getAllProjects().subscribe({
-      next: (projects) => {
-        this.projects = projects;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading projects:', err);
-        this.isLoading = false;
-      }
+    const id = +this.route.snapshot.paramMap.get('id')!;
+    this.requestService.getExpenseRequestById(id).subscribe(req => {
+      this.request = req;
+      this.populateForm();
+      // Disable these fields after setting values
+      this.requestForm.get('reference')?.disable();
+      this.requestForm.get('reimbursementMethod')?.disable();
     });
   }
 
-  loadRequest(): void {
-    this.isLoading = true;
-    this.expenseRequestService.getExpenseRequestById(this.requestId).subscribe({
-      next: (request) => {
-        this.patchFormValues(request);
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading request:', err);
-        this.isLoading = false;
-      }
-    });
+  
+
+  get detailControls(): FormArray {
+    return this.requestForm.get('details') as FormArray;
   }
 
-  patchFormValues(request: ExpenseRequest): void {
+getControl(name: string): FormControl {
+  return this.requestForm.get(name) as FormControl;
+}
+
+getDetailControl(index: number, controlName: string): FormControl {
+  return (this.detailControls.at(index) as FormGroup).get(controlName) as FormControl;
+}
+
+
+  populateForm(): void {
     this.requestForm.patchValue({
-      employee: request.employee,
-      projectId: request.project.idProject,
-      startDate: request.startDate,
-      returnDate: request.returnDate,
-      mission: request.mission,
-      missionLocation: request.missionLocation,
-      reimbursementMethod: request.reimbursementMethod,
-      status: request.status
+      reference: this.request.reference,
+      mission: this.request.mission,
+      missionLocation: this.request.missionLocation,
+      startDate: this.request.startDate,
+      returnDate: this.request.returnDate,
+      reimbursementMethod: this.request.reimbursementMethod
     });
 
-    request.details.forEach(detail => {
-      this.addExpenseDetail(detail);
+    this.detailControls.clear();
+    this.request.details.forEach(d => {
+      this.detailControls.push(this.fb.group({
+        description: [d.description, Validators.required],
+        amount: [d.amount, [Validators.required, Validators.min(0.01)]],
+        currencyCode: [d.currency, Validators.required]
+      }));
     });
-    this.updateUsedCurrencies();
-    this.updateTotalByCurrency();
+    this.recomputeTotals();
   }
 
-  get expenseDetails(): FormArray {
-    return this.requestForm.get('expenseDetails') as FormArray;
+  addDetail(): void {
+    this.detailControls.push(this.fb.group({
+      description: ['', Validators.required],
+      amount: [0, [Validators.required, Validators.min(0.01)]],
+      currencyCode: ['', Validators.required]
+    }));
   }
 
-  addExpenseDetail(detail?: any): void {
-    const control = this.fb.group({
-      description: [detail?.description || '', Validators.required],
-      amount: [detail?.amount || '', [Validators.required, Validators.min(0.01)]],
-      currency: [detail?.currency || '', Validators.required],
-      currencyDescription: [detail?.currencyDescription || '']
-    });
-
-    control.get('currency')?.valueChanges.subscribe(code => {
-      const selected = this.currencies.find(c => c.code === code);
-      if (selected) {
-        control.get('currencyDescription')?.setValue(selected.description, { emitEvent: false });
-      }
-      this.updateUsedCurrencies();
-      this.updateTotalByCurrency();
-    });
-
-    this.expenseDetails.push(control);
-    this.updateUsedCurrencies();
-    this.updateTotalByCurrency();
+  removeDetail(i: number): void {
+    this.detailControls.removeAt(i);
+    this.recomputeTotals();
   }
 
-  removeExpenseDetail(index: number): void {
-    this.expenseDetails.removeAt(index);
-    this.updateUsedCurrencies();
-    this.updateTotalByCurrency();
-  }
+  onCurrencyChange(index: number, newCurrency: string): void {
+    if (!newCurrency) return;
 
-  getUniqueCurrencies(): string[] {
-    const currencies = this.expenseDetails.controls
-      .map(control => control.get('currency')?.value)
-      .filter(Boolean);
-    return [...new Set(currencies)];
-  }
-
-  updateUsedCurrencies(): void {
-    this.usedCurrencies = this.getUniqueCurrencies();
-    this.errorMessage = '';
-  }
-
-  isCurrencyDisabled(currencyCode: string): boolean {
-    return this.usedCurrencies.length >= 2 && !this.usedCurrencies.includes(currencyCode);
-  }
-
-  updateTotalByCurrency(): void {
-    this.totalByCurrency = {};
-    this.expenseDetails.controls.forEach(control => {
-      const amount = control.get('amount')?.value;
-      const currency = control.get('currency')?.value;
-      if (amount && currency) {
-        this.totalByCurrency[currency] = (this.totalByCurrency[currency] || 0) + +amount;
+    // First, check if this would violate the constraint BEFORE applying
+    const tempCurrencies = new Set<string>();
+    this.detailControls.controls.forEach((ctrl, i) => {
+      const currency = i === index ? newCurrency : ctrl.get('currencyCode')?.value;
+      if (currency && currency.trim()) {
+        tempCurrencies.add(currency);
       }
     });
+
+    // Check constraint: maximum 2 different currencies
+    if (tempCurrencies.size > 2) {
+      this.showError('Maximum 2 different currencies allowed. Please choose from the currencies already used.');
+      // Set to empty immediately to prevent any display of invalid value
+      const currencyControl = this.getDetailControl(index, 'currencyCode');
+      currencyControl.setValue('', { emitEvent: false }); // emitEvent: false prevents recursive calls
+      this.recomputeTotals();
+      return;
+    }
+
+    // Apply the change (selection is allowed)
+    const currencyControl = this.getDetailControl(index, 'currencyCode');
+    currencyControl.setValue(newCurrency);
+    this.recomputeTotals();
   }
 
-  getCurrencyKeys(): string[] {
-    return Object.keys(this.totalByCurrency);
+  trackByIndex(index: number): number {
+    return index;
   }
 
-  getCurrencyDescription(code: string): string {
-    if (!code) return '';
-    const currency = this.currencies.find(c => c.code === code);
-    return currency ? currency.description : '';
+  recomputeTotals(): void {
+    this.totalAmounts = {};
+    this.usedCurrencies = [];
+
+    this.detailControls.controls.forEach(ctrl => {
+      const amt = +ctrl.get('amount')?.value || 0;
+      const cur = ctrl.get('currencyCode')?.value;
+      if (cur) {
+        this.totalAmounts[cur] = (this.totalAmounts[cur] || 0) + amt;
+        if (!this.usedCurrencies.includes(cur)) {
+          this.usedCurrencies.push(cur);
+        }
+      }
+    });
+
+    this.formattedTotals = Object.entries(this.totalAmounts)
+      .map(([c, v]) => `${c} ${v.toFixed(2)}`)
+      .join(', ');
   }
 
-  onSubmit(): void {
+  
+
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
+  }
+
+  showSuccess(msg: string): void {
+    this.alertMessage = msg;
+    this.showSuccessAlert = true;
+  }
+
+  showError(msg: string): void {
+    this.errorMessage = msg;
+    this.showErrorAlert = true;
+  }
+
+  isFormValidForSubmission(): boolean {
+    // Check if form is valid
     if (this.requestForm.invalid) {
-      this.requestForm.markAllAsTouched();
+      return false;
+    }
+
+    // Check if we have at least one valid detail
+    const validDetails = this.detailControls.controls.filter(ctrl => {
+      const desc = ctrl.get('description')?.value;
+      const amount = ctrl.get('amount')?.value;
+      const currency = ctrl.get('currencyCode')?.value;
+      return desc && amount > 0 && currency;
+    });
+
+    if (validDetails.length === 0) {
+      return false;
+    }
+
+    // Check currency constraint
+    const usedCurrenciesSet = new Set();
+    validDetails.forEach(ctrl => {
+      const currency = ctrl.get('currencyCode')?.value;
+      if (currency) {
+        usedCurrenciesSet.add(currency);
+      }
+    });
+
+    // Must not exceed 2 currencies
+    return usedCurrenciesSet.size <= 2;
+  }
+
+  // Form validation helper methods
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.requestForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  getFieldError(fieldName: string): string {
+    const field = this.requestForm.get(fieldName);
+    if (field && field.errors && (field.dirty || field.touched)) {
+      if (field.errors['required']) {
+        return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
+      }
+    }
+    return '';
+  }
+
+  hasValidDetails(): boolean {
+    const validDetails = this.detailControls.controls.filter(ctrl => {
+      const desc = ctrl.get('description')?.value;
+      const amount = ctrl.get('amount')?.value;
+      const currency = ctrl.get('currencyCode')?.value;
+      return desc && desc.trim() && amount > 0 && currency && currency.trim();
+    });
+    return validDetails.length > 0;
+  }
+
+  onUpdate(): void {
+    // Validate form
+    if (this.requestForm.invalid) {
+      this.showError('Please fill in all required fields.');
+      setTimeout(() => this.showErrorAlert = false, 5000);
       return;
     }
 
-    this.isLoading = true;
-    const formValue = this.requestForm.getRawValue();
-    const selectedProject = this.projects.find(p => p.idProject === +formValue.projectId);
+    // Validate details
+    const validDetails = this.detailControls.controls.filter(ctrl => {
+      const desc = ctrl.get('description')?.value;
+      const amount = ctrl.get('amount')?.value;
+      const currency = ctrl.get('currencyCode')?.value;
+      return desc && amount > 0 && currency;
+    });
 
-    if (!selectedProject) {
-      alert('Please select a valid project');
-      this.isLoading = false;
+    if (validDetails.length === 0) {
+      this.showError('Please add at least one valid expense detail.');
+      setTimeout(() => this.showErrorAlert = false, 5000);
       return;
     }
 
-    const request: ExpenseRequest = {
-      idRequest: this.requestId,
-      employee: formValue.employee,
-      project: selectedProject,
-      startDate: formValue.startDate,
-      returnDate: formValue.returnDate,
-      mission: formValue.mission,
-      missionLocation: formValue.missionLocation,
-      reimbursementMethod: formValue.reimbursementMethod,
-      status: formValue.status,
-      details: formValue.expenseDetails,
-      amountByCurrency: this.totalByCurrency
+    // Check currency constraint
+    const usedCurrenciesSet = new Set();
+    validDetails.forEach(ctrl => {
+      const currency = ctrl.get('currencyCode')?.value;
+      if (currency) {
+        usedCurrenciesSet.add(currency);
+      }
+    });
+
+    if (usedCurrenciesSet.size > 2) {
+      this.showError('You can only use up to 2 currencies. Please fix your expense details before updating.');
+      setTimeout(() => this.showErrorAlert = false, 5000);
+      return;
+    }
+
+    const raw = this.requestForm.getRawValue();
+    
+    // Prepare details in the correct format matching ExpenseDetails interface
+    const details = raw.details.map((d: any) => ({
+      description: d.description,
+      amount: +d.amount,
+      currency: d.currencyCode,
+      currencyDescription: this.currencies.find(c => c.code === d.currencyCode)?.description || ''
+    }));
+
+    // Prepare the payload exactly matching ExpenseRequest interface
+    const payload: ExpenseRequest = {
+      reference: this.request.reference,
+      employee: {
+        reference: this.request.employee.reference
+      } as Employee,
+      project: {
+        idProject: this.request.project.idProject
+      } as Project,
+      mission: raw.mission,
+      missionLocation: raw.missionLocation,
+      startDate: raw.startDate,
+      returnDate: raw.returnDate,
+      reimbursementMethod: this.request.reimbursementMethod,
+      status: this.request.status,
+      details: details,
+      amountByCurrency: this.totalAmounts
     };
 
-    this.expenseRequestService.updateExpenseRequest(this.requestId, request).subscribe({
-      next: () => {
-        this.router.navigate(['/requests']);
+    console.log('Update payload:', JSON.stringify(payload, null, 2));
+    console.log('Raw form data:', raw);
+    console.log('Request details:', details);
+    console.log('Used currencies:', this.usedCurrencies);
+    console.log('Total amounts:', this.totalAmounts);
+
+    this.requestService.updateExpenseRequest(this.request.idRequest!, payload).subscribe({
+      next: (response) => {
+        console.log('Update successful:', response);
+        this.showSuccess('Request updated successfully');
+        setTimeout(() => this.router.navigate(['/requests']), 2000);
       },
-      error: (err) => {
-        console.error('Update error:', err);
-        alert('Error updating request');
-        this.isLoading = false;
+      error: err => {
+        console.error('Update error details:', err);
+        console.error('Error status:', err.status);
+        console.error('Error message:', err.error);
+        this.showError(err.error?.message || 'Failed to update request');
+        setTimeout(() => this.showErrorAlert = false, 5000);
       }
     });
   }
-
-
-
-
-
 
 }

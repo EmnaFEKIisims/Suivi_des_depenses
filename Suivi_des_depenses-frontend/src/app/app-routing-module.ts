@@ -4,7 +4,7 @@ import { CreateEmployee } from './modules/employee/components/create-employee/cr
 import { EmployeeList } from './modules/employee/components/employee-list/employee-list';
 import { UpdateEmployee } from './modules/employee/components/update-employee/update-employee';
 import { ProjectList } from './modules/project/components/project-list/project-list';
-import { CreateProjectComponent } from './modules/project/components/create-project/create-project';
+import { CreateProject } from './modules/project/components/create-project/create-project';
 import { UpdateProject } from './modules/project/components/update-project/update-project';
 import { RequestList } from './modules/request/component/request-list/request-list';
 import { CreateRequest } from './modules/request/component/create-request/create-request';
@@ -13,6 +13,10 @@ import { RequestDetails } from './modules/request/component/request-details/requ
 import { ProjectDetails } from './modules/project/components/project-details/project-details';
 import { EmployeeDetails } from './modules/employee/components/employee-details/employee-details';
 import { Home } from './modules/home/home';
+import { ClientList } from './modules/client/components/client-list/client-list';
+import { UpdateClient } from './modules/client/components/update-client/update-client';
+import { CreateClient } from './modules/client/components/create-client/create-client';
+import { ClientDetails } from './modules/client/components/client-details/client-details';
 
 
 
@@ -23,8 +27,12 @@ const routes: Routes = [
   { path: 'update-employee/:CIN', component: UpdateEmployee },
   { path: 'add-employee', component: CreateEmployee },
   { path: 'employees/details/:reference', component: EmployeeDetails },
+  { path: 'clients', component: ClientList },
+  { path: 'update-client/:idClient', component: UpdateClient },
+  { path: 'add-client', component: CreateClient },
+  { path: 'clients/details/:idClient', component: ClientDetails },
   { path: 'projects', component: ProjectList },
-  { path: 'add-project', component: CreateProjectComponent }, 
+  { path: 'add-project', component: CreateProject }, 
   { path: 'projects/edit/:id', component: UpdateProject }, 
   { path: 'projects/:id', component: ProjectDetails },   
   { path: 'requests', component: RequestList },

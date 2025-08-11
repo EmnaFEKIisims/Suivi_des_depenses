@@ -4,6 +4,8 @@ import { EmployeeService } from '../../employee-service';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 
 
@@ -21,6 +23,7 @@ export class EmployeeList implements OnInit {
   selectedDepartment: string = 'All';
   searchTerm: string = '';
   isLoading: boolean = false;
+  private searchTerms = new Subject<string>();
 
   constructor(
     private employeeService: EmployeeService,
@@ -30,6 +33,10 @@ export class EmployeeList implements OnInit {
   ngOnInit(): void {
     this.loadEmployees();
   }
+
+
+
+
 
   loadEmployees(): void {
     this.isLoading = true;
@@ -68,34 +75,25 @@ export class EmployeeList implements OnInit {
     }
   }
 
-onSearch(): void {
-  const search = this.searchTerm.trim();
-  if (!search) {
-    this.filterEmployees();
-    return;
-  }
-
-  this.employeeService.getEmployeeByReference(search).pipe(
-    catchError(() => this.employeeService.getEmployeeByPhone(search)),
-    catchError(() => this.employeeService.getEmployeeByUsername(search)),
-    catchError(() => of(null))
-  ).subscribe(employee => {
-    this.filteredEmployees = employee ? [employee] : [];
-  });
+search(): void {
+  this.filterEmployees();
 }
 
 
 
+filterEmployees(): void {
+  this.filteredEmployees = this.employees.filter(emp => {
+    const matchesDepartment =
+      this.selectedDepartment === 'All' || !this.selectedDepartment || emp.department === this.selectedDepartment;
 
-  filterEmployees(): void {
-    if (this.selectedDepartment === 'All') {
-      this.filteredEmployees = [...this.employees];
-    } else {
-      this.filteredEmployees = this.employees.filter(
-        emp => emp.department === this.selectedDepartment
-      );
-    }
-  }
+    const matchesSearch =
+      !this.searchTerm ||
+      emp.fullName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      emp.phoneNumber.toLowerCase().includes(this.searchTerm.toLowerCase());
+
+    return matchesDepartment && matchesSearch;
+  });
+}
 
 
 

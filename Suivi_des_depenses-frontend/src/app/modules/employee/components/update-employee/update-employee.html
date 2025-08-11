@@ -1,21 +1,24 @@
 <div class="container mt-4">
   <!-- Success Alert -->
-  <div *ngIf="showSuccessAlert" class="alert alert-success alert-dismissible fade show custom-alert" role="alert">
-    <div class="alert-content">
-      <i class="bi bi-check-circle-fill alert-icon"></i>
-      <span>{{ alertMessage }}</span>
-    </div>
-    <button type="button" class="btn-close" (click)="showSuccessAlert = false" aria-label="Close"></button>
-  </div>
+  <div class="alert-container">
+      <div *ngIf="showSuccessAlert" class="alert alert-success alert-dismissible fade show custom-alert" role="alert">
+        <div class="alert-content">
+          <i class="bi bi-check-circle-fill alert-icon"></i>
+          <span>{{ alertMessage }}</span>
+        </div>
+        <button type="button" class="btn-close" (click)="showSuccessAlert = false" aria-label="Close"></button>
+      </div>
 
-  <!-- Error Alert -->
-  <div *ngIf="showErrorAlert" class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
-    <div class="alert-content">
-      <i class="bi bi-exclamation-triangle-fill alert-icon"></i>
-      <span>{{ alertMessage }}</span>
+      <!-- Error Alert -->
+      <div *ngIf="showErrorAlert" class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
+        <div class="alert-content">
+          <i class="bi bi-exclamation-triangle-fill alert-icon"></i>
+          <span>{{ alertMessage }}</span>
+        </div>
+        <button type="button" class="btn-close" (click)="showErrorAlert = false" aria-label="Close"></button>
+      </div>
+
     </div>
-    <button type="button" class="btn-close" (click)="showErrorAlert = false" aria-label="Close"></button>
-  </div>
 
   <div class="d-flex justify-content-between mb-4">
     <button class="btn btn-outline-secondary" (click)="navigateTo('/employees')">

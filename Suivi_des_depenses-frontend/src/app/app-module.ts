@@ -9,6 +9,8 @@ import { CommonModule } from '@angular/common';
 import { ProjectModule } from './modules/project/project-module';
 import { RequestModule } from './modules/request/request-module';
 import { Home } from './modules/home/home';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { ClientModule } from './modules/client/client-module';
 
 @NgModule({
   declarations: [App, Home],
@@ -20,7 +22,9 @@ import { Home } from './modules/home/home';
     FormsModule,
     ReactiveFormsModule,
     EmployeeModule,
+    ClientModule,
     ProjectModule,
+    NgSelectModule,
     RequestModule
   ],
   

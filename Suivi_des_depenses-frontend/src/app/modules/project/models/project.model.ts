@@ -1,16 +1,19 @@
 import { Employee } from "../../employee/models/employee.model";
+import { Client } from "../../client/models/client.model";
+import { Status , Priority } from "./project.enums";
 
-export class Project {
-  idProject!: number;
-  name!: string;
+export interface Project {
+  idProject?: number;
+  reference: string;
+  name: string;
   description?: string;
-  startDate!: string; 
-  endDate?: string;
-  status!: string;
+  startDate: Date | string;
+  endDate:  Date | string;
+  status: Status;
   budget?: number;
-  clientName!: string;
-  priority!: string;
-  progress!: number;
-  teamMembers!: Employee[];
-  projectLeader!: Employee;
+  client: Client;
+  priority: Priority;
+  progress: number;
+  teamMembers: Employee[];
+  projectLeader: Employee;
 }

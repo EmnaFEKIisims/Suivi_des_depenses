@@ -1,142 +1,211 @@
-<div class="update-request-container container my-5">
-  <h2 class="mb-4 text-primary text-center">Update Expense Request</h2>
-
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
+<div class="container mt-4">
+  <!-- Alerts Section -->
+  <div class="alert-container">
+    <div *ngIf="showSuccessAlert" class="alert alert-success alert-dismissible fade show custom-alert" role="alert">
+      <div class="alert-content">
+        <i class="bi bi-check-circle-fill alert-icon"></i>
+        <div><strong>Success!</strong> {{ alertMessage }}</div>
+      </div>
+      <button type="button" class="btn-close" (click)="showSuccessAlert = false"></button>
+    </div>
+    <div *ngIf="showErrorAlert" class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
+      <div class="alert-content">
+        <i class="bi bi-exclamation-triangle-fill alert-icon"></i>
+        <div><strong>Error!</strong> {{ errorMessage }}</div>
+      </div>
+      <button type="button" class="btn-close" (click)="showErrorAlert = false"></button>
+    </div>
   </div>
 
-  <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" novalidate>
-    <div class="row g-3">
-      <!-- Employee Display -->
-      <div class="col-md-6">
-        <label class="form-label">Employee</label>
-        <input type="text" class="form-control" [value]="requestForm.get('employee')?.value?.fullName" readonly>
-      </div>
+  <!-- Navigation Buttons -->
+  <div class="d-flex justify-content-between mb-4">
+    <button class="btn btn-outline-secondary" (click)="navigateTo('/requests')">
+      <i class="bi bi-arrow-left"></i> Back to Requests
+    </button>
+    <button class="btn btn-outline-primary" (click)="navigateTo('/home')">
+      <i class="bi bi-house"></i> Home
+    </button>
+  </div>
 
-      <!-- Project Selection -->
-      <div class="col-md-6">
-        <label for="projectId" class="form-label">Project</label>
-        <select id="projectId" formControlName="projectId" class="form-select"
-          [class.is-invalid]="requestForm.get('projectId')?.invalid && requestForm.get('projectId')?.touched">
-          <option value="" disabled>Select Project</option>
-          <option *ngFor="let project of projects" [value]="project.idProject"
-            [selected]="project.idProject === requestForm.get('projectId')?.value">
-            {{ project.name }}
-          </option>
-        </select>
-      </div>
-
-      <!-- Mission Details -->
-      <div class="col-md-6">
-        <label for="mission" class="form-label">Mission</label>
-        <input id="mission" type="text" formControlName="mission" class="form-control"
-          [class.is-invalid]="requestForm.get('mission')?.invalid && requestForm.get('mission')?.touched">
-      </div>
-
-      <!-- Dates -->
-      <div class="col-md-6">
-        <label for="startDate" class="form-label">Start Date</label>
-        <input id="startDate" type="date" formControlName="startDate" class="form-control">
-      </div>
-
-      <div class="col-md-6">
-        <label for="returnDate" class="form-label">Return Date</label>
-        <input id="returnDate" type="date" formControlName="returnDate" class="form-control">
-      </div>
-
-      <!-- Location -->
-      <div class="col-md-6">
-        <label for="missionLocation" class="form-label">Location</label>
-        <input id="missionLocation" type="text" formControlName="missionLocation" class="form-control">
-      </div>
-
-      <!-- Reimbursement Method -->
-      <div class="col-md-6">
-        <label class="form-label">Reimbursement Method</label>
-        <div class="form-check">
-          <input type="radio" id="cash" class="form-check-input" formControlName="reimbursementMethod" value="CASH_DESK">
-          <label for="cash" class="form-check-label">Cash Desk</label>
-        </div>
-        <div class="form-check">
-          <input type="radio" id="ava" class="form-check-input" formControlName="reimbursementMethod" value="AVA">
-          <label for="ava" class="form-check-label">AVA</label>
-        </div>
-      </div>
-
-      <!-- Expense Details Table -->
-      <div class="col-12 mt-4">
-        <h4>Expense Details</h4>
-        <div class="table-responsive">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Currency</th>
-                <th>Currency Description</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody formArrayName="expenseDetails">
-              <tr *ngFor="let detail of expenseDetails.controls; let i = index" [formGroupName]="i">
-                <td>
-                  <input type="text" formControlName="description" class="form-control">
-                </td>
-                <td>
-                  <input type="number" formControlName="amount" class="form-control">
-                </td>
-                <td>
-                  <select formControlName="currency" class="form-select"
-                    [disabled]="isCurrencyDisabled(detail.get('currency')?.value)">
-                    <option value="" disabled>Select Currency</option>
-                    <option *ngFor="let curr of currencies" [value]="curr.code"
-                      [disabled]="isCurrencyDisabled(curr.code)">
-                      {{ curr.code }}
-                    </option>
-                  </select>
-                </td>
-                <td>
-                  <input type="text" [value]="getCurrencyDescription(detail.get('currency')?.value)" 
-                    class="form-control" readonly>
-                </td>
-                <td>
-                  <button type="button" class="btn btn-outline-danger btn-sm" 
-                    (click)="removeExpenseDetail(i)">
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <div *ngIf="errorMessage" class="alert alert-danger mt-2">
-          {{ errorMessage }}
-        </div>
-        
-        <button type="button" class="btn btn-outline-primary mt-2" 
-          (click)="addExpenseDetail()" [disabled]="usedCurrencies.length >= 2">
-          Add Expense
-        </button>
-      </div>
-
-      <!-- Totals Display -->
-      <div class="col-12 mt-3">
-        <h5>Total Amounts</h5>
-        <div *ngIf="getCurrencyKeys().length > 0" class="alert alert-info">
-          <div *ngFor="let currency of getCurrencyKeys()">
-            {{ currency }} {{ totalByCurrency[currency] | number:'1.2-2' }}
-          </div>
-        </div>
-      </div>
-
-      <!-- Submit Button -->
-      <div class="col-12 text-center mt-4">
-        <button type="submit" class="btn btn-primary px-5" [disabled]="requestForm.invalid || isLoading">
-          <span *ngIf="!isLoading">Update Request</span>
-          <span *ngIf="isLoading" class="spinner-border spinner-border-sm"></span>
-        </button>
-      </div>
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0">Update Expense Request</h3>
     </div>
-  </form>
+    <div class="card-body">
+      <form [formGroup]="requestForm" (ngSubmit)="onUpdate()">
+        <div class="row g-3">
+
+          <!-- Row 1: Reference | Status | Total Amount -->
+          <div class="col-md-4">
+            <label class="form-label">Reference</label>
+            <input class="form-control bg-light" [formControl]="getControl('reference')" readonly />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Status</label>
+            <input class="form-control bg-light" [value]="request?.status" readonly />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Total Amount</label>
+            <input class="form-control bg-light" [value]="formattedTotals" readonly />
+          </div>
+
+          <!-- Row 2: Employee FullName | Project Name -->
+          <div class="col-md-6">
+            <label class="form-label">Employee</label>
+            <input class="form-control bg-light" [value]="request?.employee?.fullName" readonly />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Project</label>
+            <input class="form-control bg-light" [value]="request?.project?.name" readonly />
+          </div>
+
+          <!-- Row 3: Mission | Mission Location -->
+          <div class="col-md-6">
+            <label class="form-label">Mission*</label>
+            <input class="form-control" 
+                   [class.is-invalid]="isFieldInvalid('mission')"
+                   formControlName="mission" />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('mission')">
+              {{ getFieldError('mission') }}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Mission Location*</label>
+            <input class="form-control" 
+                   [class.is-invalid]="isFieldInvalid('missionLocation')"
+                   formControlName="missionLocation" />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('missionLocation')">
+              {{ getFieldError('missionLocation') }}
+            </div>
+          </div>
+
+          <!-- Row 4: Start Date | Return Date -->
+          <div class="col-md-6">
+            <label class="form-label">Start Date*</label>
+            <input type="date" class="form-control" 
+                   [class.is-invalid]="isFieldInvalid('startDate')"
+                   formControlName="startDate" />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('startDate')">
+              {{ getFieldError('startDate') }}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Return Date*</label>
+            <input type="date" class="form-control" 
+                   [class.is-invalid]="isFieldInvalid('returnDate')"
+                   formControlName="returnDate" />
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('returnDate')">
+              {{ getFieldError('returnDate') }}
+            </div>
+          </div>
+
+          <!-- Details -->
+          <div class="col-12 mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0">Expense Details</h5>
+              <button type="button" class="btn btn-outline-primary rounded-circle p-0 btn-add" 
+                      (click)="addDetail()" title="Add Detail"
+                      style="width: 32px; height: 32px;">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+            </div>
+
+            <div *ngFor="let det of detailControls.controls; let i = index" class="row g-2 align-items-end mb-3 detail-row">
+              <div class="col-md-4">
+                <input
+                  class="form-control"
+                  [class.is-invalid]="getDetailControl(i, 'description')?.invalid && (getDetailControl(i, 'description')?.dirty || getDetailControl(i, 'description')?.touched)"
+                  placeholder="Description*"
+                  [formControl]="getDetailControl(i, 'description')"
+                />
+                <div class="invalid-feedback" *ngIf="getDetailControl(i, 'description')?.invalid && (getDetailControl(i, 'description')?.dirty || getDetailControl(i, 'description')?.touched)">
+                  Description is required
+                </div>
+              </div>
+              <div class="col-md-2">
+                <input
+                  type="number"
+                  class="form-control"
+                  [class.is-invalid]="getDetailControl(i, 'amount')?.invalid && (getDetailControl(i, 'amount')?.dirty || getDetailControl(i, 'amount')?.touched)"
+                  placeholder="Amount*"
+                  [formControl]="getDetailControl(i, 'amount')"
+                  (input)="recomputeTotals()"
+                />
+                <div class="invalid-feedback" *ngIf="getDetailControl(i, 'amount')?.invalid && (getDetailControl(i, 'amount')?.dirty || getDetailControl(i, 'amount')?.touched)">
+                  Amount is required
+                </div>
+              </div>
+              <div class="col-md-3">
+                <ng-select
+                  [items]="currencies"
+                  bindLabel="description"
+                  bindValue="code"
+                  [formControl]="getDetailControl(i, 'currencyCode')"
+                  [clearable]="false"
+                  [searchable]="true"
+                  (ngModelChange)="onCurrencyChange(i, $event)"
+                  placeholder="Select currency*"
+                  [class.is-invalid]="getDetailControl(i, 'currencyCode')?.invalid && (getDetailControl(i, 'currencyCode')?.dirty || getDetailControl(i, 'currencyCode')?.touched)"
+                ></ng-select>
+                <div class="invalid-feedback" *ngIf="getDetailControl(i, 'currencyCode')?.invalid && (getDetailControl(i, 'currencyCode')?.dirty || getDetailControl(i, 'currencyCode')?.touched)">
+                  Currency is required
+                </div>
+              </div>
+              <div class="col-md-2">
+                <input class="form-control bg-light" placeholder="Code" [value]="getDetailControl(i, 'currencyCode')?.value" readonly />
+              </div>
+              <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger" (click)="removeDetail(i)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Totals by Currency -->
+            <div class="col-12 mt-3" *ngIf="usedCurrencies.length > 0">
+              <div class="d-flex justify-content-center">
+                <div class="total-amounts-container">
+                  <div class="total-header">
+                    <i class="bi bi-calculator me-2"></i>
+                    <span>Total Amounts</span>
+                  </div>
+                  <div class="currencies-display-inline">
+                    <span class="total-text">
+                      <span *ngFor="let currency of usedCurrencies; let i = index">
+                        <span *ngIf="i === 0">Total </span>
+                        <span class="currency-display">{{ currency }}: {{ totalAmounts[currency] || 0 | number:'1.2-2' }}</span>
+                        <span *ngIf="i < usedCurrencies.length - 1"> , </span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="col-12 d-flex justify-content-end mt-4 gap-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="navigateTo('/requests')">
+              Cancel
+            </button>
+            <div class="d-flex flex-column align-items-end">
+              <button type="submit" class="btn btn-primary" [disabled]="!isFormValidForSubmission()">
+                Update Request
+              </button>
+              <small *ngIf="!hasValidDetails() && detailControls.length > 0" class="text-danger mt-1">
+                <i class="bi bi-exclamation-triangle"></i> At least one valid detail line is required
+              </small>
+              <small *ngIf="!isFormValidForSubmission() && usedCurrencies.length > 2" class="text-danger mt-1">
+                <i class="bi bi-exclamation-triangle"></i> Too many currencies (max 2 allowed)
+              </small>
+              <small *ngIf="detailControls.length === 0" class="text-muted mt-1">
+                <i class="bi bi-info-circle"></i> Add expense details to continue
+              </small>
+            </div>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

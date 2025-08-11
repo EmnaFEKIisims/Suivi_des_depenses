@@ -3,20 +3,19 @@ import { Employee } from '../../employee/models/employee.model';
 import { Project } from '../../project/models/project.model';
 
 export enum ExpenseStatus {
-  DRAFT = 'DRAFT',
   SUBMITTED = 'SUBMITTED',
   APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-  PROCESSED = 'PROCESSED'
+  REJECTED = 'REJECTED'
 }
 
 export enum ReimbursementMethod {
   CASH_DESK = 'Cash Desk',
-  AVA = 'AVA'
+  BANK_TRANSFER = 'Bank Transfer'
 }
 
 export interface ExpenseRequest {
   idRequest?: number;
+  reference?: string;
   employee: Employee;
   project: Project;
   startDate: string;   

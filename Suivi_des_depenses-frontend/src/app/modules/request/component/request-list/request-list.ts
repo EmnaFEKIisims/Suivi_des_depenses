@@ -1,15 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatTableDataSource } from '@angular/material/table';
-import { SelectionModel } from '@angular/cdk/collections';
 import { Router } from '@angular/router';
-import { Observable, forkJoin , of } from 'rxjs';
 import { ExpenseRequestService } from '../../expense-request-service';
-import { ExpenseRequest, ExpenseStatus } from '../../models/expense-request.model';
-import { EmployeeService } from '../../../employee/employee-service';
-import { ProjectService } from '../../../project/project-service';
-import { timeout, map , catchError} from 'rxjs/operators';
-import { getFormattedTotals } from '../../models/expense-request.model';
+import { ExpenseRequest, ExpenseStatus , calculateTotals, getFormattedTotals } from '../../models/expense-request.model';
+import { CURRENCY_LIST } from '../../models/expense-details.model';
+
 
 @Component({
   selector: 'app-request-list',
@@ -18,180 +12,139 @@ import { getFormattedTotals } from '../../models/expense-request.model';
   styleUrl: './request-list.scss'
 })
 export class RequestList implements OnInit {
-    displayedColumns: string[] = [
-    'select',
-    'idRequest',
-    'employeeCin',
-    'startDate',
-    'returnDate',
-    'mission',
-    'totalAmount',
-    'status',
-    'actions'
-  ];
-  dataSource = new MatTableDataSource<ExpenseRequest>();
-  selection = new SelectionModel<ExpenseRequest>(true, []);
-  isLoading = true;
-  statusFilter = '';
-  searchTerm = '';
-  
+   expenseRequests: (ExpenseRequest & { id: number; totalAmount: number; currency: string | null })[] = [];
+  filteredRequests: typeof this.expenseRequests = [];
 
-  // Options for filters
-  statusOptions = Object.values(ExpenseStatus);
+  searchTerm: string = '';
+  selectedCurrencyId: string | null = null;
+  selectedStatus: string = 'ALL';
+
+  currencies = CURRENCY_LIST;
+  statuses = Object.values(ExpenseStatus);
+
+  successMessage: string = '';
+  showSuccessMessage: boolean = false;
 
   constructor(
     private expenseRequestService: ExpenseRequestService,
-    private employeeService: EmployeeService,
-    private projectService: ProjectService,
-    private dialog: MatDialog,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadRequests();
+    this.fetchRequests();
   }
 
-  loadRequests(): void {
-  this.isLoading = true;
-  this.expenseRequestService.getAllExpenseRequests().pipe(
-    timeout(10000),
-    catchError(err => {
-      console.error('Error loading requests:', err);
-      this.isLoading = false;
-      this.dataSource.data = [];
-      return of([]); // Retourne un tableau vide pour continuer le flux
-    })
-  ).subscribe({
-    next: (requests) => {
-      if (!requests || requests.length === 0) {
-        this.isLoading = false;
-        this.dataSource.data = [];
-        return;
+  fetchRequests(): void {
+    this.expenseRequestService.getAllExpenseRequests().subscribe({
+      next: (requests) => {
+        const updatedRequests = requests.map((req) => {
+          calculateTotals(req);
+
+          const totalAmount = Object.values(req.amountByCurrency || {}).reduce((a, b) => a + b, 0);
+          const currencies = Object.keys(req.amountByCurrency || {});
+          const currency = currencies.length > 0 ? currencies[0] : null;
+
+          const id = (req as any).id ?? (req as any).idRequest;
+
+          return {
+            ...req,
+            id,
+            totalAmount,
+            currency,
+          };
+        });
+
+        this.expenseRequests = updatedRequests;
+        this.applyFilters();
+      },
+      error: () => {
+        this.expenseRequests = [];
+        this.filteredRequests = [];
       }
-
-      const observables = requests.map(request => 
-        forkJoin({
-          employee: this.employeeService.getEmployeeByCIN(request.employee?.cin || '').pipe(
-            catchError(() => of({ fullName: 'Unknown Employee', cin: request.employee?.cin || '' } as any))
-          ),
-          project: this.projectService.getProjectById(request.project?.idProject || 0).pipe(
-            catchError(() => of({ name: 'Unknown Project', idProject: request.project?.idProject || 0 } as any))
-          )
-        }).pipe(
-          map(({ employee, project }) => ({
-            ...request,
-            employee,
-            project
-          }))
-        ));
-
-      forkJoin(observables).subscribe({
-        next: (mappedRequests) => {
-          this.dataSource.data = mappedRequests;
-          this.isLoading = false;
-        },
-        error: (err) => {
-          console.error('Error in forkJoin:', err);
-          this.isLoading = false;
-          this.dataSource.data = [];
-        }
-      });
-    }
-  });
-}
-
-  applyFilter(): void {
-    this.dataSource.filterPredicate = (data: ExpenseRequest, filter: string) => {
-      const filterObject = JSON.parse(filter);
-      const searchTerm = filterObject.search.toLowerCase();
-      const matchesSearch =
-        (data.project?.name?.toLowerCase()?.includes(searchTerm) || false) ||
-        (data.employee?.fullName?.toLowerCase()?.includes(searchTerm) || false);
-      const matchesStatus = filterObject.status === '' || data.status === filterObject.status;
-      return matchesSearch && matchesStatus;
-    };
-
-    this.dataSource.filter = JSON.stringify({
-      search: this.searchTerm,
-      status: this.statusFilter
     });
   }
 
-  isAllSelected(): boolean {
-    const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.length;
-    return numSelected === numRows;
+  applyFilters(): void {
+    const searchText = this.searchTerm.toLowerCase();
+
+    this.filteredRequests = this.expenseRequests.filter(request => {
+      const matchesSearch = !this.searchTerm ||
+        request.employee?.fullName?.toLowerCase().includes(searchText) ||
+        request.project?.name?.toLowerCase().includes(searchText);
+
+      const matchesCurrency = !this.selectedCurrencyId ||
+        request.details?.some(detail => detail.currency === this.selectedCurrencyId);
+
+      const matchesStatus = this.selectedStatus === 'ALL' ||
+        request.status === this.selectedStatus;
+
+      return matchesSearch && matchesCurrency && matchesStatus;
+    });
   }
 
-  toggleAllRows(): void {
-    if (this.isAllSelected()) {
-      this.selection.clear();
-      return;
-    }
-    this.selection.select(...this.dataSource.data);
+  approveRequest(requestId: number): void {
+    this.expenseRequestService.approveRequest(requestId).subscribe({
+      next: () => {
+        this.successMessage = 'Request approved successfully!';
+        this.showSuccessMessage = true;
+        this.fetchRequests();
+        setTimeout(() => this.showSuccessMessage = false, 3000);
+      },
+      error: err => {
+        console.error('Approval failed', err);
+      }
+    });
   }
 
-  viewDetails(request: ExpenseRequest): void {
-  this.router.navigate(['/requests', request.idRequest]);
-}
-
-  private formatRequestDetails(request: ExpenseRequest): string {
-    return `
-      <div class="request-details">
-        <p><strong>Employee:</strong> ${request.employee?.fullName || 'N/A'}</p>
-        <p><strong>Mission:</strong> ${request.mission}</p>
-        <p><strong>Location:</strong> ${request.missionLocation}</p>
-        <p><strong>Status:</strong> ${request.status}</p>
-        <p><strong>Total Amount:</strong> ${this.calculateTotal(request)}</p>
-      </div>
-    `;
+  rejectRequest(requestId: number): void {
+    this.expenseRequestService.rejectRequest(requestId, 'Rejected by admin').subscribe({
+      next: () => {
+        this.successMessage = 'Request rejected successfully!';
+        this.showSuccessMessage = true;
+        this.fetchRequests();
+        setTimeout(() => this.showSuccessMessage = false, 3000);
+      },
+      error: err => {
+        console.error('Rejection failed', err);
+      }
+    });
   }
 
-  editRequest(request: ExpenseRequest): void {
-    this.router.navigate(['/requests/edit', request.idRequest]);
+  onSearchChange(): void {
+    this.applyFilters();
   }
 
-  deleteRequest(id: number): void {
-    if (confirm('Are you sure you want to delete this request?')) {
-      this.expenseRequestService.deleteExpenseRequest(id).subscribe({
-        next: () => {
-          this.loadRequests();
-        },
-        error: (err) => console.error('Error deleting request:', err)
-      });
-    }
+  onCurrencyChange(): void {
+    this.applyFilters();
   }
 
-  bulkSubmit(): void {
-    const selectedIds = this.selection.selected.map(r => r.idRequest);
-    if (selectedIds.length === 0) return;
-
-    if (confirm(`Submit ${selectedIds.length} selected requests for approval?`)) {
-      // Implement bulk submit logic if needed
-    }
+  onStatusChange(): void {
+    this.applyFilters();
   }
 
-  getStatusColor(status: ExpenseStatus): string {
-    switch (status) {
-      case ExpenseStatus.DRAFT:
-        return 'secondary';
-      case ExpenseStatus.APPROVED:
-        return 'success';
-      case ExpenseStatus.REJECTED:
-        return 'warn';
-      case ExpenseStatus.SUBMITTED:
-        return 'primary';
-      case ExpenseStatus.PROCESSED:
-        return 'accent';
-      default:
-        return '';
-    }
+  getCurrencySymbol(code: string | undefined): string {
+    if (!code) return '';
+    const currency = CURRENCY_LIST.find(c => c.code === code || c.description === code);
+    return currency ? currency.code : '';
   }
 
-  calculateTotal(request: ExpenseRequest): string {
-    return getFormattedTotals(request) || 'N/A';
+  formatStatus(status: ExpenseStatus): string {
+    return status.charAt(0) + status.slice(1).toLowerCase().replace('_', ' ');
   }
 
+  viewRequest(id: number): void {
+    this.router.navigate(['/requests', id]);
+  }
 
-  
+  editRequest(id: number): void {
+    this.router.navigate(['/requests/edit', id]);
+  }
+
+  goToCreateExpenseRequest(): void {
+    this.router.navigate(['/requests/add']);
+  }
+
+  navigateTo(path: string): void {
+    this.router.navigate([path]);
+  }
 }

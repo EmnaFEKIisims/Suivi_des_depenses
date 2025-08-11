@@ -1,0 +1,87 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between mb-4">
+    <button class="btn btn-outline-secondary" (click)="navigateTo('/clients')">
+      <i class="bi bi-arrow-left"></i> Back to Clients
+    </button>
+    <button class="btn btn-outline-primary" (click)="navigateTo('/home')">
+      <i class="bi bi-house"></i> Home
+    </button>
+  </div>
+
+  <div class="card shadow-lg">
+    <div class="card-header bg-primary text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">Client Details</h3>
+        <button class="btn btn-light btn-sm" (click)="navigateToEdit(client.idClient!)">
+          <i class="bi bi-pencil-square"></i> Edit
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- Row 1: Reference + Name -->
+      <div class="row mb-3 border-bottom pb-3">
+        <div class="col-md-6">
+          <div class="d-flex justify-content-between">
+            <label class="form-label fw-bold text-muted">Reference</label>
+            <p class="mb-0">{{ client?.reference }}</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex justify-content-between">
+            <label class="form-label fw-bold text-muted">Name</label>
+            <p class="mb-0">{{ client?.name }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: Email + Registration Date -->
+      <div class="row mb-3 border-bottom pb-3">
+        <div class="col-md-6">
+          <div class="d-flex justify-content-between">
+            <label class="form-label fw-bold text-muted">Email</label>
+            <p class="mb-0">{{ client?.email }}</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex justify-content-between">
+            <label class="form-label fw-bold text-muted">Registration Date</label>
+            <p class="mb-0">{{ client?.registrationDate | date:'mediumDate' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Address + Continent -->
+      <div class="row mb-3 border-bottom pb-3">
+        <div class="col-md-6">
+          <div class="d-flex justify-content-between">
+            <label class="form-label fw-bold text-muted">Address</label>
+            <p class="mb-0">{{ client?.address }}</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex justify-content-between">
+            <label class="form-label fw-bold text-muted">Continent</label>
+            <p class="mb-0">{{ client?.continent }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 4: Contact Person + Phone Number -->
+      <div class="row mb-3 border-bottom pb-3">
+        <div class="col-md-6">
+          <div class="d-flex justify-content-between">
+            <label class="form-label fw-bold text-muted">Contact Person</label>
+            <p class="mb-0">{{ client?.contactPerson }}</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex justify-content-between">
+            <label class="form-label fw-bold text-muted">Phone Number</label>
+            <p class="mb-0">{{ client?.phoneNumber }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,143 +1,158 @@
-<div class="create-project-container container my-5">
-  <h2 class="mb-4 text-primary text-center">Add New Project</h2>
+<div class="container mt-4">
+  <!-- Alerts Section -->
+  <div class="alert-container">
+    <div *ngIf="showSuccessAlert" class="alert alert-success alert-dismissible fade show custom-alert" role="alert">
+      <div class="alert-content">
+        <i class="bi bi-check-circle-fill alert-icon"></i>
+        <div>
+          <strong>Success!</strong> {{ alertMessage || 'Project created successfully.' }}
+        </div>
+      </div>
+      <button type="button" class="btn-close" (click)="showSuccessAlert = false" aria-label="Close"></button>
+    </div>
 
-  <!-- Error Message Display -->
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
+    <div *ngIf="showErrorAlert" class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
+      <div class="alert-content">
+        <i class="bi bi-exclamation-triangle-fill alert-icon"></i>
+        <div>
+          <strong>Error!</strong> {{ errorMessage || 'Failed to create project.' }}
+        </div>
+      </div>
+      <button type="button" class="btn-close" (click)="showErrorAlert = false" aria-label="Close"></button>
+    </div>
   </div>
 
-  <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" novalidate>
-    <div class="row g-3">
-      <!-- Project Name -->
-      <div class="col-md-6">
-        <label for="name" class="form-label">Project Name</label>
-        <input id="name" type="text" formControlName="name" class="form-control"
-          [class.is-invalid]="projectForm.get('name')?.invalid && projectForm.get('name')?.touched">
-        <div *ngIf="projectForm.get('name')?.invalid && projectForm.get('name')?.touched" class="invalid-feedback">
-          Project name is required
-        </div>
-      </div>
+  <!-- Navigation Buttons -->
+  <div class="d-flex justify-content-between mb-4">
+    <button class="btn btn-outline-secondary" (click)="navigateTo('/projects')">
+      <i class="bi bi-arrow-left"></i> Back to Projects
+    </button>
+    <button class="btn btn-outline-primary" (click)="navigateTo('')">
+      <i class="bi bi-house"></i> Home
+    </button>
+  </div>
 
-      <!-- Client Name -->
-      <div class="col-md-6">
-        <label for="clientName" class="form-label">Client Name</label>
-        <input id="clientName" type="text" formControlName="clientName" class="form-control"
-          [class.is-invalid]="projectForm.get('clientName')?.invalid && projectForm.get('clientName')?.touched">
-        <div *ngIf="projectForm.get('clientName')?.invalid && projectForm.get('clientName')?.touched" class="invalid-feedback">
-          Client name is required
-        </div>
-      </div>
-
-      <!-- Description -->
-      <div class="col-md-12">
-        <label for="description" class="form-label">Description</label>
-        <textarea id="description" formControlName="description" class="form-control" rows="3"></textarea>
-      </div>
-
-      <!-- Dates -->
-      <div class="col-md-6">
-        <label for="startDate" class="form-label">Start Date</label>
-        <input id="startDate" type="date" formControlName="startDate" class="form-control"
-          [class.is-invalid]="projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched">
-        <div *ngIf="projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched" class="invalid-feedback">
-          Start date is required
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <label for="endDate" class="form-label">End Date</label>
-        <input id="endDate" type="date" formControlName="endDate" class="form-control">
-      </div>
-
-      <!-- Status and Priority -->
-      <div class="col-md-4">
-        <label for="status" class="form-label">Status</label>
-        <select id="status" formControlName="status" class="form-select"
-          [class.is-invalid]="projectForm.get('status')?.invalid && projectForm.get('status')?.touched">
-          <option value="" disabled>Select Status</option>
-          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
-        </select>
-        <div *ngIf="projectForm.get('status')?.invalid && projectForm.get('status')?.touched" class="invalid-feedback">
-          Status is required
-        </div>
-      </div>
-
-      <div class="col-md-4">
-        <label for="priority" class="form-label">Priority</label>
-        <select id="priority" formControlName="priority" class="form-select"
-          [class.is-invalid]="projectForm.get('priority')?.invalid && projectForm.get('priority')?.touched">
-          <option value="" disabled>Select Priority</option>
-          <option *ngFor="let p of priorities" [value]="p">{{ p }}</option>
-        </select>
-        <div *ngIf="projectForm.get('priority')?.invalid && projectForm.get('priority')?.touched" class="invalid-feedback">
-          Priority is required
-        </div>
-      </div>
-
-      <!-- Budget -->
-      <div class="col-md-4">
-        <label for="budget" class="form-label">Budget</label>
-        <input id="budget" type="number" formControlName="budget" class="form-control"
-          [class.is-invalid]="projectForm.get('budget')?.invalid && projectForm.get('budget')?.touched">
-        <div *ngIf="projectForm.get('budget')?.invalid && projectForm.get('budget')?.touched" class="invalid-feedback">
-          Budget must be ≥ 0
-        </div>
-      </div>
-
-      <!-- Progress -->
-      <div class="col-md-6">
-        <label for="progress" class="form-label">Progress (%)</label>
-        <input id="progress" type="number" formControlName="progress" class="form-control"
-          [class.is-invalid]="projectForm.get('progress')?.invalid && projectForm.get('progress')?.touched">
-        <div *ngIf="projectForm.get('progress')?.invalid && projectForm.get('progress')?.touched" class="invalid-feedback">
-          Progress must be between 0-100
-        </div>
-      </div>
-
-      <!-- Project Leader -->
-      <div class="col-md-6">
-        <label for="projectLeaderCin" class="form-label">Project Leader</label>
-        <select id="projectLeaderCin" formControlName="projectLeaderCin" class="form-select"
-          [class.is-invalid]="projectForm.get('projectLeaderCin')?.invalid && projectForm.get('projectLeaderCin')?.touched">
-          <option value="" disabled selected>Select a leader</option>
-          <option *ngFor="let emp of employees" [value]="emp.cin">{{ emp.fullName }}</option>
-        </select>
-        <div *ngIf="projectForm.get('projectLeaderCin')?.invalid && projectForm.get('projectLeaderCin')?.touched" class="invalid-feedback">
-          Project leader is required
-        </div>
-      </div>
-
-      <!-- Team Members -->
-      <div class="col-md-12">
-        <label class="form-label">Team Members</label>
-        <div formArrayName="teamMembersCins">
-          <div *ngFor="let member of teamMembersCins.controls; let i = index" class="input-group mb-2">
-            <select class="form-select" [formControlName]="i">
-              <option value="" disabled>Select a member</option>
-              <option *ngFor="let emp of employees" [value]="emp.cin">{{ emp.fullName }}</option>
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0">Create New Project</h3>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+        <div class="row g-3">
+          <!-- First Row: Reference + Priority -->
+          <div class="col-md-6">
+            <label for="reference" class="form-label">Reference</label>
+            <input type="text" class="form-control bg-light" id="reference" formControlName="reference" readonly>
+          </div>
+          <div class="col-md-6">
+            <label for="priority" class="form-label">Priority*</label>
+            <select class="form-select" id="priority" formControlName="priority">
+              <option *ngFor="let p of priorities" [value]="p">{{p}}</option>
             </select>
-            <button type="button" class="btn btn-outline-danger" 
-                    (click)="removeTeamMemberControl(i)"
-                    *ngIf="teamMembersCins.length > 1">
-              Remove
+          </div>
+
+          <!-- Second Row: Name + Description -->
+          <div class="col-md-6">
+            <label for="name_project" class="form-label">Name*</label>
+            <input type="text" class="form-control" id="name_project" formControlName="name_project">
+            <div *ngIf="projectForm.get('name_project')?.invalid && projectForm.get('name_project')?.touched" class="text-danger">
+              <small *ngIf="projectForm.get('name_project')?.errors?.['required']">Name is required</small>
+              <small *ngIf="projectForm.get('name_project')?.errors?.['minlength']">Name must be at least 3 characters</small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="description" class="form-label">Description</label>
+            <input type="text" class="form-control" id="description" formControlName="description">
+          </div>
+
+          <!-- Third Row: Status + Progress -->
+          <div class="col-md-6">
+            <label for="status" class="form-label">Status*</label>
+            <select class="form-select" id="status" formControlName="status">
+              <option *ngFor="let status of statuses" [value]="status">{{status}}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="progress" class="form-label">Progress (%)</label>
+            <input type="number" class="form-control" id="progress" formControlName="progress">
+          </div>
+
+          <!-- Fourth Row: Start Date + End Date -->
+          <div class="col-md-6">
+            <label for="start_date" class="form-label">Start Date*</label>
+            <input type="date" class="form-control" id="start_date" formControlName="start_date">
+          </div>
+          <div class="col-md-6">
+            <label for="end_date" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="end_date" formControlName="end_date">
+          </div>
+
+          <!-- Fifth Row: Client + Budget -->
+          <div class="col-md-6">
+            <label for="client_id" class="form-label">Client*</label>
+            <div class="select-container" [class.is-invalid]="projectForm.get('client_id')?.invalid && projectForm.get('client_id')?.touched">
+              <ng-select 
+                [items]="clients" 
+                bindLabel="name" 
+                bindValue="idClient"
+                formControlName="client_id"
+                placeholder="Select client">
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="budget" class="form-label">Budget</label>
+            <input type="number" class="form-control" id="budget" formControlName="budget">
+          </div>
+
+          <!-- Sixth Row: Project Leader -->
+          <div class="col-12">
+            <label for="project_leader_Reference" class="form-label">Project Leader*</label>
+            <ng-select
+              [items]="employees"
+              bindLabel="fullName"
+              bindValue="reference"
+              formControlName="project_leader_Reference"
+              placeholder="Select project leader">
+            </ng-select>
+          </div>
+
+          <!-- Seventh Row: Team Members -->
+          <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="form-label mb-0">Team Members*</label>
+              <button type="button" class="btn btn-outline-success btn-sm" (click)="addTeamMember()">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+            </div>
+            <div *ngFor="let memberControl of team_members.controls; let i = index" class="mb-2">
+              <div class="team-member-item select-container"
+                  [class.is-invalid]="team_members.at(i).invalid && (team_members.at(i).touched)">
+                <ng-select
+                  [items]="employees" 
+                  bindLabel="fullName" 
+                  bindValue="reference"
+                  [formControl]="memberControl"
+                  placeholder="Select team member">
+                </ng-select>
+                <button type="button" class="btn btn-outline-danger remove-member" (click)="removeTeamMember(i)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="d-flex justify-content-end mt-4 gap-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="navigateTo('/projects')">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="projectForm.invalid">
+              Create Project
             </button>
           </div>
         </div>
-        <button type="button" class="btn btn-outline-primary mt-2" (click)="addTeamMemberControl()">
-          + Add Team Member
-        </button>
-      </div>
+      </form>
     </div>
-
-    <!-- Submit Button -->
-    <div class="text-center mt-4">
-      <button type="submit" class="btn btn-primary px-5" [disabled]="projectForm.invalid || isLoading">
-        <span *ngIf="!isLoading">Create Project</span>
-        <span *ngIf="isLoading">
-          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-          Creating...
-        </span>
-      </button>
-    </div>
-  </form>
+  </div>
 </div>

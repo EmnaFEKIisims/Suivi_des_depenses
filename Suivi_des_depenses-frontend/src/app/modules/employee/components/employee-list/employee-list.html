@@ -12,15 +12,14 @@
   </div>
 
   <!-- Search and Filter Section -->
-  <div class="card shadow mb-4">
+  <div class="card shadow mb-6">
     <div class="card-body">
       <div class="row g-3">
         <!-- Search by Reference, Phone, Username -->
         <div class="col-md-4">
           <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchTerm" 
-                   (keyup.enter)="onSearch()">
-            <button class="btn btn-primary" type="button" (click)="onSearch()">
+            <input type="text"  class="form-control" placeholder="Search by name or phoneNumber..." [(ngModel)]="searchTerm" (input)="search()">
+            <button class="btn btn-primary" type="button" (click)="search()">
               <i class="bi bi-search"></i>
             </button>
           </div>

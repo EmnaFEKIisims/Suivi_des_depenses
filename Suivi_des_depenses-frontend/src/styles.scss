@@ -1,109 +1,208 @@
-// Color variables
-$primary-color: #2c3e50;
-$secondary-color: #3498db;
-$accent-color: #e74c3c;
-$light-color: #ecf0f1;
-$dark-color: #2c3e50;
-$text-color: #333;
-$footer-bg: #34495e;
 
-// Navbar styling
+
+
+
+// Unified Elegant Color Palette - Navy & Gold Theme
+:root {
+  /* Primary Colors - Deep Navy & Warm Gold */
+  --primary-dark: #1a252f;
+  --primary-main: #2c3e50;
+  --primary-light: #34495e;
+  --accent-main: #d4af37;
+  --accent-light: #f4e4bc;
+  
+  /* Secondary Colors */
+  --secondary-dark: #5d6d7e;
+  --secondary-main: #7f8c8d;
+  --secondary-light: #aab7b8;
+  
+  /* Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #ecf0f1;
+  
+  /* Text Colors */
+  --text-primary: #2c3e50;
+  --text-secondary: #5d6d7e;
+  --text-light: #ffffff;
+  --text-muted: #95a5a6;
+  
+  /* Status Colors */
+  --success: #27ae60;
+  --warning: #f39c12;
+  --danger: #e74c3c;
+  --info: #3498db;
+}
+
+// Legacy Variables for Compatibility
+$primary-color: #2c3e50;
+$secondary-color: #7f8c8d;
+$accent-color: #d4af37;
+$light-color: #f8f9fa;
+$dark-color: #2c3e50;
+$text-color: #2c3e50;
+$footer-bg: #2c3e50;
+
+// Unified Professional Navbar
 .navbar {
-  background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 10%) 100%) !important;
-  padding: 0.8rem 1rem;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-main) 100%) !important;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 25px rgba(26, 37, 47, 0.2);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
   
   .navbar-brand {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+    font-weight: 700;
     letter-spacing: 0.5px;
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-main), transparent);
+    }
   }
   
   .nav-link {
     font-weight: 500;
-    padding: 0.5rem 1rem;
-    margin: 0 0.2rem;
-    border-radius: 4px;
+    padding: 0.75rem 1.25rem;
+    margin: 0 0.25rem;
+    border-radius: 10px;
     transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.9) !important;
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
     
     &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
+      background: linear-gradient(135deg, var(--accent-main) 0%, #b8941f 100%);
+      color: white !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+      
+      &::before {
+        left: 100%;
+      }
     }
     
     &.active {
-      background-color: rgba($secondary-color, 0.2);
-      color: lighten($secondary-color, 10%);
+      background: var(--accent-main);
+      color: var(--primary-dark) !important;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
     }
   }
 }
 
-// Main content area
+// Main content area with elegant spacing
 .main-content {
-  min-height: calc(100vh - 120px); // Adjust based on your header/footer height
-  padding: 2rem 0;
-  margin-bottom: 60px; // Equal to footer height to prevent overlap
+  min-height: calc(100vh - 140px);
+  padding: 2.5rem 0;
+  margin-bottom: 80px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
 
+// Unified Professional Footer
 .footer {
   position: fixed;
   bottom: 0;
   width: 100%;
-  height: 4rem; /* Exactly 4cm (1rem ≈ 1cm on most screens) */
-  background: $footer-bg;
-  color: $light-color;
-  padding: 0.5rem 0; /* Reduced padding */
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  height: 5rem;
+  background: linear-gradient(135deg, var(--primary-main) 0%, var(--primary-dark) 100%);
+  color: var(--text-light);
+  padding: 1rem 0;
+  box-shadow: 0 -4px 25px rgba(26, 37, 47, 0.25);
   z-index: 1000;
   display: flex;
-  align-items: center; /* Vertically center content */
+  align-items: center;
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 
   .footer-section {
-    padding: 0 1rem;
+    padding: 0 1.5rem;
     
     h5 {
-      font-size: 1rem; /* Smaller heading */
-      margin-bottom: 0.25rem;
+      font-size: 1.1rem;
+      margin-bottom: 0.4rem;
       white-space: nowrap;
+      font-weight: 600;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     }
     
     p {
-      font-size: 0.85rem; /* Smaller text */
+      font-size: 0.9rem;
       margin-bottom: 0;
-      line-height: 1.2;
+      line-height: 1.4;
+      opacity: 0.9;
     }
   }
 
   .social-icons {
     a {
       color: $light-color;
-      margin-left: 0.75rem;
-      font-size: 1.1rem;
-      transition: opacity 0.2s;
+      margin-left: 1rem;
+      font-size: 1.3rem;
+      transition: all 0.3s ease;
       
       &:hover {
         opacity: 0.8;
+        transform: translateY(-2px);
+        color: $accent-color;
       }
     }
   }
 
   @media (max-width: 768px) {
     height: auto;
-    padding: 0.5rem 0;
+    padding: 1rem 0;
     
     .footer-section {
       text-align: center !important;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.8rem;
       
       &:last-child {
         margin-bottom: 0;
       }
     }
-    
-    .social-icons {
-      justify-content: center;
-      a {
-        margin: 0 0.5rem;
-      }
-    }
+  }
+}
+
+// Professional Global Styles
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: $text-color;
+  background-color: #f8f9fa;
+}
+
+// Elegant Card Headers for Forms  
+.card-header.bg-primary {
+  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%) !important;
+  color: white;
+  border: none;
+  font-weight: 600;
+  
+  h3 {
+    color: white !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
   }
 }
 
@@ -130,7 +229,6 @@ $footer-bg: #34495e;
   }
 }
 
-
 .scroll-indicator {
   position: fixed;
   right: 10px;
@@ -149,12 +247,40 @@ $footer-bg: #34495e;
     top: 0;
     left: 0;
     width: 100%;
-    height: 30%; // Base height
+    height: 30%;
     background: $secondary-color;
     border-radius: 3px;
     transition: transform 0.1s ease-out;
   }
   
-  // Glow effect
   box-shadow: 0 0 10px rgba($secondary-color, 0.3);
 }
+
+.ng-select.custom-select {
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  background: white;
+}
+
+.ng-select.custom-select .ng-select-container {
+  min-height: 38px !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.ng-dropdown-panel {
+  border: 1px solid #ddd !important;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1) !important;
+}
+
+.team-members-container {
+  border: 1px solid #eee;
+  padding: 10px;
+  border-radius: 5px;
+  background: #f9f9f9;
+  margin-top: 10px;
+}
+
+
