@@ -4,7 +4,7 @@ public enum Continent {
 
     TUNISIA,
     FRANCE,
-    GERMANY,
+    BELGIUM ,
     AFRICA,
     EUROPE,
     ASIA,

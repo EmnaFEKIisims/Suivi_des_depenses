@@ -7,6 +7,7 @@ import com.example.core.client.Continent;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,10 +61,10 @@ public class ClientController {
     }
 
 
-    @PutMapping("/updateClient")
-    public ResponseEntity<Client> updateClient(@RequestBody Client client) {
-        Client updatedClient = clientServices.updateClient(client);
-        return ResponseEntity.ok(updatedClient);
+    @PutMapping("/updateClient/{idClient}")
+    public ResponseEntity<Client> updateClient(@PathVariable Long idClient, @RequestBody Client client) {
+        Client updated = clientServices.updateClient(idClient, client);
+        return ResponseEntity.ok(updated);
     }
 
 
@@ -72,6 +73,20 @@ public class ClientController {
     public ResponseEntity<String> generateReference() {
         String reference = clientServices.generateClientReference();
         return ResponseEntity.ok(reference);
+    }
+
+    @GetMapping("/getClientById/{idClient}")
+    public ResponseEntity<Client> getClientById(@PathVariable Long idClient) {
+        Optional<Client> clientOptional = clientServices.findClientById(idClient);
+        return clientOptional
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
+    @GetMapping("/continents")
+    public ResponseEntity<List<Continent>> getContinents() {
+        return ResponseEntity.ok(Arrays.asList(Continent.values()));
     }
 
 

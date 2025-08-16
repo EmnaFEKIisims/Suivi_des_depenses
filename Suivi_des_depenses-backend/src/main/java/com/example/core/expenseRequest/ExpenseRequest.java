@@ -62,7 +62,7 @@ public class ExpenseRequest {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private ExpenseStatus status = ExpenseStatus.DRAFT;
+    private ExpenseStatus status = ExpenseStatus.SUBMITTED;
 
     @OneToMany(mappedBy = "expenseRequest", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

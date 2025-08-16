@@ -15,14 +15,13 @@ public interface ProjectServices {
 
     List<Project> getProjectByStatus(String status);
 
-    List<Project> getProjectByProjectLeader_CIN(String cin);
+    List<Project> getProjectByProjectLeader_Reference(String cin);
 
     List<Project> getProjectByClientNameContainingIgnoreCase(String clientName);
 
-    Optional<Project> getProjectByIdProject(Long idProject);
+    Optional<Project> getProjectById(Long id);
 
     List<Project> getProjectsByClient(Client client);
-
 
     Optional<Project> getProjectByReference(String reference);
 

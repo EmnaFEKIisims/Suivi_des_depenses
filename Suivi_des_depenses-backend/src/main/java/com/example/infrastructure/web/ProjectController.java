@@ -22,51 +22,40 @@ public class ProjectController {
         this.projectServices = projectServices;
     }
 
-
     @GetMapping
     public List<Project> getAllProjects() {
         return projectServices.getAllProjects();
     }
 
-
     @GetMapping("/getProjectById/{id}")
     public Optional<Project> getProjectById(@PathVariable Long id) {
-        return projectServices.getProjectByIdProject(id);
+        return projectServices.getProjectById(id);
     }
-
 
     @PostMapping("/createProject")
     public Project createProject(@RequestBody Project project) {
         return projectServices.createProject(project);
     }
 
-
     @PutMapping("/updateProject/{id}")
     public Project updateProject(@PathVariable Long id, @RequestBody Project project) {
         return projectServices.updateProject(id, project);
     }
-
-
-
 
     @GetMapping("/getProjectsByStatus/{status}")
     public List<Project> getProjectsByStatus(@PathVariable String status) {
         return projectServices.getProjectByStatus(status);
     }
 
-
-    @GetMapping("/getProjectsByLeader/{leaderCIN}")
-    public List<Project> getProjectsByLeader(@PathVariable String leaderId) {
-        return projectServices.getProjectByProjectLeader_CIN( leaderId);
+    @GetMapping("/getProjectsByLeader/{leaderReference}")
+    public List<Project> getProjectsByLeader(@PathVariable String leaderReference) {
+        return projectServices.getProjectByProjectLeader_Reference(leaderReference);
     }
-
 
     @GetMapping("/getProjectsByClient")
     public List<Project> getProjectsByClientName(@RequestParam String name) {
         return projectServices.getProjectByClientNameContainingIgnoreCase(name);
     }
-
-
 
     @GetMapping("/getProjectsByClient/{clientId}")
     public ResponseEntity<List<Project>> getProjectsByClient(@PathVariable Long clientId) {
@@ -78,11 +67,10 @@ public class ProjectController {
 
     @GetMapping("/getProjectsByReference/{reference}")
     public ResponseEntity<Project> getProjectByReference(@PathVariable String reference) {
-        return projectServices.getProjectByReference(reference)
-                .map(ResponseEntity::ok)
+        Optional<Project> project = projectServices.getProjectByReference(reference);
+        return project.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
 
     @GetMapping("/generate-reference")
     public ResponseEntity<String> generateReference() {

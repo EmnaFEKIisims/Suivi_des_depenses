@@ -1,6 +1,8 @@
 package com.example.core.client;
 
 import com.example.core.project.Project;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,8 +52,10 @@ public class Client {
 
 
 
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "client")
+    @JsonIgnoreProperties("client")
     private List<Project> projects;
+
 
 
 

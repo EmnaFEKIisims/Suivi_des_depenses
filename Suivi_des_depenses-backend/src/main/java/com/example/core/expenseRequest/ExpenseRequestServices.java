@@ -21,7 +21,6 @@ public interface ExpenseRequestServices {
 
     Map<Currency, Double> calculateTotalAmountsByCurrency(Long requestId);
     void validateCurrencyLimit(Long requestId, int maxCurrencies) throws BusinessException;
-    ExpenseRequest submitForApproval(Long requestId);
     ExpenseRequest approveRequest(Long requestId, String approverComments);
     ExpenseRequest rejectRequest(Long requestId, String rejectionReason);
 

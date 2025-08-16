@@ -90,11 +90,7 @@ public class ExpenseRequestCotroller {
         return ResponseEntity.ok(totals);
     }
 
-    @PostMapping("/{requestId}/submit")
-    public ResponseEntity<ExpenseRequest> submitForApproval(@PathVariable Long requestId) {
-        ExpenseRequest submitted = expenseRequestServices.submitForApproval(requestId);
-        return ResponseEntity.ok(submitted);
-    }
+
 
     @PostMapping("/{requestId}/approve")
     public ResponseEntity<ExpenseRequest> approveRequest(

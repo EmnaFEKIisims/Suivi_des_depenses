@@ -15,16 +15,16 @@ public interface ProjectRepoPort {
 
     List<Project> getProjectByStatus(String status);
 
-    List<Project> getProjectByProjectLeader_CIN(String cin);
+    List<Project> getProjectByProjectLeader_Reference(String reference);
 
     List<Project> getProjectByClientNameContainingIgnoreCase(String clientName);
 
-    Optional<Project> getProjectByIdProject(Long idProject);
+    Optional<Project> getProjectById(Long id);
 
-    List<Project> findByClient(Client client);
+    List<Project> getProjectsByClient(Client client);
 
-    Optional<Project> findByReference(String reference);
+    Optional<Project> getProjectByReference(String reference);
 
-    Optional<Project> getLastProjectByReference();
+    Optional<Project> getLastProjectByReferencePrefix(String prefix);
 
 }

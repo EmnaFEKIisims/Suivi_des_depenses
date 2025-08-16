@@ -1,27 +1,38 @@
 package com.example.application;
 
 import com.example.core.client.Client;
+import com.example.core.employee.Employee;
 import com.example.core.project.Project;
 import com.example.core.project.ProjectRepoPort;
 import com.example.core.project.ProjectServices;
+import com.example.infrastructure.persistence.client.ClientRepo;
+import com.example.infrastructure.persistence.employee.EmployeeRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import jakarta.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class ProjectServicesImpl implements ProjectServices {
 
     private final ProjectRepoPort projectRepoPort;
+    private final ClientRepo clientRepository ;
+    private final EmployeeRepo employeeRepository;
 
     @Autowired
-    public ProjectServicesImpl(ProjectRepoPort projectRepoPort) {
+    public ProjectServicesImpl(ProjectRepoPort projectRepoPort,
+                               ClientRepo clientRepository,
+                               EmployeeRepo employeeRepository) {
         this.projectRepoPort = projectRepoPort;
+        this.clientRepository = clientRepository;
+        this.employeeRepository = employeeRepository;
     }
+
+
 
     @Override
     public List<Project> getAllProjects() {
@@ -30,50 +41,52 @@ public class ProjectServicesImpl implements ProjectServices {
 
     @Override
     public Project createProject(Project project) {
-        try {
+        Project newProject = new Project();
+        newProject.setReference(project.getReference());
+        newProject.setName(project.getName());
+        newProject.setDescription(project.getDescription());
+        newProject.setStartDate(project.getStartDate());
+        newProject.setEndDate(project.getEndDate());
+        newProject.setStatus(project.getStatus());
+        newProject.setBudget(project.getBudget());
+        newProject.setPriority(project.getPriority());
+        newProject.setProgress(project.getProgress());
 
-            Project newProject = new Project();
-            newProject.setReference(project.getReference());
-            newProject.setName(project.getName());
-            newProject.setDescription(project.getDescription());
-            newProject.setStartDate(project.getStartDate());
-            newProject.setEndDate(project.getEndDate());
-            newProject.setStatus(project.getStatus());
-            newProject.setBudget(project.getBudget());
-            newProject.setPriority(project.getPriority());
-            newProject.setProgress(project.getProgress());
-
-
-            Project savedProject = projectRepoPort.createProject(newProject);
-
-
-            if (project.getClient() != null) {
-                savedProject.setClient(project.getClient());
-            }
-
-            // Then set relationships if they exist
-            if (project.getProjectLeader() != null) {
-                savedProject.setProjectLeader(project.getProjectLeader());
-            }
-
-            if (project.getTeamMembers() != null && !project.getTeamMembers().isEmpty()) {
-                savedProject.setTeamMembers(new ArrayList<>(project.getTeamMembers()));
-            }
-
-            // Final save with relationships
-            return projectRepoPort.updateProject(savedProject.getIdProject(), savedProject);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create project: " + e.getMessage(), e);
+        // Client : charger depuis la DB à partir de l'id
+        if (project.getClient() != null && project.getClient().getIdClient() != null) {
+            Client clientFromDb = clientRepository.findById(project.getClient().getIdClient())
+                    .orElseThrow(() -> new RuntimeException("Client non trouvé"));
+            newProject.setClient(clientFromDb);
         }
+
+        // ProjectLeader : charger depuis DB avec reference
+        if (project.getProjectLeader() != null && project.getProjectLeader().getReference() != null) {
+            Employee leaderFromDb = employeeRepository.findByReference(project.getProjectLeader().getReference())
+                    .orElseThrow(() -> new RuntimeException("Leader non trouvé"));
+            newProject.setProjectLeader(leaderFromDb);
+        }
+
+        // TeamMembers : recharger depuis DB la liste
+        if (project.getTeamMembers() != null && !project.getTeamMembers().isEmpty()) {
+            Set<Employee> uniqueMembers = project.getTeamMembers().stream()
+                    .map(e -> employeeRepository.findByReference(e.getReference())
+                            .orElseThrow(() -> new RuntimeException("Membre non trouvé: " + e.getReference())))
+                    .collect(Collectors.toSet());
+
+            newProject.setTeamMembers(uniqueMembers);
+        }
+
+        return projectRepoPort.createProject(newProject);
     }
 
-    @Override
-    public Project updateProject(Long id, Project project) {
-        Project existing = projectRepoPort.getProjectByIdProject(id)
-                .orElseThrow(() -> new RuntimeException("Project with id " + id + " not found"));
 
-        // Update only mutable fields
+    @Override
+    @Transactional
+    public Project updateProject(Long id, Project project) {
+        Project existing = projectRepoPort.getProjectById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        // Update basic fields
         existing.setName(project.getName());
         existing.setDescription(project.getDescription());
         existing.setStartDate(project.getStartDate());
@@ -83,21 +96,39 @@ public class ProjectServicesImpl implements ProjectServices {
         existing.setPriority(project.getPriority());
         existing.setProgress(project.getProgress());
 
-        if (project.getClient() != null) {
-            existing.setClient(project.getClient());
+        // Update client
+        if (project.getClient() != null && project.getClient().getIdClient() != null) {
+            Client clientFromDb = clientRepository.findById(project.getClient().getIdClient())
+                    .orElseThrow(() -> new RuntimeException("Client not found"));
+            existing.setClient(clientFromDb);
         }
 
-
-        if (project.getProjectLeader() != null) {
-            existing.setProjectLeader(project.getProjectLeader());
+        // Update project leader
+        if (project.getProjectLeader() != null && project.getProjectLeader().getReference() != null) {
+            Employee leaderFromDb = employeeRepository.findByReference(project.getProjectLeader().getReference())
+                    .orElseThrow(() -> new RuntimeException("Leader not found"));
+            existing.setProjectLeader(leaderFromDb);
         }
 
+        // Handle team_members from JSON (list of references)
+        // Since team_members is a list of strings in the JSON, we need to access it differently
+        // We'll assume the JSON deserialization sets teamMembers as null due to the mismatch
+        // Instead, we'll rely on a custom method to check for team_members in the raw JSON
+        // For simplicity, we'll assume you have a way to access the raw team_members list
+        // If teamMembers is null, check if the JSON included team_members
         if (project.getTeamMembers() != null) {
-            existing.setTeamMembers(new ArrayList<>(project.getTeamMembers()));
+            Set<Employee> uniqueMembers = project.getTeamMembers().stream()
+                    .filter(e -> e.getReference() != null)
+                    .map(e -> employeeRepository.findByReference(e.getReference())
+                            .orElseThrow(() -> new RuntimeException("Member not found: " + e.getReference())))
+                    .collect(Collectors.toSet());
+            existing.setTeamMembers(uniqueMembers);
         }
+        // If team_members is not provided in the JSON, do nothing to preserve existing teamMembers
 
         return projectRepoPort.updateProject(id, existing);
     }
+
 
 
 
@@ -107,44 +138,47 @@ public class ProjectServicesImpl implements ProjectServices {
     }
 
     @Override
-    public List<Project> getProjectByProjectLeader_CIN(String cin) {
-        return projectRepoPort.getProjectByProjectLeader_CIN(cin);
+    public List<Project> getProjectByProjectLeader_Reference(String reference) {
+        return projectRepoPort.getProjectByProjectLeader_Reference(reference);
     }
 
     @Override
     public List<Project> getProjectByClientNameContainingIgnoreCase(String clientName) {
         return projectRepoPort.getProjectByClientNameContainingIgnoreCase(clientName);
     }
-    @Override
-    public Optional<Project> getProjectByIdProject(Long idProject) {
-        return projectRepoPort.getProjectByIdProject(idProject);
-    }
 
+    @Override
+    public Optional<Project> getProjectById(Long id) {
+        return projectRepoPort.getProjectById(id);
+    }
 
     @Override
     public List<Project> getProjectsByClient(Client client) {
-        return projectRepoPort.findByClient(client);
+        return projectRepoPort.getProjectsByClient(client);
     }
 
     @Override
     public Optional<Project> getProjectByReference(String reference) {
-        return projectRepoPort.findByReference(reference);
+        return projectRepoPort.getProjectByReference(reference);
     }
-
-
-
 
     @Override
     public String generateProjectReference() {
-        Optional<Project> last = projectRepoPort.getLastProjectByReference();
+        Optional<Project> last = projectRepoPort.getLastProjectByReferencePrefix("PR");
         if (last.isPresent()) {
             String lastRef = last.get().getReference();
-            int number = Integer.parseInt(lastRef.substring(2));
-            return "PR" + (number + 1);
+            try {
+                int number = Integer.parseInt(lastRef.substring(2));
+                return "PR" + (number + 1);
+            } catch (NumberFormatException e) {
+                return "PR1001";
+            }
         } else {
-            return "PR1000";
+            return "PR1001";
         }
     }
+
+
 
 
 }

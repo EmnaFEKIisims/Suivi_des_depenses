@@ -51,7 +51,7 @@ public class ClientJpaAdapter implements ClientRepoPort {
 
 
     @Override
-    public Client updateClient(Client client) {
+    public Client updateClient(Long idClient,Client client) {
         return clientRepo.save(client);
 
     }
@@ -61,6 +61,13 @@ public class ClientJpaAdapter implements ClientRepoPort {
     public Optional<Client> getLastClientByReference() {
         return clientRepo.findTopByReferenceStartingWithOrderByReferenceDesc("Cl");
     }
+
+    @Override
+    public Optional<Client> findClientById(Long idClient) {
+        return clientRepo.findById(idClient);
+    }
+
+
 
 
 }

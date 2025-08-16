@@ -17,9 +17,11 @@ public interface ClientServices {
 
     List<Client> getClientsByAddress(String address);
 
-    Client updateClient(Client client);
+    Client updateClient(Long idClient,Client client);
 
     String generateClientReference();
+
+    Optional<Client> findClientById(Long idClient);
 
 
 }

@@ -32,15 +32,12 @@ public class ProjectJpaAdapter implements ProjectRepoPort {
 
     @Override
     public Project updateProject(Long id, Project project) {
-
         if (!projectRepository.existsById(id)) {
             throw new RuntimeException("Project with id " + id + " not found");
         }
-
         project.setIdProject(id);
         return projectRepository.save(project);
     }
-
 
     @Override
     public List<Project> getProjectByStatus(String status) {
@@ -48,36 +45,33 @@ public class ProjectJpaAdapter implements ProjectRepoPort {
     }
 
     @Override
-    public List<Project> getProjectByProjectLeader_CIN(String cin) {
-        return projectRepository.findByProjectLeader_CIN(cin);
+    public List<Project> getProjectByProjectLeader_Reference(String reference) {
+        return projectRepository.findByProjectLeader_Reference(reference);
     }
 
     @Override
     public List<Project> getProjectByClientNameContainingIgnoreCase(String clientName) {
-        return projectRepository.findByClientNameContainingIgnoreCase(clientName);
+        return projectRepository.searchByClientName(clientName);
     }
 
     @Override
-    public Optional<Project> getProjectByIdProject(Long idProject) {
-        return projectRepository.findByIdProject(idProject);
+    public Optional<Project> getProjectById(Long id) {
+        return projectRepository.findById(id);
     }
 
-
-
     @Override
-    public List<Project> findByClient(Client client) {
+    public List<Project> getProjectsByClient(Client client) {
         return projectRepository.findByClient(client);
     }
 
     @Override
-    public Optional<Project> findByReference(String reference) {
+    public Optional<Project> getProjectByReference(String reference) {
         return projectRepository.findByReference(reference);
     }
 
-
     @Override
-    public Optional<Project> getLastProjectByReference() {
-        return projectRepository.findTopByReferenceStartingWithOrderByReferenceDesc("PR");
+    public Optional<Project> getLastProjectByReferencePrefix(String prefix) {
+        return projectRepository.findTopByReferenceStartingWithOrderByReferenceDesc(prefix);
     }
 
 

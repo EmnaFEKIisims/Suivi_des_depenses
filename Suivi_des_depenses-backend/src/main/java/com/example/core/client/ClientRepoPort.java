@@ -13,11 +13,13 @@ public interface ClientRepoPort {
 
     Optional<Client> findClientByReference(String reference);
 
+    Optional<Client> findClientById(Long idClient);
+
     List<Client> findClientsByName(String name);
 
     List<Client> findClientsByContinent(Continent continent);
 
-    Client updateClient(Client client);
+    Client updateClient(Long idClient, Client client);
 
     List<Client> findClientsByAddress(String address);
 
