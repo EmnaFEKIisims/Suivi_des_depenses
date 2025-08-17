@@ -1,6 +1,10 @@
 package com.example.infrastructure.web;
 
 
+import com.example.core.employee.Employee;
+import com.example.core.employee.EmployeeServices;
+import com.example.core.exceptions.BusinessException;
+import com.example.core.exceptions.InsufficientFundsException;
 import com.example.core.expenseRequest.ExpenseRequest;
 import com.example.core.expenseRequest.ExpenseStatus;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ import java.util.List;
 public class ExpenseRequestCotroller {
 
     private final ExpenseRequestServices expenseRequestServices;
+    private final EmployeeServices employeeServices;
 
 
     @PostMapping("/createExpenseRequest")
@@ -93,12 +98,14 @@ public class ExpenseRequestCotroller {
 
 
     @PostMapping("/{requestId}/approve")
-    public ResponseEntity<ExpenseRequest> approveRequest(
-            @PathVariable Long requestId,
-            @RequestParam(required = false) String approverComments) {
-        ExpenseRequest approved = expenseRequestServices.approveRequest(requestId, approverComments);
-        return ResponseEntity.ok(approved);
+    public ResponseEntity<?> approveRequest(@PathVariable Long requestId) {
+        try {
+            return ResponseEntity.ok(expenseRequestServices.approveRequest(requestId));
+        } catch (BusinessException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
 
     @PostMapping("/{requestId}/reject")
     public ResponseEntity<ExpenseRequest> rejectRequest(

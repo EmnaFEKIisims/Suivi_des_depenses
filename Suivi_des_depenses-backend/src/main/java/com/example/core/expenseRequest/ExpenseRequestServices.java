@@ -1,5 +1,6 @@
 package com.example.core.expenseRequest;
 
+import com.example.core.employee.Employee;
 import com.example.core.exceptions.BusinessException;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public interface ExpenseRequestServices {
 
     Map<Currency, Double> calculateTotalAmountsByCurrency(Long requestId);
     void validateCurrencyLimit(Long requestId, int maxCurrencies) throws BusinessException;
-    ExpenseRequest approveRequest(Long requestId, String approverComments);
+    ExpenseRequest approveRequest(Long requestId);
     ExpenseRequest rejectRequest(Long requestId, String rejectionReason);
 
 

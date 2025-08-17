@@ -110,12 +110,7 @@ public class ProjectServicesImpl implements ProjectServices {
             existing.setProjectLeader(leaderFromDb);
         }
 
-        // Handle team_members from JSON (list of references)
-        // Since team_members is a list of strings in the JSON, we need to access it differently
-        // We'll assume the JSON deserialization sets teamMembers as null due to the mismatch
-        // Instead, we'll rely on a custom method to check for team_members in the raw JSON
-        // For simplicity, we'll assume you have a way to access the raw team_members list
-        // If teamMembers is null, check if the JSON included team_members
+
         if (project.getTeamMembers() != null) {
             Set<Employee> uniqueMembers = project.getTeamMembers().stream()
                     .filter(e -> e.getReference() != null)

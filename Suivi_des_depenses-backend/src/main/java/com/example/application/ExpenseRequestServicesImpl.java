@@ -1,21 +1,28 @@
 package com.example.application;
+import com.example.core.budget.BudgetServices;
+import com.example.core.budget.BudgetType;
+import com.example.core.budget.Operation;
 import com.example.core.employee.Employee;
 import com.example.core.employee.EmployeeServices;
 import com.example.core.exceptions.BusinessException;
+import com.example.core.exceptions.InsufficientFundsException;
 import com.example.core.expenseRequest.ExpenseRequest;
 import com.example.core.expenseRequest.ExpenseRequestRepoPort;
 import com.example.core.expenseRequest.ExpenseRequestServices;
 import com.example.core.project.Project;
 import com.example.core.project.ProjectServices;
+import com.example.infrastructure.persistence.ExpenseRequest.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.core.expenseRequest.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+import java.util.stream.Collectors;
 
 
 @Service
@@ -26,6 +33,7 @@ public class ExpenseRequestServicesImpl implements ExpenseRequestServices {
     private final ExpenseRequestRepoPort requestRepoPort;
     private final EmployeeServices employeeServices;
     private final ProjectServices projectServices;
+    private  final BudgetServices budgetServices;
 
     @Override
     public ExpenseRequest createExpenseRequest(ExpenseRequest expenseRequest) {
@@ -156,10 +164,43 @@ public class ExpenseRequestServicesImpl implements ExpenseRequestServices {
 
 
     @Override
-    public ExpenseRequest approveRequest(Long requestId, String approverComments) {
-        ExpenseRequest request = getExpenseRequestById(requestId);
+    public ExpenseRequest approveRequest(Long requestId) {
+        ExpenseRequest request = requestRepoPort.findRequestById(requestId)
+                .orElseThrow(() -> new BusinessException("Expense request not found"));
+
+        if (!request.getStatus().equals(ExpenseStatus.SUBMITTED)) {
+            throw new BusinessException("Request must be in SUBMITTED status");
+        }
+
+        request.calculateTotals();
+        deductFromBudget(request);
+
         request.setStatus(ExpenseStatus.APPROVED);
         return requestRepoPort.saveRequest(request);
+    }
+
+    private void deductFromBudget(ExpenseRequest request) {
+        BudgetType budgetType = "Cash Desk".equalsIgnoreCase(request.getReimbursementMethod())
+                ? BudgetType.CASH
+                : BudgetType.BANK;
+
+        request.getAmountByCurrency().forEach((currency, amount) -> {
+            try {
+                budgetServices.modifyBudget(
+                        Operation.DEDUCT,
+                        budgetType,
+                        BigDecimal.valueOf(amount),
+                        currency,
+                        request.getEmployee(),
+                        request
+                );
+            } catch (InsufficientFundsException e) {
+                throw new BusinessException(
+                        String.format("Cannot deduct %s %s: %s",
+                                amount, currency, e.getMessage())
+                );
+            }
+        });
     }
 
     @Override
