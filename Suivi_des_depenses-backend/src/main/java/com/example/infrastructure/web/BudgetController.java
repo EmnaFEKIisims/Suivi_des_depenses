@@ -11,6 +11,7 @@ import com.example.core.expenseRequest.Currency;
 import com.example.core.expenseRequest.ExpenseRequest;
 import com.example.core.expenseRequest.ExpenseRequestServices;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ import java.util.Optional;
 
 @RestController
 @Transactional
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/api/budgets")
 public class BudgetController {
 

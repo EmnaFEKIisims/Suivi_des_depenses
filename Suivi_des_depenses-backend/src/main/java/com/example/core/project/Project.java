@@ -1,4 +1,5 @@
 package com.example.core.project;
+
 import com.example.core.employee.Employee;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
@@ -6,11 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.example.core.client.Client;
-import java.util.*;
-
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -25,15 +23,13 @@ public class Project {
     @Column(name = "idProject", unique = true, nullable = false)
     private Long idProject;
 
-
     @Column(name = "reference", unique = true, nullable = false)
     private String reference;
-
 
     @Column(name = "nameProject", nullable = false)
     private String name;
 
-    @Column(name="description" , columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "startDate", nullable = false)
@@ -60,7 +56,6 @@ public class Project {
     @Column(name = "progress", nullable = false)
     private Integer progress;
 
-
     @ManyToMany
     @JoinTable(
             name = "project_employee",
@@ -72,7 +67,7 @@ public class Project {
             property = "reference"
     )
     @JsonIdentityReference(alwaysAsId = true)
-    private Set<Employee> teamMembers = new HashSet<>();
+    private Set<Employee> teamMembers;
 
     @ManyToOne
     @JoinColumn(name = "project_leader_reference", referencedColumnName = "reference")
@@ -80,36 +75,56 @@ public class Project {
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "reference"
     )
+    @JsonIdentityReference(alwaysAsId = true)
     private Employee projectLeader;
 
-
-    @JsonProperty("team_members")
+    @JsonSetter("teamMembers")
+    @JsonProperty("teamMembers")
     public void setTeamMembersFromReferences(List<String> references) {
-        if (references != null) {
-            // This assumes you can inject EmployeeRepo or fetch employees via a static context
-            // For simplicity, we'll assume you have access to employeeRepository here
-            // In practice, you might need to handle this differently
+        if (references != null && !references.isEmpty()) {
+            // Only set teamMembers if references are provided
             this.teamMembers = references.stream()
+                    .filter(ref -> ref != null && !ref.trim().isEmpty())
                     .map(ref -> {
-                        // You need to inject or access employeeRepository here
-                        // This is a placeholder; you'll need to adapt it
                         Employee employee = new Employee();
-                        employee.setReference(ref);
+                        employee.setReference(ref.trim());
                         return employee;
                     })
                     .collect(Collectors.toSet());
         } else {
-            this.teamMembers = new HashSet<>();
+            this.teamMembers = null; // Allow null to indicate "no update"
         }
     }
 
-    public Set<Employee> getTeamMembers() {
-        return teamMembers;
+    @JsonSetter("projectLeader")  // Force Jackson to use this setter for deserialization of "projectLeader"
+    @JsonProperty("projectLeader")  // Ensure the field is serialized/deserialized with this name
+    public void setProjectLeaderFromReference(String reference) {
+        if (reference != null) {
+            Employee employee = new Employee();
+            employee.setReference(reference);
+            this.projectLeader = employee;
+        } else {
+            this.projectLeader = null;
+        }
     }
 
-    public void setTeamMembers(Set<Employee> teamMembers) {
-        this.teamMembers = teamMembers;
+    // Custom toString to avoid cyclic reference
+    @Override
+    public String toString() {
+        return "Project{" +
+                "idProject=" + idProject +
+                ", reference='" + reference + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", status=" + status +
+                ", budget=" + budget +
+                ", clientId=" + (client != null ? client.getIdClient() : null) + // Avoid client.toString()
+                ", priority=" + priority +
+                ", progress=" + progress +
+                ", teamMembers=" + (teamMembers != null ? teamMembers.stream().map(Employee::getReference).collect(Collectors.toList()) : null) + // Only include references
+                ", projectLeader=" + (projectLeader != null ? projectLeader.getReference() : null) + // Only include reference
+                '}';
     }
-
-
 }

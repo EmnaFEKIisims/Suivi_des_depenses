@@ -52,9 +52,7 @@ public class Client {
 
 
 
-    @OneToMany(mappedBy = "client")
-    @JsonIgnoreProperties("client")
-    private List<Project> projects;
+
 
 
 

@@ -3,6 +3,7 @@ package com.example.core.expenseRequest;
 import com.example.core.employee.Employee;
 import com.example.core.project.Project;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(value = {"expenseRequest"}, allowSetters = true)
 @ToString(exclude = {"employee", "project", "details"})
 public class ExpenseRequest {
 
