@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ExpenseRequestService } from '../../expense-request-service';
 import { ProjectService } from '../../../project/project-service';
@@ -9,6 +9,7 @@ import { CURRENCY_LIST, ExpenseDetails } from '../../models/expense-details.mode
 import { Employee } from '../../../employee/models/employee.model';
 import { Project } from '../../../project/models/project.model';
 import { Subject } from 'rxjs';
+import Swal, { SweetAlertOptions } from 'sweetalert2';
 
 interface DetailRow {
   description: string;
@@ -18,42 +19,37 @@ interface DetailRow {
 
 @Component({
   selector: 'app-create-request',
-  standalone: false,
   templateUrl: './create-request.html',
-  styleUrls: ['./create-request.scss']
+  styleUrls: ['./create-request.scss'],
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class CreateRequest implements OnInit {
   requestForm!: FormGroup;
-  
-  // Alerts
-  showSuccessAlert = false;
-  showErrorAlert = false;
-  alertMessage = '';
-  errorMessage = '';
-
-  // Employee fields
+  detailRows: DetailRow[] = [];
+  currencies = CURRENCY_LIST;
+  usedCurrencies: string[] = [];
+  totalAmounts: { [key: string]: number } = {};
   employeeCIN = '';
   employeeFullName = '';
   fullEmployee: Employee | null = null;
-
-  // Project fields
+  employeeCINTouched = false;
   projectReference = '';
   projectName = '';
-  projectSearchInput = '';
   selectedProjectId: number | null = null;
+  projectSelectTouched = false;
   projects: Project[] = [];
   allProjects: Project[] = [];
   fullProject: Project | null = null;
   projectSearchTerm$ = new Subject<string>();
-
-  // Currency and details
-  currencies = CURRENCY_LIST;
-  detailRows: DetailRow[] = [];
-  usedCurrencies: string[] = [];
-  totalAmounts: { [key: string]: number } = {};
-  
-  // Enums
+  showSuccessAlert = false;
+  showErrorAlert = false;
+  errorMessage = '';
   reimbursementMethods = Object.values(ReimbursementMethod);
+  private filteredCurrenciesPerRow: { code: string; description: string }[][] = [];
+
+  @ViewChild('successAlert') successAlert!: ElementRef;
+  @ViewChild('errorAlert') errorAlert!: ElementRef;
 
   constructor(
     private fb: FormBuilder,
@@ -68,7 +64,6 @@ export class CreateRequest implements OnInit {
     this.loadProjects();
     this.setupProjectSearch();
     this.generateReference();
-    console.log('ngOnInit - currencies loaded:', this.currencies.length, 'first 3:', this.currencies.slice(0, 3));
   }
 
   private initializeForm(): void {
@@ -76,85 +71,116 @@ export class CreateRequest implements OnInit {
       reference: ['', Validators.required],
       mission: ['', Validators.required],
       missionLocation: ['', Validators.required],
-      startDate: ['', Validators.required],
-      returnDate: ['', Validators.required],
-      reimbursementMethod: [null, Validators.required]
+      start_date: ['', Validators.required],
+      return_date: ['', Validators.required],
+      reimbursementMethod: [null, Validators.required],
+      details: this.fb.array([])
     });
-    
-    // Disable the reference field after initialization
+
     this.requestForm.get('reference')?.disable();
+    this.requestForm.get('return_date')?.setValidators([
+      Validators.required,
+      (control) => {
+        const start = this.requestForm?.get('start_date')?.value;
+        const end = control.value;
+        return start && end && new Date(end) < new Date(start)
+          ? { invalidReturnDate: true }
+          : null;
+      }
+    ]);
+  }
+
+  get details(): FormArray {
+    return this.requestForm.get('details') as FormArray;
   }
 
   private generateReference(): void {
-    this.requestService.generateReference().subscribe(ref => {
-      this.requestForm.get('reference')?.setValue(ref);
+    this.requestService.generateReference().subscribe({
+      next: (ref) => {
+        this.requestForm.get('reference')?.setValue(ref);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to generate request reference.';
+        this.triggerSweetAlert('error', this.errorMessage);
+      }
     });
   }
 
   private loadProjects(): void {
-    this.projectService.getAllProjects().subscribe(projects => {
-      this.allProjects = projects;
-      this.projects = [...projects];
+    this.projectService.getAllProjects().subscribe({
+      next: (projects) => {
+        this.allProjects = projects;
+        this.projects = [...projects];
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to load projects.';
+        this.triggerSweetAlert('error', this.errorMessage);
+      }
     });
   }
 
   private setupProjectSearch(): void {
     this.projectSearchTerm$.subscribe(term => {
-      this.projectSearchInput = term;
-      this.searchProjectsByName();
+      this.searchProjectsByName(term);
     });
   }
 
-  // Navigation
-  navigateTo(path: string): void {
-    this.router.navigate([path]);
-  }
-
-  // Employee methods
   fetchEmployee(): void {
-    if (!this.employeeCIN.trim()) return;
-    
+    if (!this.employeeCIN.trim()) {
+      this.employeeCINTouched = true;
+      this.triggerSweetAlert('error', 'Please enter a valid CIN.');
+      return;
+    }
+
     this.employeeService.getEmployeeByCIN(this.employeeCIN).subscribe({
       next: (emp) => {
         this.fullEmployee = emp;
         this.employeeFullName = emp.fullName;
+        this.employeeCINTouched = true;
       },
-      error: () => {
+      error: (err) => {
         this.fullEmployee = null;
         this.employeeFullName = '';
-        this.showError('Employee not found.');
+        this.employeeCINTouched = true;
+        this.errorMessage = err.error?.message || 'Employee not found.';
+        this.triggerSweetAlert('error', this.errorMessage);
       }
     });
   }
 
-  // Project methods
   fetchProjectByReference(): void {
-    if (!this.projectReference.trim()) return;
-    
+    if (!this.projectReference.trim()) {
+      this.projectSelectTouched = true;
+      return;
+    }
+
     this.projectService.getProjectByReference(this.projectReference).subscribe({
       next: (proj) => {
         this.fullProject = proj;
         this.projectName = proj.name;
         this.selectedProjectId = proj.idProject ?? null;
         this.projects = [proj];
+        this.projectSelectTouched = true;
       },
-      error: () => {
+      error: (err) => {
         this.fullProject = null;
         this.projectName = '';
         this.selectedProjectId = null;
         this.projects = [...this.allProjects];
-        this.showError('Project not found.');
+        this.projectSelectTouched = true;
+        this.errorMessage = err.error?.message || 'Project not found.';
+        this.triggerSweetAlert('error', this.errorMessage);
       }
     });
   }
 
-  searchProjectsByName(): void {
-    if (!this.projectSearchInput.trim()) {
+  searchProjectsByName(term: string): void {
+    if (!term.trim()) {
       this.projects = [...this.allProjects];
       return;
     }
-    this.projects = this.allProjects.filter(project => 
-      project.name.toLowerCase().includes(this.projectSearchInput.toLowerCase())
+    this.projects = this.allProjects.filter(project =>
+      project.name.toLowerCase().includes(term.toLowerCase())
     );
   }
 
@@ -163,20 +189,27 @@ export class CreateRequest implements OnInit {
     this.projectName = project.name;
     this.selectedProjectId = project.idProject ?? null;
     this.projectReference = project.reference;
+    this.projectSelectTouched = true;
   }
 
-  // Detail rows management
   addDetail(): void {
     this.detailRows.push({
       description: '',
       amount: 0,
       currency: ''
     });
-    console.log('addDetail called - detailRows length:', this.detailRows.length);
+    this.details.push(this.fb.group({
+      description: ['', Validators.required],
+      amount: [0, [Validators.required, Validators.min(0.01)]],
+      currency: ['', Validators.required]
+    }));
+    this.updateAllFilteredCurrencies();
   }
 
   removeDetail(index: number): void {
     this.detailRows.splice(index, 1);
+    this.details.removeAt(index);
+    this.updateAllFilteredCurrencies();
     this.updateCurrencyTotals();
   }
 
@@ -184,58 +217,49 @@ export class CreateRequest implements OnInit {
     return index;
   }
 
-  // Currency constraint logic
+  private updateAllFilteredCurrencies(): void {
+    this.filteredCurrenciesPerRow = this.detailRows.map((_, index) => this.computeFilteredCurrencies(index));
+  }
+
+  private computeFilteredCurrencies(index: number): { code: string; description: string }[] {
+    return this.currencies; // Default to all currencies, filtered by onCurrencyChange
+  }
+
   getFilteredCurrencies(index: number): { code: string; description: string }[] {
-    // Get all currently used currencies (excluding the current row being edited)
-    const usedCurrenciesSet = new Set<string>();
-    this.detailRows.forEach((row, i) => {
-      if (i !== index && row.currency) {
-        usedCurrenciesSet.add(row.currency);
-      }
-    });
+    return this.filteredCurrenciesPerRow[index] || [];
+  }
 
-    // If less than 2 different currencies are already used, show all currencies
-    if (usedCurrenciesSet.size < 2) {
-      return this.currencies.map(c => ({ code: c.code, description: c.description }));
-    }
+  setDetailValue(index: number, field: string, value: any): void {
+    this.details.at(index).get(field)?.setValue(value);
+  }
 
-    // If exactly 2 currencies are already used, only show those 2 currencies
-    const allowedCurrencies = Array.from(usedCurrenciesSet);
-    const result = this.currencies
-      .filter(c => allowedCurrencies.includes(c.code))
-      .map(c => ({ code: c.code, description: c.description }));
-    
-    console.log('getFilteredCurrencies - 2 currencies constraint active. Showing only:', allowedCurrencies);
-    return result;
+  markDetailTouched(index: number, field: string): void {
+    this.details.at(index).get(field)?.markAsTouched();
   }
 
   onCurrencyChange(index: number, newCurrency: string): void {
-    console.log('onCurrencyChange called - index:', index, 'newCurrency:', newCurrency);
     if (!newCurrency) return;
 
-    // Calculate what currencies would be used after this change
     const tempRows = [...this.detailRows];
     tempRows[index] = { ...tempRows[index], currency: newCurrency };
-    
-    const usedCurrenciesSet = new Set<string>();
-    tempRows.forEach(row => {
-      if (row.currency) {
-        usedCurrenciesSet.add(row.currency);
-      }
+
+    const tempCurrencies = new Set<string>();
+    tempRows.forEach((row, i) => {
+      const currency = i === index ? newCurrency : row.currency;
+      if (currency && currency.trim()) tempCurrencies.add(currency);
     });
 
-    // Check constraint: maximum 2 different currencies
-    if (usedCurrenciesSet.size > 2) {
-      this.showError('Maximum 2 different currencies allowed. Please choose from the currencies already used.');
-      // Reset the currency to previous value
+    if (tempCurrencies.size > 2) {
+      this.triggerSweetAlert('error', 'Maximum 2 different currencies allowed. Please choose from the currencies already used.');
       this.detailRows[index].currency = '';
+      this.details.at(index).get('currency')?.setValue('');
       return;
     }
 
-    // Apply the change
     this.detailRows[index].currency = newCurrency;
+    this.details.at(index).get('currency')?.setValue(newCurrency);
+    this.updateAllFilteredCurrencies();
     this.updateCurrencyTotals();
-    console.log('Currency change applied. Used currencies:', Array.from(usedCurrenciesSet));
   }
 
   updateCurrencyTotals(): void {
@@ -252,49 +276,119 @@ export class CreateRequest implements OnInit {
     });
   }
 
-  // Form submission
+  formatted(amount: number): string {
+    if (amount == null) return '';
+    const rounded = Math.round(amount * 100) / 100;
+    const [integerPart, decimalPart = '00'] = rounded.toString().split('.');
+    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return decimalPart === '00' ? `${formattedInteger}` : `${formattedInteger}.${decimalPart}`;
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.requestForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  isDetailFieldInvalid(index: number, field: string): boolean {
+    const detail = this.details.at(index);
+    if (!detail) return false;
+    const control = detail.get(field);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  isAnyDetailFieldTouched(index: number): boolean {
+    const detail = this.detailRows[index];
+    return !!(detail && (detail.description || detail.amount || detail.currency));
+  }
+
+  hasValidDetails(): boolean {
+    return this.detailRows.some(row =>
+      row.description && row.description.trim() &&
+      row.amount > 0 &&
+      row.currency && row.currency.trim()
+    );
+  }
+
+  getCurrencyDescription(code: string): string {
+    const currency = this.currencies.find(c => c.code === code);
+    return currency ? currency.description : code;
+  }
+
+  triggerSweetAlert(type: 'success' | 'error', message: string) {
+    const swalConfig: SweetAlertOptions = {
+      icon: type === 'success' ? 'success' : 'error',
+      title: type === 'success' ? 'Success!' : 'Error!',
+      text: message,
+      showConfirmButton: true,
+      timer: type === 'success' ? 3000 : 5000,
+      willOpen: () => {
+        const popup = Swal.getPopup();
+        if (popup) {
+          const popupElement = popup as HTMLElement;
+          popupElement.style.background = 'var(--bg-glass)';
+          popupElement.style.border = 'var(--border-whisper)';
+          popupElement.style.borderRadius = 'var(--radius-xl)';
+          popupElement.style.backdropFilter = 'blur(16px)';
+          popupElement.style.boxShadow = 'var(--shadow-medium)';
+          const title = document.querySelector('.swal2-title');
+          if (title) {
+            const titleElement = title as HTMLElement;
+            titleElement.style.color = type === 'success' ? 'var(--emerald)' : 'var(--ruby)';
+            titleElement.style.fontFamily = "'Playfair Display', serif'";
+            titleElement.style.fontSize = '1.5rem';
+          }
+        }
+      }
+    };
+
+    Swal.fire(swalConfig).then(() => {
+      if (type === 'success') {
+        this.router.navigate(['/requests']);
+      }
+      this.showSuccessAlert = false;
+      this.showErrorAlert = false;
+    });
+  }
+
   onSubmit(): void {
-    // Validate form
+    this.employeeCINTouched = true;
+    this.projectSelectTouched = true;
+    this.requestForm.markAllAsTouched();
+    this.markFormGroupTouched(this.requestForm);
+
     if (this.requestForm.invalid) {
-      this.showError('Please fill in all required fields.');
+      this.triggerSweetAlert('error', 'Please fill in all required fields correctly.');
       return;
     }
 
     if (!this.fullEmployee) {
-      this.showError('Please fetch a valid employee first.');
+      this.triggerSweetAlert('error', 'Please fetch a valid employee.');
       return;
     }
 
     if (!this.fullProject) {
-      this.showError('Please fetch a valid project first.');
+      this.triggerSweetAlert('error', 'Please select a valid project.');
       return;
     }
 
-    // Validate details
-    const validDetails = this.detailRows.filter(row => 
-      row.description && row.amount > 0 && row.currency
+    const validDetails = this.detailRows.filter(row =>
+      row.description && row.description.trim() &&
+      row.amount > 0 &&
+      row.currency && row.currency.trim()
     );
 
     if (validDetails.length === 0) {
-      this.showError('Please add at least one valid expense detail.');
+      this.triggerSweetAlert('error', 'Please add at least one valid expense detail.');
       return;
     }
 
-    // Check currency constraint
-    const usedCurrenciesSet = new Set(validDetails.map(d => d.currency));
-    if (usedCurrenciesSet.size > 2) {
-      this.showError('You can only use up to 2 currencies.');
-      return;
-    }
-
-    // Prepare payload
     const formValue = this.requestForm.getRawValue();
     const payload: ExpenseRequest = {
       reference: formValue.reference,
       mission: formValue.mission,
       missionLocation: formValue.missionLocation,
-      startDate: formValue.startDate,
-      returnDate: formValue.returnDate,
+      startDate: this.formatDate(formValue.start_date),
+      returnDate: this.formatDate(formValue.return_date),
       reimbursementMethod: formValue.reimbursementMethod as ReimbursementMethod,
       status: ExpenseStatus.SUBMITTED,
       employee: {
@@ -315,102 +409,55 @@ export class CreateRequest implements OnInit {
       })
     };
 
-    // Submit
     this.requestService.createExpenseRequest(payload).subscribe({
       next: () => {
-        this.showSuccess('Expense request created successfully.');
+        this.triggerSweetAlert('success', 'Expense request created successfully.');
         this.resetForm();
-        setTimeout(() => {
-          this.showSuccessAlert = false;
-          this.router.navigate(['/requests']);
-        }, 2000);
       },
-      error: () => {
-        this.showError('Failed to create expense request.');
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to create expense request.';
+        this.triggerSweetAlert('error', this.errorMessage);
       }
     });
   }
 
-  // Form validation helper methods
-  isFieldInvalid(fieldName: string): boolean {
-    const field = this.requestForm.get(fieldName);
-    return !!(field && field.invalid && (field.dirty || field.touched));
+  private formatDate(date: string | Date): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    return `${d.getFullYear()}-${month}-${day}`;
   }
 
-  getFieldError(fieldName: string): string {
-    const field = this.requestForm.get(fieldName);
-    if (field && field.errors && (field.dirty || field.touched)) {
-      if (field.errors['required']) {
-        return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
+  private markFormGroupTouched(formGroup: FormGroup | FormArray): void {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+      if (control instanceof FormGroup || control instanceof FormArray) {
+        this.markFormGroupTouched(control);
       }
-    }
-    return '';
-  }
-
-  hasValidDetails(): boolean {
-    const validDetails = this.detailRows.filter(row => 
-      row.description && row.description.trim() && 
-      row.amount > 0 && 
-      row.currency && row.currency.trim()
-    );
-    return validDetails.length > 0;
-  }
-
-  // Detail field validation helpers
-  isDetailFieldInvalid(index: number, field: string): boolean {
-    const detail = this.detailRows[index];
-    if (!detail) return false;
-    
-    switch (field) {
-      case 'description':
-        return !detail.description || detail.description.trim() === '';
-      case 'amount':
-        return !detail.amount || detail.amount <= 0;
-      case 'currency':
-        return !detail.currency || detail.currency.trim() === '';
-      default:
-        return false;
-    }
-  }
-
-  isAnyDetailFieldTouched(index: number): boolean {
-    const detail = this.detailRows[index];
-    return !!(detail && (detail.description || detail.amount || detail.currency));
-  }
-
-  // Helper methods
-  private showSuccess(message: string): void {
-    this.alertMessage = message;
-    this.showSuccessAlert = true;
-  }
-
-  private showError(message: string): void {
-    this.errorMessage = message;
-    this.showErrorAlert = true;
-    setTimeout(() => this.showErrorAlert = false, 5000);
+    });
   }
 
   private resetForm(): void {
     this.requestForm.reset();
     this.detailRows = [];
+    this.details.clear();
     this.usedCurrencies = [];
     this.totalAmounts = {};
     this.employeeCIN = '';
     this.employeeFullName = '';
     this.projectReference = '';
     this.projectName = '';
-    this.projectSearchInput = '';
+    this.selectedProjectId = null;
     this.projects = [...this.allProjects];
     this.fullEmployee = null;
     this.fullProject = null;
+    this.employeeCINTouched = false;
+    this.projectSelectTouched = false;
+    this.filteredCurrenciesPerRow = [];
   }
 
-  // Debug method for currency dropdown
-  logNgSelectOpen(index: number): void {
-    console.log('Currency dropdown opened for row:', index, {
-      availableCurrencies: this.getFilteredCurrencies(index).length,
-      currentCurrency: this.detailRows[index]?.currency,
-      usedCurrencies: this.usedCurrencies
-    });
+  navigateTo(path: string): void {
+    this.router.navigate([path]);
   }
 }

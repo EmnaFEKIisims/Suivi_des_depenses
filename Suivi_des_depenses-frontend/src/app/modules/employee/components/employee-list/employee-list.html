@@ -1,44 +1,54 @@
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Employee List</h2>
-    <div>
-      <button class="btn btn-sm btn-outline-success me-2" (click)="createNewEmployee()" title="Add new employee">
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-left">
+      <h1>Employee List</h1>
+      <p class="header-subtitle">Manage and view all employee information</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-create" (click)="createNewEmployee()" title="Add new employee">
         <i class="bi bi-plus-lg"></i>
       </button>
-      <button class="btn btn-sm btn-outline-primary" (click)="navigateTo('/home')" title="Go to home">
+      <button class="btn-home" (click)="navigateTo('/home')" title="Go to home">
         <i class="bi bi-house"></i>
       </button>
     </div>
   </div>
 
   <!-- Search and Filter Section -->
-  <div class="card shadow mb-6">
+  <div class="card shadow">
     <div class="card-body">
       <div class="row g-3">
-        <!-- Search by Reference, Phone, Username -->
-        <div class="col-md-4">
+        <!-- Search by Name or Phone -->
+        <div class="col-md-6">
           <div class="input-group">
-            <input type="text"  class="form-control" placeholder="Search by name or phoneNumber..." [(ngModel)]="searchTerm" (input)="search()">
-            <button class="btn btn-primary" type="button" (click)="search()">
+            <input type="text" class="form-control" placeholder="Search by name or phone..." [(ngModel)]="searchTerm"
+              (input)="applyFilters()">
+            <button class="btn btn-primary" type="button">
               <i class="bi bi-search"></i>
             </button>
           </div>
         </div>
 
         <!-- Status Filter -->
-        <div class="col-md-4">
-          <select class="form-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
-            <option value="Actif">Active Employees</option>
-            <option value="Inactif">Inactive Employees</option>
-            <option value="All">All Employees</option>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="selectedStatus" (change)="applyFilters()">
+            <option value="">All Status</option>
+            <option value="Actif">Active</option>
+            <option value="Inactif">Inactive</option>
           </select>
         </div>
 
         <!-- Department Filter -->
-        <div class="col-md-4">
-          <select class="form-select" [(ngModel)]="selectedDepartment" (change)="onDepartmentChange()">
-            <option value="All">All Departments</option>
-            <option *ngFor="let dept of departments" [value]="dept">{{dept}}</option>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="selectedDepartment" (change)="applyFilters()">
+            <option value="">All Departments</option>
+            <option value="IT">IT</option>
+            <option value="Maintenance">Maintenance</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Accounting">Accounting</option>
+            <option value="HR">HR</option>
+            <option value="Production">Production</option>
+            <option value="Building_Infrastructure">Building Infrastructure</option>
           </select>
         </div>
       </div>
@@ -48,44 +58,55 @@
   <!-- Employee Table -->
   <div class="card shadow">
     <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead class="table-light">
-            <tr>
-              <th>Reference</th>
-              <th>Full Name</th>
-              <th>Department</th>
-              <th>Occupation</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let employee of filteredEmployees">
-              <td>{{ employee.reference }}</td>
-              <td>{{ employee.fullName }}</td>
-              <td>{{ employee.department }}</td>
-              <td>{{ employee.occupation }}</td>
-              <td>{{ employee.phoneNumber }}</td>
-              <td>{{ employee.email }}</td>
-              <td>
-                <div class="btn-group" role="group">
-                  <button class="btn btn-sm btn-outline-primary" (click)="viewDetails(employee.reference)">
-                    <i class="bi bi-eye"></i> View
-                  </button>
-                  <button class="btn btn-sm btn-outline-secondary" (click)="editEmployee(employee.cin)">
-                    <i class="bi bi-pencil"></i> Edit
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <tr *ngIf="filteredEmployees.length === 0">
-              <td colspan="7" class="text-center">No employees found</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let employee of filteredEmployees">
+            <td>{{ employee.reference }}</td>
+            <td>{{ employee.fullName }}</td>
+            <td>{{ employee.email }}</td>
+            <td>{{ employee.phoneNumber }}</td>
+            <td>{{ employee.department }}</td>
+            <td>
+              <span [ngClass]="{
+    'employee-status': true,
+    'employee-status-active': employee.status === 'Actif',
+    'employee-status-inactive': employee.status === 'Inactif',
+    'employee-status-leave': employee.status === 'En Congé',
+    'employee-status-terminated': employee.status === 'Terminé'
+  }" style="font-size:0.7rem; display:block; margin:auto; min-width:60px;">
+                {{ employee.status.toUpperCase() }}
+              </span>
+            </td>
+            <td>
+              <div class="btn-group" role="group">
+                <button class="btn btn-sm btn-outline-primary" (click)="viewEmployee(employee.reference)">
+                  <i class="bi bi-eye"></i> View
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" (click)="editEmployee(employee.cin)">
+                  <i class="bi bi-pencil"></i> Edit
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="!filteredEmployees || filteredEmployees.length === 0">
+            <td colspan="7" class="text-center text-muted">
+              <i class="bi bi-person-slash me-2"></i>
+              No employees found matching your criteria
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

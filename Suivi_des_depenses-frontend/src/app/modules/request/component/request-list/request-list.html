@@ -1,22 +1,25 @@
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Expense Request List</h2>
-    <div>
-      <button class="btn btn-sm btn-outline-success me-2" (click)="goToCreateExpenseRequest()" title="Add new request">
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-left">
+      <h1>Expense Request List</h1>
+      <p class="header-subtitle">Manage and view all expense request information</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-create" (click)="goToCreateExpenseRequest()" title="Add new request">
         <i class="bi bi-plus-lg"></i>
       </button>
-      <button class="btn btn-sm btn-outline-primary" (click)="navigateTo('/home')" title="Go to home">
+      <button class="btn-home" (click)="navigateTo('/home')" title="Go to home">
         <i class="bi bi-house"></i>
       </button>
     </div>
   </div>
 
   <!-- Search and Filters -->
-  <div class="card shadow mb-4">
+  <div class="card shadow">
     <div class="card-body">
       <div class="row g-3">
         <!-- Search input -->
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="input-group">
             <input
               type="text"
@@ -30,10 +33,20 @@
           </div>
         </div>
 
-        <!-- Currency filter -->
-        <div class="col-md-4">
+        <!-- Currency filter 1 -->
+        <div class="col-md-3">
           <select class="form-select" [(ngModel)]="selectedCurrencyId" (change)="onCurrencyChange()">
-            <option value="">All Currencies</option>
+            <option value="" selected>All Currencies</option>
+            <option *ngFor="let currency of currencies" [value]="currency.code">
+              {{ currency.description }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Currency filter 2 -->
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="selectedCurrencyId2" (change)="onCurrencyChange()">
+            <option value="" selected>All Currencies</option>
             <option *ngFor="let currency of currencies" [value]="currency.code">
               {{ currency.description }}
             </option>
@@ -41,10 +54,9 @@
         </div>
 
         <!-- Status filter -->
-        <div class="col-md-4">
+        <div class="col-md-3">
           <select class="form-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
-            <option value="ALL">All Statuses</option>
-            <option *ngFor="let status of statuses" [value]="status">
+            <option *ngFor="let status of statuses" [value]="status" [selected]="status === statuses[0]">
               {{ formatStatus(status) }}
             </option>
           </select>
@@ -61,62 +73,64 @@
         <button type="button" class="btn-close" (click)="showSuccessMessage = false" aria-label="Close"></button>
       </div>
 
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead class="table-light">
-            <tr>
-              <th>Reference</th>
-              <th>Employee</th>
-              <th>Project</th>
-              <th>Total Amount</th>
-              <th>Status</th>
-              <th>Actions</th>
-              <th>Decision</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let request of filteredRequests">
-              <td>{{ request.reference }}</td>
-              <td>{{ request.employee?.fullName }}</td>
-              <td>{{ request.project?.name }}</td>
-              <td>
-                {{ request.totalAmount | number:'1.2-2' }}
-                {{ request.currency ? getCurrencySymbol(request.currency) : '' }}
-              </td>
-              <td>{{ formatStatus(request.status) }}</td>
-              <td>
-                <div class="btn-group" role="group">
-                  <button class="btn btn-sm btn-outline-primary" (click)="viewRequest(request.id)">
-                    <i class="bi bi-eye"></i> View
-                  </button>
-                  <button class="btn btn-sm btn-outline-secondary" (click)="editRequest(request.id)">
-                    <i class="bi bi-pencil"></i> Edit
-                  </button>
-                </div>
-              </td>
-              <td>
-                <div class="btn-group" role="group">
-                  <button
-                    class="btn btn-sm btn-outline-success"
-                    [disabled]="request.status === 'APPROVED'"
-                    (click)="approveRequest(request.id)">
-                    <i class="bi bi-check2-circle"></i> Approve
-                  </button>
-                  <button
-                    class="btn btn-sm btn-outline-danger"
-                    [disabled]="request.status === 'REJECTED'"
-                    (click)="rejectRequest(request.id)">
-                    <i class="bi bi-x-circle"></i> Reject
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <tr *ngIf="filteredRequests.length === 0">
-              <td colspan="7" class="text-center">No requests found</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Employee</th>
+            <th>Project</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+            <th>Decision</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let request of filteredRequests">
+            <td>{{ request.reference }}</td>
+            <td>{{ request.employee.fullName }}</td>
+            <td>{{ request.project.name }}</td>
+            <td>
+              <ng-container *ngFor="let pair of getAmountsByCurrency(request); let i = index">
+                <span>"{{ formatAmount(pair.amount) }} {{ getCurrencySymbol(pair.currency) }}"</span><br *ngIf="i < getAmountsByCurrency(request).length - 1" />
+              </ng-container>
+            </td>
+            <td>{{ formatStatus(request.status) }}</td>
+            <td>
+              <div class="btn-group" role="group">
+                <button class="btn btn-sm btn-outline-primary"  (click)="viewRequest(request.id)">
+                  <i class="bi bi-eye"></i> View
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" [disabled]="request.status !== 'SUBMITTED'" (click)="editRequest(request.id)">
+                  <i class="bi bi-pencil"></i> Edit
+                </button>
+              </div>
+            </td>
+            <td>
+              <div class="btn-group" role="group">
+                <button
+                  class="btn btn-sm btn-outline-success"
+                  [disabled]="request.status !== 'SUBMITTED'"
+                  (click)="approveRequest(request.id)">
+                  <i class="bi bi-check2-circle"></i> Approve
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-danger"
+                  [disabled]="request.status !== 'SUBMITTED'"
+                  (click)="rejectRequest(request.id)">
+                  <i class="bi bi-x-circle"></i> Reject
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filteredRequests.length === 0">
+            <td colspan="7" class="text-center text-muted">
+              <i class="bi bi-receipt-cutoff me-2"></i>
+              No expense requests found matching your criteria
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

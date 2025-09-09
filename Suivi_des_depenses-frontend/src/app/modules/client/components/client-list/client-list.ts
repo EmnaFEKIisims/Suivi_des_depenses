@@ -1,18 +1,27 @@
-import { Component , OnInit} from '@angular/core';
+import { Component , OnInit, ViewEncapsulation} from '@angular/core';
 import { Client } from '../../models/client.model';
 import { ClientService } from '../../client-service';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-
-
-
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-client-list',
-  standalone: false,
+  standalone: true,
   templateUrl: './client-list.html',
-  styleUrl: './client-list.scss'
+  styleUrls: [
+    '../../../../shared/styles/executive-list-template.scss',
+    './client-list.scss'
+  ],
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgClass
+  ]
 })
 export class ClientList implements OnInit {
    clients: Client[] = [];

@@ -1,4 +1,4 @@
-import { Component ,OnInit } from '@angular/core';
+import { Component ,OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Client } from '../../models/client.model';
 import { ClientService } from '../../client-service';
@@ -7,7 +7,8 @@ import { ClientService } from '../../client-service';
   selector: 'app-client-details',
   standalone: false,
   templateUrl: './client-details.html',
-  styleUrl: './client-details.scss'
+  styleUrls: ['../../../../shared/styles/executive-details-template.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class ClientDetails implements OnInit {
 

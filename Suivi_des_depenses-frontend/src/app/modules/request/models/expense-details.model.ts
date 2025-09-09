@@ -73,6 +73,6 @@ export const CURRENCY_LIST = [
 
 
 export function getCurrencyDescription(code: string): string {
-  const currency = CURRENCY_LIST.find(c => c.code === code);
-  return currency ? currency.description : '';
+  const found = CURRENCY_LIST.find(c => c.code === code);
+  return found ? found.description : '';
 }

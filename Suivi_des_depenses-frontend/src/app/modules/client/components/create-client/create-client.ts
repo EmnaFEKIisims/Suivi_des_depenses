@@ -1,17 +1,29 @@
-import { Component , OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
-import { Client , Continent } from '../../models/client.model'; 
+import { Client, Continent } from '../../models/client.model';
 import { ClientService } from '../../client-service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import Swal, { SweetAlertOptions } from 'sweetalert2';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-create-client',
-  standalone: false,
+  standalone: true,
   templateUrl: './create-client.html',
-  styleUrl: './create-client.scss'
+  styleUrls: ['./create-client.scss'],
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    // Add required modules for template bindings
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    NgClass
+  ]
 })
 export class CreateClient implements OnInit {
-
   client: Client = {
     reference: '',
     name: '',
@@ -23,39 +35,36 @@ export class CreateClient implements OnInit {
     registrationDate: ''
   };
 
-  showSuccessAlert: boolean = false;
-showErrorAlert: boolean = false;
-errorMessage: string = '';
-clientForm!: FormGroup;
-alertMessage = '';
-
+  clientForm: FormGroup;
   continents: string[] = [];
+  showSuccessAlert = false;
+  showErrorAlert = false;
+  errorMessage = '';
+
+  @ViewChild('successAlert') successAlert!: ElementRef;
+  @ViewChild('errorAlert') errorAlert!: ElementRef;
 
   constructor(
     private clientService: ClientService,
-    private router: Router ,
-  private fb: FormBuilder
-  ) {}
+    private router: Router,
+    private fb: FormBuilder
+  ) {
+    this.clientForm = this.fb.group({
+      reference: ['', Validators.required], // changed: removed disabled
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      registrationDate: ['', Validators.required],
+      address: ['', Validators.required],
+      continent: ['', Validators.required],
+      contactPerson: ['', Validators.required],
+      phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9\\s-]{7,20}$')]]
+    });
+  }
 
   ngOnInit(): void {
     this.loadContinents();
     this.generateReference();
-  this.initForm();
   }
-
-
-  initForm(): void {
-  this.clientForm = this.fb.group({
-    reference: [{ value: '', disabled: true }],
-    name: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    registrationDate: [{ value: '' }],
-    address: ['', Validators.required],
-    continent: ['', Validators.required],
-    contactPerson: ['', Validators.required],
-    phoneNumber: ['', Validators.required],
-  });
-}
 
   generateReference(): void {
     this.clientService.generateReference().subscribe({
@@ -64,7 +73,8 @@ alertMessage = '';
         this.clientForm.get('reference')?.setValue(ref);
       },
       error: (err) => {
-        console.error('Error generating reference:', err);
+        this.errorMessage = err.error?.message || 'Failed to generate reference.';
+        this.triggerSweetAlert('error', this.errorMessage);
       }
     });
   }
@@ -75,54 +85,68 @@ alertMessage = '';
         this.continents = data;
       },
       error: (err) => {
-        console.error('Error loading continents:', err);
+        this.errorMessage = err.error?.message || 'Failed to load continents.';
+        this.triggerSweetAlert('error', this.errorMessage);
       }
     });
   }
 
-  createClient(): void {
-  this.client.registrationDate = new Date().toISOString().split('T')[0];
-  this.clientService.createClient(this.client).subscribe({
-    next: () => {
-      this.showSuccessAlert = true;
-      this.showErrorAlert = false;
-      setTimeout(() => this.router.navigate(['/clients']), 2000);
-      
-    },
-    error: (err) => {
+  triggerSweetAlert(type: 'success' | 'error', message: string) {
+    const swalConfig: SweetAlertOptions = {
+      icon: type === 'success' ? 'success' : 'error',
+      title: type === 'success' ? 'Success!' : 'Error!',
+      text: message,
+      showConfirmButton: true,
+      timer: type === 'success' ? 3000 : 5000,
+      willOpen: () => {
+        const popup = Swal.getPopup();
+        if (popup) {
+          const popupElement = popup as HTMLElement;
+          popupElement.style.background = 'var(--bg-glass)';
+          popupElement.style.border = 'var(--border-whisper)';
+          popupElement.style.borderRadius = 'var(--radius-xl)';
+          popupElement.style.backdropFilter = 'blur(16px)';
+          popupElement.style.boxShadow = 'var(--shadow-medium)';
+          const title = document.querySelector('.swal2-title');
+          if (title) {
+            const titleElement = title as HTMLElement;
+            titleElement.style.color = type === 'success' ? 'var(--emerald)' : 'var(--ruby)';
+            titleElement.style.fontFamily = "'Playfair Display', serif";
+            titleElement.style.fontSize = '1.5rem';
+          }
+        }
+      }
+    };
+
+    Swal.fire(swalConfig).then(() => {
+      if (type === 'success') {
+        this.router.navigate(['/clients']);
+      }
       this.showSuccessAlert = false;
-      this.showErrorAlert = true;
-      this.errorMessage = err.error?.message || 'Failed to create client.';
-      setTimeout(() => this.showErrorAlert = false, 5000);
-      console.error('Error creating client:', err);
-    }
-  });
-}
-
-
-onSubmit(): void {
-  if (this.clientForm.invalid) return;
-  this.client = { ...this.client, ...this.clientForm.getRawValue() };
-  this.client.registrationDate = new Date().toISOString().split('T')[0];
-  this.createClient();
-}
-
-
-  navigateTo(route: string): void {
-    this.router.navigate([route]);
+      this.showErrorAlert = false;
+    });
   }
 
-
-    showAlert(message: string, type: 'success' | 'error'): void {
-    this.alertMessage = message;
-    if (type === 'success') {
-      this.showSuccessAlert = true;
-      setTimeout(() => this.showSuccessAlert = false, 3000);
-    } else {
-      this.showErrorAlert = true;
-      setTimeout(() => this.showErrorAlert = false, 3000);
+  onSubmit(): void {
+    if (this.clientForm.invalid) {
+      this.triggerSweetAlert('error', 'Please fill all required fields correctly.');
+      return;
     }
+
+    this.client = { ...this.client, ...this.clientForm.getRawValue() };
+    this.client.registrationDate = new Date().toISOString().split('T')[0];
+    this.clientService.createClient(this.client).subscribe({
+      next: () => {
+        this.triggerSweetAlert('success', 'Client created successfully.');
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to create client. Please try again.';
+        this.triggerSweetAlert('error', this.errorMessage);
+      }
+    });
   }
 
-
+  navigateTo(path: string): void {
+    this.router.navigate([path]);
+  }
 }

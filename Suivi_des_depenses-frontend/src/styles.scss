@@ -1,286 +1,418 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
 
-
-
-// Unified Elegant Color Palette - Navy & Gold Theme
+/* This is the styling of the global CSS variables */
 :root {
-  /* Primary Colors - Deep Navy & Warm Gold */
-  --primary-dark: #1a252f;
-  --primary-main: #2c3e50;
-  --primary-light: #34495e;
-  --accent-main: #d4af37;
-  --accent-light: #f4e4bc;
-  
-  /* Secondary Colors */
-  --secondary-dark: #5d6d7e;
-  --secondary-main: #7f8c8d;
-  --secondary-light: #aab7b8;
-  
-  /* Background Colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --bg-tertiary: #ecf0f1;
-  
-  /* Text Colors */
-  --text-primary: #2c3e50;
-  --text-secondary: #5d6d7e;
-  --text-light: #ffffff;
-  --text-muted: #95a5a6;
-  
-  /* Status Colors */
-  --success: #27ae60;
-  --warning: #f39c12;
-  --danger: #e74c3c;
-  --info: #3498db;
+  --primary-color: #1e3a8a;
+  --primary-dark: #1e40af;
+  --primary-light: #3b82f6;
+  --secondary-color: #64748b;
+  --accent-color: #60a5fa;
+  --accent-hover: #3b82f6;
+  --sidebar-bg: #1e3a8a;
+  --sidebar-hover: #1e40af;
+  --main-bg: #f8fafc;
+  --content-bg: #ffffff;
+  --text-primary: #1e3a8a;
+  --text-secondary: #374151;
+  --text-light: #6b7280;
+  --border-color: #e2e8f0;
+  --shadow-light: 0 1px 3px 0 rgba(30, 58, 138, 0.1), 0 1px 2px 0 rgba(30, 58, 138, 0.06);
+  --shadow-medium: 0 4px 6px -1px rgba(30, 58, 138, 0.1), 0 2px 4px -1px rgba(30, 58, 138, 0.06);
+  --shadow-large: 0 10px 15px -3px rgba(30, 58, 138, 0.1), 0 4px 6px -2px rgba(30, 58, 138, 0.05);
+  --border-radius: 8px;
+  --sidebar-width: 220px;
+
+  /* EXECUTIVE TEMPLATE VARIABLES - MISSING VARIABLES ADDED */
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  --bg-glass: rgba(255, 255, 255, 0.8);
+  --bg-elevated: #ffffff;
+  --ivory: #ffffff;
+  --accent: #b8860b;
+  --bronze: #cd7f32;
+  --amber: #f59e0b;
+  --primary-900: #1e3a8a;
+  --primary-800: #1e40af;
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --text-muted: #6b7280;
+  --emerald: #10b981;
+  --ruby: #ef4444;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1rem;
+  --space-xl: 1.5rem;
+  --space-2xl: 2rem;
+  --space-3xl: 3rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --border-whisper: 1px solid rgba(184, 134, 11, 0.1);
+  --border-subtle: 1px solid #e5e7eb;
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-// Legacy Variables for Compatibility
-$primary-color: #2c3e50;
-$secondary-color: #7f8c8d;
-$accent-color: #d4af37;
-$light-color: #f8f9fa;
-$dark-color: #2c3e50;
-$text-color: #2c3e50;
-$footer-bg: #2c3e50;
-
-// Unified Professional Navbar
-.navbar {
-  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-main) 100%) !important;
-  padding: 1rem 2rem;
-  box-shadow: 0 4px 25px rgba(26, 37, 47, 0.2);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-  
-  .navbar-brand {
-    font-size: 1.75rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: white !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    position: relative;
-    
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent-main), transparent);
-    }
-  }
-  
-  .nav-link {
-    font-weight: 500;
-    padding: 0.75rem 1.25rem;
-    margin: 0 0.25rem;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    color: rgba(255, 255, 255, 0.9) !important;
-    position: relative;
-    overflow: hidden;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
-      transition: left 0.5s ease;
-    }
-    
-    &:hover {
-      background: linear-gradient(135deg, var(--accent-main) 0%, #b8941f 100%);
-      color: white !important;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
-      
-      &::before {
-        left: 100%;
-      }
-    }
-    
-    &.active {
-      background: var(--accent-main);
-      color: var(--primary-dark) !important;
-      font-weight: 600;
-      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
-    }
-  }
+/* This is the styling of global reset and base styles */
+* {
+  box-sizing: border-box;
 }
 
-// Main content area with elegant spacing
-.main-content {
-  min-height: calc(100vh - 140px);
-  padding: 2.5rem 0;
-  margin-bottom: 80px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--main-bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
 }
 
+/* This is the styling of the layout structure */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
 
-// Unified Professional Footer
-.footer {
+/* This is the styling of the sidebar navigation */
+.sidebar {
+  width: var(--sidebar-width);
+  background: linear-gradient(180deg, var(--sidebar-bg) 0%, #0f172a 100%);
   position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 5rem;
-  background: linear-gradient(135deg, var(--primary-main) 0%, var(--primary-dark) 100%);
-  color: var(--text-light);
-  padding: 1rem 0;
-  box-shadow: 0 -4px 25px rgba(26, 37, 47, 0.25);
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
   z-index: 1000;
+  box-shadow: var(--shadow-large);
+  transition: all 0.3s ease;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 2px;
+}
+
+/* This is the styling of the sidebar header */
+.sidebar-header {
+  padding: 2rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-brand {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
   display: flex;
   align-items: center;
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-
-  .footer-section {
-    padding: 0 1.5rem;
-    
-    h5 {
-      font-size: 1.1rem;
-      margin-bottom: 0.4rem;
-      white-space: nowrap;
-      font-weight: 600;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    }
-    
-    p {
-      font-size: 0.9rem;
-      margin-bottom: 0;
-      line-height: 1.4;
-      opacity: 0.9;
-    }
-  }
-
-  .social-icons {
-    a {
-      color: $light-color;
-      margin-left: 1rem;
-      font-size: 1.3rem;
-      transition: all 0.3s ease;
-      
-      &:hover {
-        opacity: 0.8;
-        transform: translateY(-2px);
-        color: $accent-color;
-      }
-    }
-  }
-
-  @media (max-width: 768px) {
-    height: auto;
-    padding: 1rem 0;
-    
-    .footer-section {
-      text-align: center !important;
-      margin-bottom: 0.8rem;
-      
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-  }
+  gap: 0.75rem;
 }
 
-// Professional Global Styles
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: $text-color;
-  background-color: #f8f9fa;
+.sidebar-brand:hover {
+  color: var(--primary-light);
+  text-decoration: none;
 }
 
-// Elegant Card Headers for Forms  
-.card-header.bg-primary {
-  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%) !important;
-  color: white;
-  border: none;
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--primary-color);
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+/* This is the styling of the navigation menu */
+.sidebar-nav {
+  padding: 1rem 0;
+}
+
+.nav-section {
+  margin-bottom: 2rem;
+}
+
+.nav-section-title {
+  color: var(--text-light);
+  font-size: 0.75rem;
   font-weight: 600;
-  
-  h3 {
-    color: white !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    font-weight: 700;
-  }
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
-// Responsive adjustments
+.nav-item {
+  margin: 0.25rem 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  color: #ffffff;
+  background-color: var(--sidebar-hover);
+  text-decoration: none;
+}
+
+.nav-link.active {
+  color: #ffffff;
+  background-color: var(--primary-color);
+  position: relative;
+}
+
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--accent-color);
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 0.75rem;
+  opacity: 0.8;
+}
+
+.nav-link:hover .nav-icon,
+.nav-link.active .nav-icon {
+  opacity: 1;
+}
+
+/* This is the styling of the main content area */
+.main-content {
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  background-color: var(--main-bg);
+  width: calc(100vw - var(--sidebar-width)); /* Explicitly set width */
+  transition: margin-left 0.3s ease;
+}
+
+/* This is the styling of the main content container */
+.main-content-container {
+  margin-left: var(--sidebar-width);
+  margin-right: 0;
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  width: 100%; /* Allow full width */
+  max-width: none; /* Remove max-width constraint */
+}
+
+/* This is the styling of the content header */
+.content-header {
+  background-color: var(--content-bg);
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-light);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.content-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.content-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0 0;
+}
+
+/* This is the styling of the content body */
+.content-body {
+  padding: 2rem;
+}
+
+/* This is the styling of cards and components */
+.card {
+  background-color: var(--content-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  transition: box-shadow 0.2s ease;
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 2rem auto !important;
+  border-radius: 0.75rem !important;
+  box-shadow: var(--shadow-large) !important;
+  background: #fff !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+.card-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--border-color);
+  padding: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #ffffff;
+  font-weight: 300;
+  padding: 0.6rem 0.7rem; /* Reduced vertical padding from 0.75rem to 0.625rem, horizontal unchanged */
+  font-size: 0.75rem; /* Unchanged */
+  border-radius: var(--border-radius);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-success {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: #ffffff;
+  font-weight: 300;
+  padding: 0.6rem 0.7rem; /* Reduced vertical padding from 0.75rem to 0.625rem, horizontal unchanged */
+  font-size: 0.75rem; /* Unchanged */
+  border-radius: var(--border-radius);
+}
+
+.btn-success:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* This is the styling of container styles */
+.container {
+  max-width: none !important;
+  width: calc(150% + 1cm) !important;
+  padding: 1rem !important;
+  margin: 0 auto !important;
+}
+
+/* This is the styling of add and home buttons */
+.btn-create, .btn-home {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  font-size: 1.5rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* This is the styling of responsive design */
 @media (max-width: 768px) {
-  .footer {
-    position: relative;
-    margin-top: 2rem;
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.mobile-open {
+    transform: translateX(0);
   }
   
   .main-content {
-    margin-bottom: 0;
-    min-height: auto;
-  }
-  
-  .footer-section {
-    margin-bottom: 2rem;
-    text-align: center;
-    
-    h5::after {
-      left: 50%;
-      transform: translateX(-50%);
-    }
+    margin-left: 0;
   }
 }
 
+/* This is the styling of utility classes */
+.text-primary { color: var(--text-primary) !important; }
+.text-secondary { color: var(--text-secondary) !important; }
+.text-light { color: var(--text-light) !important; }
+.bg-primary { background-color: var(--primary-color) !important; }
+.bg-success { background-color: var(--accent-color) !important; }
+
+/* This is the styling of animation classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* This is the styling of scroll indicator */
 .scroll-indicator {
   position: fixed;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 150px;
-  width: 6px;
-  background: rgba($secondary-color, 0.2);
-  border-radius: 3px;
-  z-index: 999;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 30%;
-    background: $secondary-color;
-    border-radius: 3px;
-    transition: transform 0.1s ease-out;
-  }
-  
-  box-shadow: 0 0 10px rgba($secondary-color, 0.3);
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: 3px;
+  background-color: rgba(37, 99, 235, 0.1);
+  z-index: 1001;
 }
 
-.ng-select.custom-select {
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 5px;
-  background: white;
+.scroll-progress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  transition: width 0.1s ease;
 }
 
-.ng-select.custom-select .ng-select-container {
-  min-height: 38px !important;
-  border: none !important;
-  box-shadow: none !important;
+/* This is the styling of list header alignment */
+.list-header {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin: 0 !important;
 }
 
-.ng-dropdown-panel {
-  border: 1px solid #ddd !important;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.1) !important;
+.list-header > .header-left {
+  flex: 1 1 0 !important;
+  text-align: left !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
 }
 
-.team-members-container {
-  border: 1px solid #eee;
-  padding: 10px;
-  border-radius: 5px;
-  background: #f9f9f9;
-  margin-top: 10px;
+.list-header > .header-actions {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
 }
 
+.list-header h1 {
+  text-align: left !important;
+  margin: 0 !important;
+}
 

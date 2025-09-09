@@ -1,20 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EmployeeService } from '../../employee-service';
-import { Gender, Department, Employee , Status } from '../../models/employee.model';
+import { Gender, Department, Employee, Status } from '../../models/employee.model';
 import { OCCUPATIONS_BY_DEPARTMENT } from '../../models/occupations-by-department.ts';
-
+import Swal, { SweetAlertOptions } from 'sweetalert2';
+import { CommonModule, NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-create-employee',
-  standalone: false,
   templateUrl: './create-employee.html',
-  styleUrl: './create-employee.scss'
+  styleUrls: ['./create-employee.scss'],
+  encapsulation: ViewEncapsulation.None,
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, NgClass]
 })
 export class CreateEmployee implements OnInit {
-
-    employeeForm!: FormGroup;
+  employeeForm!: FormGroup;
   occupations: string[] = [];
   departments = Object.values(Department);
   genders = Object.values(Gender);
@@ -22,15 +24,17 @@ export class CreateEmployee implements OnInit {
   reference: string = '';
   showPassword = false;
   showSuccessAlert = false;
-showErrorAlert = false;
-errorMessage = '';
-  alertMessage = '';
+  showErrorAlert = false;
+  errorMessage = '';
+
+  @ViewChild('successAlert') successAlert!: ElementRef;
+  @ViewChild('errorAlert') errorAlert!: ElementRef;
 
   constructor(
     private fb: FormBuilder,
-    public router: Router,
+    private router: Router,
     private employeeService: EmployeeService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.initForm();
@@ -44,7 +48,7 @@ errorMessage = '';
       fullName: ['', Validators.required],
       birthDate: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', Validators.required],
+      phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9\\s-]{7,20}$')]],
       address: ['', Validators.required],
       gender: ['', Validators.required],
       hireDate: ['', Validators.required],
@@ -64,9 +68,15 @@ errorMessage = '';
   }
 
   loadReference(): void {
-    this.employeeService.generateReference().subscribe(ref => {
-      this.reference = ref;
-      this.employeeForm.get('reference')?.setValue(ref);
+    this.employeeService.generateReference().subscribe({
+      next: (ref) => {
+        this.reference = ref;
+        this.employeeForm.get('reference')?.setValue(ref);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to generate reference.';
+        this.triggerSweetAlert('error', this.errorMessage);
+      }
     });
   }
 
@@ -74,44 +84,68 @@ errorMessage = '';
     this.showPassword = !this.showPassword;
   }
 
-  showAlert(message: string, type: 'success' | 'error'): void {
-    this.alertMessage = message;
-    if (type === 'success') {
-      this.showSuccessAlert = true;
-      setTimeout(() => this.showSuccessAlert = false, 3000);
-    } else {
-      this.showErrorAlert = true;
-      setTimeout(() => this.showErrorAlert = false, 3000);
-    }
+  triggerSweetAlert(type: 'success' | 'error', message: string) {
+    const swalConfig: SweetAlertOptions = {
+      icon: type === 'success' ? 'success' : 'error',
+      title: type === 'success' ? 'Success!' : 'Error!',
+      text: message,
+      showConfirmButton: true,
+      timer: type === 'success' ? 3000 : 5000,
+      willOpen: () => {
+        const popup = Swal.getPopup();
+        if (popup) {
+          const popupElement = popup as HTMLElement;
+          popupElement.style.background = 'var(--bg-glass)';
+          popupElement.style.border = 'var(--border-whisper)';
+          popupElement.style.borderRadius = 'var(--radius-xl)';
+          popupElement.style.backdropFilter = 'blur(16px)';
+          popupElement.style.boxShadow = 'var(--shadow-medium)';
+          const title = document.querySelector('.swal2-title');
+          if (title) {
+            const titleElement = title as HTMLElement;
+            titleElement.style.color = type === 'success' ? 'var(--emerald)' : 'var(--ruby)';
+            titleElement.style.fontFamily = "'Playfair Display', serif";
+            titleElement.style.fontSize = '1.5rem';
+          }
+        }
+      }
+    };
+
+    Swal.fire(swalConfig).then(() => {
+      if (type === 'success') {
+        this.router.navigate(['/employees']);
+      }
+      this.showSuccessAlert = false;
+      this.showErrorAlert = false;
+    });
   }
 
   onSubmit(): void {
-    if (this.employeeForm.valid) {
-      const employee = {
-        ...this.employeeForm.getRawValue(),
-        reference: this.reference,
-        status: Status.ACTIF,
-        exitDate: null
-      };
-
-      this.employeeService.createEmployee(employee).subscribe({
-        next: () => {
-          this.showSuccessAlert = true;
-          setTimeout(() => this.router.navigate(['/employees']), 2000);
-        },
-        error: (err) => {
-          this.errorMessage = err.error?.message || 'Failed to create employee. Please try again.';
-        this.showErrorAlert = true;
-        setTimeout(() => this.showErrorAlert = false, 5000);
-        }
-      });
-    } else {
+    if (this.employeeForm.invalid) {
       this.employeeForm.markAllAsTouched();
-      this.showAlert('Please fill all required fields correctly.', 'error');
+      this.triggerSweetAlert('error', 'Please fill all required fields correctly.');
+      return;
     }
+
+    const employee = {
+      ...this.employeeForm.getRawValue(),
+      reference: this.reference,
+      status: Status.ACTIF,
+      exitDate: null
+    };
+
+    this.employeeService.createEmployee(employee).subscribe({
+      next: () => {
+        this.triggerSweetAlert('success', 'Employee created successfully.');
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to create employee. Please try again.';
+        this.triggerSweetAlert('error', this.errorMessage);
+      }
+    });
   }
 
-  navigateTo(route: string): void {
-    this.router.navigate([route]);
+  navigateTo(path: string): void {
+    this.router.navigate([path]);
   }
 }

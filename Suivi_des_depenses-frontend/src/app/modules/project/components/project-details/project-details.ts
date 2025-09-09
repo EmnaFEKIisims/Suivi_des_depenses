@@ -1,4 +1,4 @@
-import { Component , OnInit } from '@angular/core';
+import { Component , OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProjectService } from '../../project-service';
 import { Project } from '../../models/project.model';
@@ -14,7 +14,8 @@ import { forkJoin } from 'rxjs';
   selector: 'app-project-details',
   standalone: false,
   templateUrl: './project-details.html',
-  styleUrl: './project-details.scss'
+  styleUrls: ['../../../../shared/styles/executive-details-template.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class ProjectDetails  implements OnInit {
   project: Project | null = null;
@@ -45,12 +46,15 @@ export class ProjectDetails  implements OnInit {
     this.projectService.getProjectById(+id).subscribe({
       next: (project) => {
         this.project = project;
-        this.loadProjectLeader();
-        this.loadTeamMembers();
         this.isLoading = false;
+        // Load additional data after basic project is loaded
+        if (project) {
+          this.loadProjectLeader();
+          this.loadTeamMembers();
+        }
       },
       error: (err) => {
-        this.errorMessage = 'Failed to load project details';
+        this.errorMessage = 'Failed to load project details: ' + (err.message || 'Unknown error');
         this.isLoading = false;
         console.error('Error loading project:', err);
       }
@@ -60,50 +64,58 @@ export class ProjectDetails  implements OnInit {
   loadProjectLeader(): void {
     if (!this.project || !this.project.projectLeader) return;
 
-    const leaderRef = typeof this.project.projectLeader === 'string' 
-      ? this.project.projectLeader 
-      : this.project.projectLeader.reference;
+    try {
+      const leaderRef = typeof this.project.projectLeader === 'string' 
+        ? this.project.projectLeader 
+        : this.project.projectLeader.reference;
 
-    this.employeeService.getEmployeeByReference(leaderRef).subscribe({
-      next: (employee) => {
-        this.projectLeader = employee;
-      },
-      error: () => {
-        this.projectLeader = { 
-          reference: leaderRef, 
-          fullName: leaderRef 
-        } as Employee;
-      }
-    });
+      this.employeeService.getEmployeeByReference(leaderRef).subscribe({
+        next: (employee) => {
+          this.projectLeader = employee;
+        },
+        error: (err) => {
+          console.warn('Could not load project leader:', err);
+          // Create a minimal employee object for display
+          this.projectLeader = null;
+        }
+      });
+    } catch (error) {
+      console.warn('Error processing project leader:', error);
+    }
   }
 
 loadTeamMembers(): void {
-  if (!this.project || !this.project.teamMembers) return;
+  if (!this.project || !this.project.teamMembers) {
+    this.teamMembers = [];
+    return;
+  }
 
-  // Clear existing members
-  this.teamMembers = [];
+  try {
+    // Clear existing members
+    this.teamMembers = [];
 
-  // Create an array of observables for all team members
-  const memberObservables = this.project.teamMembers.map(member => {
-    const memberRef = typeof member === 'string' ? member : member.reference;
-    return this.employeeService.getEmployeeByReference(memberRef);
-  });
+    // Create an array of observables for all team members
+    const memberObservables = this.project.teamMembers.map(member => {
+      const memberRef = typeof member === 'string' ? member : member.reference;
+      return this.employeeService.getEmployeeByReference(memberRef);
+    });
 
-  // Process all members at once
-  forkJoin(memberObservables).subscribe({
-    next: (employees: Employee[]) => {
-      this.teamMembers = employees;
-      console.log('Processed team members with full names:', 
-        this.teamMembers.map(m => ({ref: m.reference, name: m.fullName})));
-    },
-    error: () => {
-      // Fallback to references if any request fails
-      this.teamMembers = this.project!.teamMembers.map(member => {
-        const memberRef = typeof member === 'string' ? member : member.reference;
-        return { reference: memberRef, fullName: memberRef } as Employee;
-      });
-    }
-  });
+    // Process all members at once
+    forkJoin(memberObservables).subscribe({
+      next: (employees: Employee[]) => {
+        this.teamMembers = employees || [];
+        console.log('Loaded team members:', this.teamMembers.length);
+      },
+      error: (err) => {
+        console.warn('Could not load all team members:', err);
+        // Don't fail silently, just set empty array
+        this.teamMembers = [];
+      }
+    });
+  } catch (error) {
+    console.warn('Error processing team members:', error);
+    this.teamMembers = [];
+  }
 }
 
 getMemberDisplay(member: Employee): string {

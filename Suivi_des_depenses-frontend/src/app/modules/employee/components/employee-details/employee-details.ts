@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Employee } from '../../models/employee.model';
 import { EmployeeService } from '../../employee-service';
 import { ActivatedRoute , Router} from '@angular/router';
@@ -10,9 +10,10 @@ import { ActivatedRoute , Router} from '@angular/router';
   selector: 'app-employee-details',
   standalone: false,
   templateUrl: './employee-details.html',
-  styleUrls : ['./employee-details.scss']
+  styleUrls: ['../../../../shared/styles/executive-details-template.scss'],
+  encapsulation: ViewEncapsulation.None
 })
-export class EmployeeDetails {
+export class EmployeeDetails implements OnInit {
   employee: Employee | undefined;
   showPassword = false;
 
@@ -65,6 +66,12 @@ export class EmployeeDetails {
     navigateToEdit(): void {
     if (this.employee?.cin) {
       this.router.navigate([`/update-employee/${this.employee.cin}`]);
+    }
+  }
+
+  editEmployee(): void {
+    if (this.employee?.cin) {
+      this.router.navigate(['/update-employee'], { state: { cin: this.employee.cin } });
     }
   }
 

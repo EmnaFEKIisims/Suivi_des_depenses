@@ -13,8 +13,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
-    CreateEmployee,
-    UpdateEmployee,
     EmployeeDetails,
     EmployeeList
   ],
@@ -22,7 +20,9 @@ import { ReactiveFormsModule } from '@angular/forms';
     FormsModule,
     CommonModule,
     EmployeeRoutingModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CreateEmployee,
+    UpdateEmployee
   ]
 })
 export class EmployeeModule { }

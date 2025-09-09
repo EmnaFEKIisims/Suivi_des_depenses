@@ -1,4 +1,4 @@
-import { Component , OnInit} from '@angular/core';
+import { Component , OnInit, ViewEncapsulation} from '@angular/core';
 import { ProjectService } from '../../project-service';
 import { Project } from '../../models/project.model';
 import { Status, Priority } from '../../models/project.enums';
@@ -11,7 +11,11 @@ declare const bootstrap: any;
   selector: 'app-project-list',
   standalone: false,
   templateUrl: './project-list.html',
-  styleUrl: './project-list.scss'
+  styleUrls: [
+    '../../../../shared/styles/executive-list-template.scss',
+    './project-list.scss'
+  ],
+  encapsulation: ViewEncapsulation.None
 })
 export class ProjectList implements OnInit {
 

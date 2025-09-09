@@ -1,0 +1,7 @@
+/* App Component Styles - Using Global Executive Styles */
+/* All styles are applied globally from src/styles.scss */
+
+/* App specific overrides can go here if needed */
+:host {
+  display: block;
+}

@@ -17,6 +17,9 @@ import { ClientList } from './modules/client/components/client-list/client-list'
 import { UpdateClient } from './modules/client/components/update-client/update-client';
 import { CreateClient } from './modules/client/components/create-client/create-client';
 import { ClientDetails } from './modules/client/components/client-details/client-details';
+import { BudgetList } from './modules/budget/components/budget-list/budget-list';
+import { HistoryList } from './modules/budget/components/history-list/history-list';
+import { CreateBudgetLine } from './modules/budget/components/create-budget-line/create-budget-line';
 
 
 
@@ -25,6 +28,7 @@ const routes: Routes = [
   { path: 'home', component: Home },
   { path: 'employees', component: EmployeeList },
   { path: 'update-employee/:CIN', component: UpdateEmployee },
+  { path: 'update-employee', component: UpdateEmployee }, // Added route for navigation state
   { path: 'add-employee', component: CreateEmployee },
   { path: 'employees/details/:reference', component: EmployeeDetails },
   { path: 'clients', component: ClientList },
@@ -38,7 +42,10 @@ const routes: Routes = [
   { path: 'requests', component: RequestList },
   { path: 'requests/add', component: CreateRequest },        
   { path: 'requests/edit/:id', component: UpdateRequest },    
-  { path: 'requests/:id', component: RequestDetails }          
+  { path: 'requests/:id', component: RequestDetails },
+  { path: 'budget', component: BudgetList },
+  { path: 'budget/history', component: HistoryList },
+  { path: 'budget/create-line', component: CreateBudgetLine }        
 ];
 
 @NgModule({

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Employee , Department } from '../../models/employee.model';
 import { EmployeeService } from '../../employee-service';
 import { Router } from '@angular/router';
@@ -13,14 +13,18 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   selector: 'app-employee-list',
   standalone: false,
   templateUrl: './employee-list.html',
-  styleUrl: './employee-list.scss'
+  styleUrls: [
+    '../../../../shared/styles/executive-list-template.scss',
+    './employee-list.scss'
+  ],
+  encapsulation: ViewEncapsulation.None
 })
 export class EmployeeList implements OnInit {
    employees: Employee[] = [];
   filteredEmployees: Employee[] = [];
   departments = Object.values(Department);
   selectedStatus: string = 'Actif';
-  selectedDepartment: string = 'All';
+  selectedDepartment: string = '';
   searchTerm: string = '';
   isLoading: boolean = false;
   private searchTerms = new Subject<string>();
@@ -34,16 +38,13 @@ export class EmployeeList implements OnInit {
     this.loadEmployees();
   }
 
-
-
-
-
   loadEmployees(): void {
     this.isLoading = true;
-    this.employeeService.getEmployeesByStatus(this.selectedStatus).subscribe({
+    this.employeeService.getAllEmployees().subscribe({
       next: (employees) => {
+        console.log('Loaded employees:', employees);
         this.employees = employees;
-        this.filterEmployees();
+        this.applyFilters();
         this.isLoading = false;
       },
       error: (err) => {
@@ -53,57 +54,30 @@ export class EmployeeList implements OnInit {
     });
   }
 
-  onStatusChange(): void {
-    if (this.selectedStatus === 'All') {
-      this.employeeService.getAllEmployees().subscribe(employees => {
-        this.employees = employees;
-        this.filterEmployees();
-      });
-    } else {
-      this.loadEmployees();
-    }
+  applyFilters(): void {
+    this.filteredEmployees = this.employees.filter(emp => {
+      // Status filter
+      const matchesStatus = !this.selectedStatus || emp.status === this.selectedStatus;
+      
+      // Department filter
+      const matchesDepartment = !this.selectedDepartment || emp.department === this.selectedDepartment;
+
+      // Search filter (name or phone)
+      const matchesSearch = !this.searchTerm ||
+        emp.fullName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        emp.phoneNumber.toLowerCase().includes(this.searchTerm.toLowerCase());
+
+      return matchesStatus && matchesDepartment && matchesSearch;
+    });
+    console.log('Filtered employees:', this.filteredEmployees);
   }
 
-  onDepartmentChange(): void {
-    if (this.selectedDepartment === 'All') {
-      this.loadEmployees();
-    } else {
-      this.employeeService.getEmployeesByDepartment(this.selectedDepartment).subscribe(employees => {
-        this.employees = employees;
-        this.filterEmployees();
-      });
-    }
-  }
-
-search(): void {
-  this.filterEmployees();
-}
-
-
-
-filterEmployees(): void {
-  this.filteredEmployees = this.employees.filter(emp => {
-    const matchesDepartment =
-      this.selectedDepartment === 'All' || !this.selectedDepartment || emp.department === this.selectedDepartment;
-
-    const matchesSearch =
-      !this.searchTerm ||
-      emp.fullName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      emp.phoneNumber.toLowerCase().includes(this.searchTerm.toLowerCase());
-
-    return matchesDepartment && matchesSearch;
-  });
-}
-
-
-
-
-  viewDetails(reference: string): void {
+  viewEmployee(reference: string): void {
     this.router.navigate(['/employees/details', reference]);
   }
 
-  editEmployee(reference: string): void {
-    this.router.navigate(['/update-employee', reference]);
+  editEmployee(cin: string): void {
+    this.router.navigate(['/update-employee'], { state: { cin } });
   }
 
   navigateTo(route: string): void {
@@ -111,11 +85,7 @@ filterEmployees(): void {
   }
 
 createNewEmployee(): void {
-  this.router.navigate(['add-employee']);
+  this.router.navigate(['/add-employee']);
 }
-
-
-
-
 
 }

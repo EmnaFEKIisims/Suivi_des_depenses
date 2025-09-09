@@ -1,45 +1,40 @@
-import { Component , OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, Validators , FormArray ,FormControl  } from '@angular/forms';
+import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
 import { Project } from '../../models/project.model';
 import { Employee } from '../../../employee/models/employee.model';
 import { ProjectService } from '../../project-service';
 import { Router } from '@angular/router';
 import { Status, Priority } from '../../models/project.enums';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
 import { EmployeeService } from '../../../employee/employee-service';
 import { ClientService } from '../../../client/client-service';
 import { Client } from '../../../client/models/client.model';
+import Swal, { SweetAlertOptions } from 'sweetalert2';
+import { CommonModule, NgClass } from '@angular/common';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-
 
 @Component({
   selector: 'app-create-project',
   templateUrl: './create-project.html',
   styleUrls: ['./create-project.scss'],
-    standalone: true,  
-  imports: [
-    
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule, 
-    NgSelectModule,
-    
-  ]
+  encapsulation: ViewEncapsulation.None,
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgClass, NgSelectModule]
 })
 export class CreateProject implements OnInit {
-   projectForm!: FormGroup;
+  projectForm!: FormGroup;
   clients: Client[] = [];
   employees: Employee[] = [];
   reference: string = '';
   showSuccessAlert = false;
   showErrorAlert = false;
   errorMessage = '';
-  alertMessage = '';
   isSubmitting = false;
-
   statuses = Object.values(Status);
   priorities = Object.values(Priority);
+
+  @ViewChild('successAlert') successAlert!: ElementRef;
+  @ViewChild('errorAlert') errorAlert!: ElementRef;
 
   constructor(
     private fb: FormBuilder,
@@ -73,19 +68,15 @@ export class CreateProject implements OnInit {
     });
 
     this.projectForm.get('end_date')?.setValidators([
-  Validators.required,
-  (control) => {
-    const start = this.projectForm?.get('start_date')?.value;
-    const end = control.value;
-    return start && end && new Date(end) < new Date(start) 
-      ? { invalidEndDate: true } 
-      : null;
+      (control) => {
+        const start = this.projectForm?.get('start_date')?.value;
+        const end = control.value;
+        return start && end && new Date(end) < new Date(start)
+          ? { invalidEndDate: true }
+          : null;
+      }
+    ]);
   }
-]);
-
-  }
-
-  
 
   get team_members(): FormArray<FormControl<string | null>> {
     return this.projectForm.get('team_members') as FormArray<FormControl<string | null>>;
@@ -107,8 +98,8 @@ export class CreateProject implements OnInit {
         this.projectForm.get('reference')?.setValue(ref);
       },
       error: (err) => {
-        console.error('Failed to generate reference:', err);
-        this.showError('Failed to generate project reference');
+        this.errorMessage = err.error?.message || 'Failed to generate project reference.';
+        this.triggerSweetAlert('error', this.errorMessage);
       }
     });
   }
@@ -119,8 +110,8 @@ export class CreateProject implements OnInit {
         this.clients = clients;
       },
       error: (err) => {
-        console.error('Failed to load clients:', err);
-        this.showError('Failed to load clients list');
+        this.errorMessage = err.error?.message || 'Failed to load clients list.';
+        this.triggerSweetAlert('error', this.errorMessage);
       }
     });
   }
@@ -131,76 +122,115 @@ export class CreateProject implements OnInit {
         this.employees = employees;
       },
       error: (err) => {
-        console.error('Failed to load employees:', err);
-        this.showError('Failed to load employees list');
+        this.errorMessage = err.error?.message || 'Failed to load employees list.';
+        this.triggerSweetAlert('error', this.errorMessage);
       }
     });
   }
 
-  showError(message: string): void {
-    this.errorMessage = message;
-    this.showErrorAlert = true;
-    setTimeout(() => this.showErrorAlert = false, 5000);
-  }
-
-  showSuccess(message: string): void {
-    this.alertMessage = message;
-    this.showSuccessAlert = true;
-    setTimeout(() => this.showSuccessAlert = false, 5000);
-  }
-
-  async onSubmit(): Promise<void> {
-    if (this.projectForm.invalid || this.isSubmitting) return;
-    this.isSubmitting = true;
-
-    try {
-      const formValue = this.projectForm.getRawValue();
-      
-      const selectedClient = this.clients.find(c => c.idClient === formValue.client_id);
-      if (!selectedClient) throw new Error('Selected client not found');
-
-      const projectLeader = this.employees.find(e => e.reference === formValue.project_leader_Reference);
-      if (!projectLeader) throw new Error('Selected project leader not found');
-
-      const teamMembers = this.employees.filter(e => 
-        formValue.team_members.includes(e.reference)
-      );
-
-      const project: Project = {
-        reference: this.reference,
-        name: formValue.name_project,
-        description: formValue.description || undefined,
-        startDate: new Date(formValue.start_date).toISOString().split('T')[0], 
-        endDate: formValue.end_date ? new Date(formValue.end_date).toISOString().split('T')[0] : '', 
-        status: formValue.status,
-        budget: formValue.budget ? Number(formValue.budget) : undefined,
-        client: selectedClient,
-        priority: formValue.priority,
-        progress: formValue.progress,
-        projectLeader: projectLeader,
-        teamMembers: teamMembers
-      };
-
-      
-
-      this.projectService.createProject(project).subscribe({
-        next: () => {
-          this.isSubmitting = false;
-          this.showSuccess('Project created successfully');
-          setTimeout(() => this.router.navigate(['/projects']), 2000);
-        },
-        error: (err) => {
-          this.isSubmitting = false;
-          console.error('API Error:', err);
-          this.showError(err.error?.message || 'Failed to create project');
-          setTimeout(() => this.showErrorAlert = false, 5000);
+  triggerSweetAlert(type: 'success' | 'error', message: string) {
+    const swalConfig: SweetAlertOptions = {
+      icon: type === 'success' ? 'success' : 'error',
+      title: type === 'success' ? 'Success!' : 'Error!',
+      text: message,
+      showConfirmButton: true,
+      timer: type === 'success' ? 3000 : 5000,
+      willOpen: () => {
+        const popup = Swal.getPopup();
+        if (popup) {
+          const popupElement = popup as HTMLElement;
+          popupElement.style.background = 'var(--bg-glass)';
+          popupElement.style.border = 'var(--border-whisper)';
+          popupElement.style.borderRadius = 'var(--radius-xl)';
+          popupElement.style.backdropFilter = 'blur(16px)';
+          popupElement.style.boxShadow = 'var(--shadow-medium)';
+          const title = document.querySelector('.swal2-title');
+          if (title) {
+            const titleElement = title as HTMLElement;
+            titleElement.style.color = type === 'success' ? 'var(--emerald)' : 'var(--ruby)';
+            titleElement.style.fontFamily = "'Playfair Display', serif";
+            titleElement.style.fontSize = '1.5rem';
+          }
         }
-      });
+      }
+    };
 
-    } catch (error) {
-      console.error('Error during project creation:', error);
-      this.showError(error instanceof Error ? error.message : 'Failed to prepare project data');
-    }
+    Swal.fire(swalConfig).then(() => {
+      if (type === 'success') {
+        this.router.navigate(['/projects']);
+      }
+      this.showSuccessAlert = false;
+      this.showErrorAlert = false;
+    });
+  }
+
+async onSubmit(): Promise<void> {
+  if (this.projectForm.invalid || this.isSubmitting) {
+    this.projectForm.markAllAsTouched();
+    this.markFormGroupTouched(this.projectForm);
+    this.triggerSweetAlert('error', 'Please fill all required fields correctly.');
+    return;
+  }
+
+  this.isSubmitting = true;
+
+  try {
+    const formValue = this.projectForm.getRawValue();
+    const selectedClient = this.clients.find(c => c.idClient === formValue.client_id);
+    if (!selectedClient) throw new Error('Selected client not found');
+
+    // Extract team member references
+    const teamMemberReferences = this.team_members.controls
+      .map(control => control.value)
+      .filter((ref: string | null): ref is string => ref !== null && ref !== '');
+
+    // Convert references to Employee objects (if interface requires Employee[])
+    const teamMembersAsEmployees = teamMemberReferences.map(ref => {
+      return { reference: ref } as Employee; // Create minimal Employee object
+    });
+
+    const project: Project = {
+      reference: this.reference,
+      name: formValue.name_project,
+      description: formValue.description || undefined,
+      startDate: this.formatDate(formValue.start_date),
+      endDate: this.formatDate(formValue.end_date),
+      status: formValue.status,
+      budget: formValue.budget ? Number(formValue.budget) : undefined,
+      client: selectedClient,
+      priority: formValue.priority,
+      progress: formValue.progress,
+      projectLeader: formValue.project_leader_Reference,
+      teamMembers: teamMembersAsEmployees // Use the converted Employee objects
+    };
+
+    console.log('Team members being sent:', teamMembersAsEmployees);
+
+    this.projectService.createProject(project).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.triggerSweetAlert('success', 'Project created successfully.');
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.errorMessage = err.error?.message || 'Failed to create project.';
+        this.triggerSweetAlert('error', this.errorMessage);
+        console.error('Error details:', err);
+      }
+    });
+  } catch (error) {
+    this.isSubmitting = false;
+    this.errorMessage = error instanceof Error ? error.message : 'Failed to prepare project data.';
+    this.triggerSweetAlert('error', this.errorMessage);
+  }
+}
+
+  private formatDate(date: string | Date): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    return `${d.getFullYear()}-${month}-${day}`;
   }
 
   private markFormGroupTouched(formGroup: FormGroup | FormArray): void {
@@ -212,8 +242,7 @@ export class CreateProject implements OnInit {
     });
   }
 
-  navigateTo(route: string): void {
-    this.router.navigate([route]);
+  navigateTo(path: string): void {
+    this.router.navigate([path]);
   }
-
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { ExpenseRequestService } from '../../expense-request-service';
@@ -10,7 +10,8 @@ import { Router } from '@angular/router';
   selector: 'app-request-details',
   standalone: false,
   templateUrl: './request-details.html',
-  styleUrl: './request-details.scss'
+  styleUrls: ['../../../../shared/styles/executive-details-template.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class RequestDetails implements OnInit {
   request: ExpenseRequest | null = null;
@@ -71,6 +72,14 @@ export class RequestDetails implements OnInit {
     return 0;
   }
 
+  getFormattedTotals(request: ExpenseRequest | null): string {
+    if (!request || this.totalsMap.size === 0) {
+      return 'Not calculated';
+    }
+    return Array.from(this.totalsMap.entries())
+      .map(([currency, amount]) => `${currency} ${amount}`)
+      .join(', ');
+  }
 
   navigateTo(path: string): void {
     this.router.navigate([path]);
@@ -78,8 +87,13 @@ export class RequestDetails implements OnInit {
 
   navigateToEdit(): void {
     if (this.request?.idRequest) {
-      this.router.navigate(['/expense-requests/edit', this.request.idRequest]);
+      this.router.navigate(['/requests/edit', this.request.idRequest]);
     }
+  }
+
+
+    isEditDisabled(): boolean {
+    return !this.request || this.request.status !== 'SUBMITTED';
   }
 
 }

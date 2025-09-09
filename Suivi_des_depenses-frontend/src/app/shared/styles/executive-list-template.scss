@@ -1,0 +1,352 @@
+/* This is the styling of the list container */
+/* This is the styling of the list container */
+.list-container {
+  background: var(--bg-gradient);
+  min-height: calc(100vh - 120px) !important;
+  height: auto !important;
+  width: 100% !important; /* Use full parent width */
+  margin-left: 0px !important;
+  padding: 2rem !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* Change to stretch to fill width */
+}
+
+/* This is the styling of the list card */
+.list-card {
+  width: 100%; /* Fill container width */
+  max-width: none; /* Remove max-width to match container */
+  margin: 0; /* Remove auto margin to avoid centering */
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-medium);
+  padding: var(--space-2xl);
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+/* This is the styling of add and home buttons */
+.btn-create, .btn-home {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  font-size: 1.5rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border: 2px solid;
+  font-weight: 600;
+  outline: none;
+  box-shadow: none;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btn-create {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.btn-create:hover {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-dark);
+}
+
+.btn-home {
+  color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+.btn-home:hover {
+  background: var(--secondary-color);
+  color: #fff;
+  border-color: var(--primary-dark);
+}
+
+/* This is the styling of the list header */
+.list-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+  margin-bottom: var(--space-3xl);
+  padding-bottom: var(--space-xl);
+  border-bottom: 2px solid rgba(184, 134, 11, 0.1);
+  
+  .header-left {
+    flex: 1;
+    text-align: left;
+    align-items: flex-start;
+    margin-top: 15px;
+    h1 {
+      font-family: 'Playfair Display', serif !important;
+      font-size: 2.75rem !important;
+      font-weight: 700 !important;
+      color: var(--text-primary) !important;
+      margin: 0 0 var(--space-sm) 0 !important;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+    }
+    .header-subtitle {
+      color: var(--text-secondary) !important;
+      font-size: 1.1rem !important;
+      margin: 0 !important;
+      font-weight: 400 !important;
+    }
+  }
+  .header-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: var(--space-md);
+  }
+}
+
+/* This is the styling of the search filter section */
+.search-filter-section {
+  background: var(--bg-glass);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  margin-bottom: var(--space-3xl);
+  border: var(--border-whisper);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-soft);
+  
+  .search-filter-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-xl);
+    align-items: end;
+    height: 80px; // Exact fixed height
+    
+    .search-input-group {
+      position: relative;
+      height: 80px; // Exact same height as filter group
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      
+      .form-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        height: 20px;
+        line-height: 20px;
+      }
+      
+      .input-wrapper {
+        position: relative;
+        height: 48px; // Fixed height
+        
+        input {
+          width: 100%;
+          height: 100%;
+          padding: 0 var(--space-lg) 0 var(--space-3xl);
+          background: var(--bg-elevated);
+          border: var(--border-subtle);
+          border-radius: var(--radius-lg);
+          font-size: 1rem;
+          color: var(--text-primary);
+          transition: all 0.3s ease;
+          
+          &:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.1);
+            background: var(--ivory);
+            outline: none;
+          }
+          
+          &::placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+          }
+        }
+        
+        .search-icon {
+          position: absolute;
+          left: var(--space-lg);
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--text-muted);
+          font-size: 1.1rem;
+          pointer-events: none;
+        }
+      }
+    }
+    
+    .filter-group {
+      display: flex;
+      gap: var(--space-md);
+      align-items: end;
+      height: 80px; // Exact same height
+      
+      .filter-select {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 80px; // Exact same height
+        
+        .form-label {
+          font-weight: 600;
+          font-size: 0.9rem;
+          color: var(--text-primary);
+          margin: 0;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          white-space: nowrap;
+          height: 20px;
+          line-height: 20px;
+        }
+        
+        select {
+          height: 48px; // Same height as search input
+          padding: 0 var(--space-3xl) 0 var(--space-lg);
+          background: var(--bg-elevated);
+          border: var(--border-subtle);
+          border-radius: var(--radius-lg);
+          font-size: 1rem;
+          color: var(--text-primary);
+          min-width: 150px;
+          cursor: pointer;
+          
+          &:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.1);
+            outline: none;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/* This is the styling of responsive design */
+@media (max-width: 768px) {
+  .list-container {
+    padding: var(--space-lg);
+  }
+  
+  .list-header {
+    flex-direction: column;
+    gap: var(--space-lg);
+    
+    .header-left h1 {
+      font-size: 2rem;
+    }
+    
+    .header-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+}
+
+/* This is the styling of the employee/project table */
+/* This is the styling of the employee/project table */
+.card-body .table {
+  width: 100% !important; /* Full width of card-body */
+  max-width: 1200px !important; /* Match card max-width */
+  border-collapse: separate !important; /* Custom border control */
+  border-spacing: 0 !important; /* Remove default spacing */
+  background: linear-gradient(135deg, var(--ivory) 0%, var(--slate-100) 100%) !important; /* Luxurious gradient */
+  border: 2px solid var(--border-whisper) !important; /* Subtle elegant border */
+  border-radius: var(--radius-xl) !important; /* Softer corners */
+  box-shadow: 0 6px 12px rgba(30, 58, 138, 0.1), 0 3px 6px rgba(30, 58, 138, 0.08) !important; /* Enhanced shadow */
+  font-family: 'Inter', sans-serif !important; /* Theme font */
+  overflow: visible !important; /* Prevent scrolling */
+}
+
+.card-body .table thead th {
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent) 100%) !important; /* Gradient like header */
+  color: #ffffff !important; /* White text */
+  font-weight: 600 !important; /* Bold but controlled */
+  padding: var(--space-md) var(--space-lg) !important; /* Consistent padding */
+  text-align: center !important; /* Centered headers */
+  border-bottom: 3px solid rgba(184, 134, 11, 0.3) !important; /* Softer accent line */
+  font-size: 1rem !important; /* Maintain default size */
+  -webkit-background-clip: text !important; /* Gradient text effect */
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.card-body .table thead th:nth-child(7) {
+  min-width: 150px !important; /* Ensure "Decision" column is wide enough for buttons */
+}
+
+.card-body .table tbody {
+  background-color: var(--bg-elevated) !important; /* Clean background */
+}
+
+.card-body .table tbody tr {
+  height: 2.5cm !important; /* Fixed row height for tbody only */
+  vertical-align: middle !important; /* Center content vertically */
+}
+
+.card-body .table tbody td {
+  padding: var(--space-md) var(--space-lg) !important; /* Consistent padding */
+  text-align: center !important; /* Center data and buttons */
+  font-size: 1rem !important; /* Match theme readability */
+  color: var(--text-primary) !important; /* Theme text */
+  word-wrap: break-word !important; /* Allow wrapping */
+  max-width: 0 !important; /* Enable wrapping */
+  line-height: 1.4 !important; /* Better multi-line spacing */
+}
+
+.card-body .table tbody td:nth-child(7) {
+  min-width: 150px !important; /* Match "Decision" column width for consistency */
+}
+
+.card-body .table tbody td:last-child {
+  padding-right: var(--space-xl) !important; /* Extra space for actions */
+}
+
+/* Enhanced button size control */
+.card-body .table tbody td .btn,
+.card-body .table tbody td .btn-group .btn {
+  padding: 0.6rem 0.7rem !important; /* Match updated styles.scss */
+  font-size: 0.75rem !important; /* Match styles.scss */
+  height: auto !important; /* Prevent row height influence */
+  width: auto !important; /* Prevent stretching */
+  line-height: 1 !important; /* Ensure text fits */
+  display: inline-flex !important; /* Ensure inline behavior */
+  align-items: center !important; /* Center content vertically */
+  vertical-align: middle !important; /* Align with row */
+  margin: 0 !important; /* Remove any margin interference */
+}
+
+/* This is the styling of active/inactive status rectangles */
+.status-active {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, #34d399 0%, #059669 100%);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.15);
+  border: none;
+  opacity: 1;
+  letter-spacing: 1px;
+}
+
+.status-inactive {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, #f87171 0%, #b91c1c 100%);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(248, 113, 113, 0.15);
+  border: none;
+  opacity: 1;
+  letter-spacing: 1px;
+}
