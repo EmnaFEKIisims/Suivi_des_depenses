@@ -1,16 +1,15 @@
-package com.example.infrastructure.persistence;
+package com.example.infrastructure.persistence.employee;
 
 
 import com.example.core.employee.Employee;
 import com.example.core.employee.EmployeeRepoPort;
+import com.example.core.employee.EmployeeStatus;
 import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 import com.example.core.employee.Department;
 import java.util.Map;
-import java.util.List;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 @Component
 public class EmployeeJpaAdapter implements EmployeeRepoPort {
@@ -18,12 +17,12 @@ public class EmployeeJpaAdapter implements EmployeeRepoPort {
     private final EmployeeRepo employeeRepo;
     private static final Map<Department, List<String>> OCCUPATIONS_BY_DEPARTMENT = Map.of(
             Department.IT, List.of("FullStack Developer", "System Administrator", "Support Technician", "IT Project Manager", "Network Engineer", "Software Engineer"),
-            Department.MAINTENANCE, List.of("Maintenance Technician", "Maintenance Engineer", "Maintenance Manager", "Maintenance Planner", "Electrical Maintenance Agent"),
-            Department.COMMERCIAL, List.of("Sales Manager", "Client Representative", "Sales Engineer", "Sales Representative", "Sales Assistant"),
-            Department.ACCOUNTING, List.of("Accountant", "Chief Accountant", "Management Controller", "Accounting Assistant", "Financial Auditor"),
+            Department.Maintenance, List.of("Maintenance Technician", "Maintenance Engineer", "Maintenance Manager", "Maintenance Planner", "Electrical Maintenance Agent"),
+            Department.Commercial, List.of("Sales Manager", "Client Representative", "Sales Engineer", "Sales Representative", "Sales Assistant"),
+            Department.Accounting, List.of("Accountant", "Chief Accountant", "Management Controller", "Accounting Assistant", "Financial Auditor"),
             Department.HR, List.of("Recruitment Officer", "HR Manager", "Payroll Manager", "HR Assistant", "Internal Trainer"),
-            Department.PRODUCTION, List.of("Production Operator", "Team Leader", "Line Manager", "Production Engineer", "Production Planner"),
-            Department.BUILDING_INFRASTRUCTURE, List.of("Site Manager", "Construction Engineer", "Infrastructure Technician", "Installation Manager", "Works Coordinator")
+            Department.Production, List.of("Production Operator", "Team Leader", "Line Manager", "Production Engineer", "Production Planner"),
+            Department.Building_Infrastructure, List.of("Site Manager", "Construction Engineer", "Infrastructure Technician", "Installation Manager", "Works Coordinator")
     );
 
     public EmployeeJpaAdapter(EmployeeRepo employeeRepo) {
@@ -46,8 +45,8 @@ public class EmployeeJpaAdapter implements EmployeeRepoPort {
     }
 
     @Override
-    public Optional<Employee> findEmployeeByUsername(String username) {
-        return employeeRepo.findByUsername(username);
+    public Optional<Employee> findEmployeeByFullName(String fullName) {
+        return employeeRepo.findByFullName(fullName);
     }
 
     @Override
@@ -61,8 +60,8 @@ public class EmployeeJpaAdapter implements EmployeeRepoPort {
     }
 
     @Override
-    public boolean existsByUsername(String username) {
-        return employeeRepo.existsByUsername(username);
+    public boolean existsByFullName(String fullName) {
+        return employeeRepo.existsByFullName(fullName);
     }
 
     @Override
@@ -88,7 +87,7 @@ public class EmployeeJpaAdapter implements EmployeeRepoPort {
     }
 
     @Override
-    public List<Employee> findByStatus(String status) {
+    public List<Employee> findByStatus(EmployeeStatus status) {
         return employeeRepo.findByStatus(status);
     }
 

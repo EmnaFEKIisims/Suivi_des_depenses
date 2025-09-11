@@ -1,4 +1,4 @@
-import { NgModule , provideBrowserGlobalErrorListeners } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing-module';
@@ -8,9 +8,15 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ProjectModule } from './modules/project/project-module';
 import { RequestModule } from './modules/request/request-module';
+import { Home } from './modules/home/home';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { ClientModule } from './modules/client/client-module';
+import { ClientList } from './modules/client/components/client-list/client-list';
+import { CreateClient } from './modules/client/components/create-client/create-client';
+import { Login } from './login/login';
 
 @NgModule({
-  declarations: [App],
+  declarations: [App, Home, Login],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -19,13 +25,14 @@ import { RequestModule } from './modules/request/request-module';
     FormsModule,
     ReactiveFormsModule,
     EmployeeModule,
+    ClientModule,
     ProjectModule,
-    RequestModule
+    NgSelectModule,
+    RequestModule,
+    ClientList,
+    CreateClient
   ],
-  
-  providers: [
-    provideBrowserGlobalErrorListeners()
-  ],
+  providers: [],
   bootstrap: [App]
 })
-export class AppModule { }
+export class AppModule {}

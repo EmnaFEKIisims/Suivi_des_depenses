@@ -1,34 +1,114 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold" routerLink="/">Suivi des Employés</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/employees" routerLinkActive="active">Employees</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/projects" routerLinkActive="active">Projects</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/requests" routerLinkActive="active">Requests</a>
-        </li>
-      </ul>
+<!-- Modern Dashboard Layout -->
+<div *ngIf="!isWelcomePage()" class="app-layout">
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar">
+    <!-- Brand Header -->
+    <div class="sidebar-header">
+      <a href="/" class="sidebar-brand" routerLink="/">
+        <div class="brand-icon">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <span>Expense Tracker</span>
+      </a>
     </div>
-  </div>
-</nav>
 
+    <!-- Navigation Menu -->
+    <div class="sidebar-nav">
+      <!-- Main Navigation -->
+      <div class="nav-section">
+        <div class="nav-section-title">Main Menu</div>
+        <div class="nav-item">
+          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+            <i class="bi bi-house-door nav-icon"></i>
+            <span>Dashboard</span>
+          </a>
+        </div>
+        <div class="nav-item">
+          <a class="nav-link" routerLink="/requests" routerLinkActive="active">
+            <i class="bi bi-file-earmark-text nav-icon"></i>
+            <span>Expense Requests</span>
+          </a>
+        </div>
+      </div>
 
+      <!-- Management Section -->
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <div class="nav-item">
+          <a class="nav-link" routerLink="/employees" routerLinkActive="active">
+            <i class="bi bi-people nav-icon"></i>
+            <span>Employees</span>
+          </a>
+        </div>
+        <div class="nav-item">
+          <a class="nav-link" routerLink="/clients" routerLinkActive="active">
+            <i class="bi bi-building nav-icon"></i>
+            <span>Clients</span>
+          </a>
+        </div>
+        <div class="nav-item">
+          <a class="nav-link" routerLink="/projects" routerLinkActive="active">
+            <i class="bi bi-folder nav-icon"></i>
+            <span>Projects</span>
+          </a>
+        </div>
+        <div class="nav-item">
+          <a class="nav-link" routerLink="/budget" routerLinkActive="active">
+            <i class="bi bi-wallet2 nav-icon"></i>
+            <span>Budget</span>
+          </a>
+        </div>
+      </div>
 
-<div class="main-content container my-4">
-  <router-outlet></router-outlet>
+      <!-- Analytics Section -->
+      <div class="nav-section">
+        <div class="nav-section-title">Analytics</div>
+        <div class="nav-item">
+          <a class="nav-link" href="#" (click)="$event.preventDefault()">
+            <i class="bi bi-bar-chart nav-icon"></i>
+            <span>Reports</span>
+          </a>
+        </div>
+        <div class="nav-item">
+          <a class="nav-link" href="#" (click)="$event.preventDefault()">
+            <i class="bi bi-pie-chart nav-icon"></i>
+            <span>Analytics</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Settings Section -->
+      <div class="nav-section">
+        <div class="nav-section-title">Settings</div>
+        <div class="nav-item">
+          <a class="nav-link" href="#" (click)="$event.preventDefault()">
+            <i class="bi bi-gear nav-icon"></i>
+            <span>Preferences</span>
+          </a>
+        </div>
+        <div class="nav-item">
+          <a class="nav-link" href="#" (click)="$event.preventDefault()">
+            <i class="bi bi-person-circle nav-icon"></i>
+            <span>Profile</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <!-- Scroll Progress Indicator -->
+    <div class="scroll-indicator">
+      <div class="scroll-progress" [style.width.%]="scrollPercentage"></div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="content-body fade-in">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
 </div>
-
-
- 
+<ng-container *ngIf="isWelcomePage()">
+  <router-outlet></router-outlet>
+</ng-container>

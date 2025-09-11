@@ -1,0 +1,85 @@
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-left">
+      <h1>Budget List</h1>
+      <p class="header-subtitle">Manage and view all budget information</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-create" (click)="navigateTo('/budget/create-line')" title="Add new budget line">
+        <i class="bi bi-plus-lg"></i>
+      </button>
+      <button class="btn-home" (click)="navigateTo('/home')" title="Go to home">
+        <i class="bi bi-house"></i>
+      </button>
+      <button class="btn-history" (click)="showHistory()" title="View history">
+        <i class="bi bi-clock-history"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Switcher for Cash/Bank -->
+  <div class="card shadow mb-3">
+    <div class="card-body d-flex align-items-center gap-3">
+      <label class="form-check-label">
+        <input type="radio" class="form-check-input" name="budgetType" [value]="BudgetType.CASH" [(ngModel)]="selectedBudgetType" (change)="onBudgetTypeChange(BudgetType.CASH)"> Cash
+      </label>
+      <label class="form-check-label">
+        <input type="radio" class="form-check-input" name="budgetType" [value]="BudgetType.BANK" [(ngModel)]="selectedBudgetType" (change)="onBudgetTypeChange(BudgetType.BANK)"> Bank
+      </label>
+    </div>
+  </div>
+
+  <!-- Search and Filter Section -->
+  <div class="card shadow">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <select class="form-select" [(ngModel)]="selectedCurrency" (change)="onCurrencyChange()">
+            <option value="">All Currencies</option>
+            <option *ngFor="let currency of currencyList" [value]="currency.code">{{ currency.code }} - {{ currency.description }}</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search by code or description" [(ngModel)]="searchTerm" (input)="onSearchChange()">
+            <button class="btn btn-primary" type="button" (click)="onSearchChange()">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Budget Table -->
+  <div class="card shadow">
+    <div class="card-body">
+      <table class="table table-hover ">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Currency</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+          <tbody>
+            <tr *ngFor="let line of budgetLines">
+              <td>{{ line.code || line.id }}</td>
+              <td>{{ line.description || line.currencyDescription }}</td>
+              <td>{{ formatAmount(line.amount) }}</td>
+              <td>{{ line.currency }}</td>
+              <td>{{ selectedBudgetType }}</td>
+            </tr>
+            <tr *ngIf="budgetLines.length === 0">
+              <td colspan="5" class="text-center text-muted">
+                <i class="bi bi-receipt-cutoff me-2"></i>
+                No budgets found matching your criteria
+              </td>
+            </tr>
+          </tbody>
+      </table>
+    </div>
+  </div>
+</div>

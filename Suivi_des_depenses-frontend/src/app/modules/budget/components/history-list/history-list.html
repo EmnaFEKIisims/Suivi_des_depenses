@@ -1,0 +1,88 @@
+<div class="list-container">
+  <div class="list-header">
+    <div class="header-left">
+      <h1>Budget History</h1>
+      <p class="header-subtitle">View all budget operations</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-back" (click)="navigateTo('/budget')" title="Back to Budget">
+        <i class="bi bi-arrow-left"></i>
+      </button>
+      <button class="btn-home" (click)="navigateTo('/home')" title="Go to home">
+        <i class="bi bi-house"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card shadow mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="selectedCurrency" (change)="applyFilters()">
+            <option value="">All Currencies</option>
+            <option *ngFor="let currency of currencyList" [value]="currency.code">{{ currency.description }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="selectedEmployee" (change)="applyFilters()">
+            <option value="">All Employees</option>
+            <option *ngFor="let emp of employeeList" [value]="emp.reference">{{ emp.fullName }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="selectedType" (change)="applyFilters()">
+            <option value="">All Types</option>
+            <option value="CASH">Cash</option>
+            <option value="BANK">Bank</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="selectedOperation" (change)="applyFilters()">
+            <option value="">All Operations</option>
+            <option value="ADD">Add</option>
+            <option value="DEDUCT">Deduct</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Budget History Table -->
+  <div class="card shadow">
+    <div class="card-body">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Type</th>
+            <th>Operation</th>
+            <th>Request Ref.</th>
+            <th>Employee</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let record of filteredHistory; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ record.budgetType }}</td>
+            <td>{{ record.operation }}</td>
+            <td>{{ record.expenseRequest?.reference || '-' }}</td>
+            <td>{{ record.employee?.fullName }}</td>
+            <td>{{ formatAmount(record.amount, record.currency) }}</td>
+            <td>{{ getCurrencyDescription(record.currency).trim() }}</td>
+            <td>{{ record.operationDate }}</td>
+          </tr>
+          <tr *ngIf="filteredHistory.length === 0">
+            <td colspan="8" class="text-center text-muted">
+              <i class="bi bi-receipt-cutoff me-2"></i>
+              No history records found.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

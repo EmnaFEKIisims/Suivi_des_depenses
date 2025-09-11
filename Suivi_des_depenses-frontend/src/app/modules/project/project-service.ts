@@ -9,61 +9,48 @@ import { catchError } from 'rxjs/operators'
 })
 export class ProjectService {
 
- private baseUrl = 'http://localhost:8080/api/projects';
+ private apiUrl = 'http://localhost:8080/api/projects';
 
-  constructor(private http: HttpClient) {}
-
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    console.error('API Error:', error.message);
-    return throwError(() => new Error('Something went wrong; please try again later.'));
-  }
+  constructor(private http: HttpClient) { }
 
   getAllProjects(): Observable<Project[]> {
-    return this.http.get<Project[]>(this.baseUrl)
-      .pipe(catchError(this.handleError));
+    return this.http.get<Project[]>(`${this.apiUrl}`);
   }
 
   getProjectById(id: number): Observable<Project> {
-    return this.http.get<Project>(`${this.baseUrl}/getProjectById/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<Project>(`${this.apiUrl}/getProjectById/${id}`);
   }
 
   createProject(project: Project): Observable<Project> {
-    const requestBody = {
-      ...project,
-      projectLeader: { cin: project.projectLeader?.cin },
-      teamMembers: project.teamMembers?.map(member => ({ cin: member.cin })) || []
-    };
-    
-    return this.http.post<Project>(`${this.baseUrl}/createProject`, requestBody)
-      .pipe(catchError(this.handleError));
+    return this.http.post<Project>(`${this.apiUrl}/createProject`, project);
   }
 
   updateProject(id: number, project: Project): Observable<Project> {
-    return this.http.put<Project>(`${this.baseUrl}/updateProject/${id}`, project)
-      .pipe(catchError(this.handleError));
-  }
-
-  deleteProject(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/deleteProject/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.http.put<Project>(`${this.apiUrl}/updateProject/${id}`, project);
   }
 
   getProjectsByStatus(status: string): Observable<Project[]> {
-    return this.http.get<Project[]>(`${this.baseUrl}/getProjectsByStatus/${status}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<Project[]>(`${this.apiUrl}/getProjectsByStatus/${status}`);
   }
 
-  getProjectsByLeader(leaderCIN: string): Observable<Project[]> {
-    return this.http.get<Project[]>(`${this.baseUrl}/getProjectsByLeader/${leaderCIN}`)
-      .pipe(catchError(this.handleError));
+  getProjectsByLeader(leaderReference: string): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.apiUrl}/getProjectsByLeader/${leaderReference}`);
   }
 
   getProjectsByClientName(name: string): Observable<Project[]> {
-    const params = new HttpParams().set('name', name);
-    return this.http.get<Project[]>(`${this.baseUrl}/getProjectsByClient`, { params })
-      .pipe(catchError(this.handleError));
+    let params = new HttpParams().set('name', name);
+    return this.http.get<Project[]>(`${this.apiUrl}/getProjectsByClient`, { params });
   }
 
-  
+  getProjectsByClientId(clientId: number): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.apiUrl}/getProjectsByClient/${clientId}`);
+  }
+
+  getProjectByReference(reference: string): Observable<Project> {
+    return this.http.get<Project>(`${this.apiUrl}/getProjectsByReference/${reference}`);
+  }
+
+  generateReference(): Observable<string> {
+    return this.http.get(`${this.apiUrl}/generate-reference`, { responseType: 'text' });
+  }
 }

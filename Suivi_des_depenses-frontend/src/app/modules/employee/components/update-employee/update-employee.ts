@@ -1,87 +1,193 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EmployeeService } from '../../employee-service';
-import { Employee } from '../../models/employee.model';
-import { Department, Gender } from '../../models/employee.model';
+import { Department, Gender, Status } from '../../models/employee.model';
 import { OCCUPATIONS_BY_DEPARTMENT } from '../../models/occupations-by-department.ts';
+import Swal, { SweetAlertOptions } from 'sweetalert2';
+import { CommonModule, NgClass } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-update-employee',
-  standalone: false ,
   templateUrl: './update-employee.html',
-  styleUrl: './update-employee.scss'
+  styleUrls: ['./update-employee.scss'],
+  encapsulation: ViewEncapsulation.None,
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, NgClass]
 })
 export class UpdateEmployee implements OnInit {
-   employeeForm!: FormGroup;
+  employeeForm!: FormGroup;
   occupations: string[] = [];
-  cin!: string;
-  isLoading = false;
+  departments = Object.values(Department);
+  genders = Object.values(Gender);
+  statuses = Object.values(Status);
+  showPassword = false;
+  showSuccessAlert = false;
+  showErrorAlert = false;
   errorMessage = '';
+  employeeCin: string = '';
 
-  readonly genders = Object.values(Gender);
-  readonly departments = Object.values(Department);
+  @ViewChild('successAlert') successAlert!: ElementRef;
+  @ViewChild('errorAlert') errorAlert!: ElementRef;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private employeeService: EmployeeService,
-    private router: Router
+    private router: Router,
+    private employeeService: EmployeeService
   ) {}
 
   ngOnInit(): void {
-    this.cin = this.route.snapshot.paramMap.get('cin')!;
+    // Get CIN from navigation state, not from route param
+    this.employeeCin = history.state.cin || '';
     this.initForm();
-    this.loadEmployee();
+    this.loadEmployeeData();
   }
 
   initForm(): void {
     this.employeeForm = this.fb.group({
-      cin: [{ value: '', disabled: true }],
-      fullName: ['', Validators.required],
+      cin: ['', Validators.required], // enabled
+      reference: ['', Validators.required], // enabled
+      fullName: ['', Validators.required], // enabled
+      birthDate: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', Validators.required],
+      phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9\\s-]{7,20}$')]],
       address: ['', Validators.required],
       gender: ['', Validators.required],
       hireDate: ['', Validators.required],
       department: ['', Validators.required],
       occupation: ['', Validators.required],
+      status: ['', Validators.required],
+      exitDate: [''], // always enabled
       username: ['', Validators.required],
       password: ['', Validators.required]
     });
 
-    // Update occupations dynamically
     this.employeeForm.get('department')?.valueChanges.subscribe(dept => {
-      this.occupations = OCCUPATIONS_BY_DEPARTMENT[dept as Department] || [];
+      const department = dept as Department;
+      this.occupations = OCCUPATIONS_BY_DEPARTMENT[department] || [];
       this.employeeForm.get('occupation')?.setValue('');
+    });
+
+    this.employeeForm.get('status')?.valueChanges.subscribe(status => {
+      this.onStatusChange();
     });
   }
 
-  loadEmployee(): void {
-    this.isLoading = true;
-    this.employeeService.getEmployeeByCIN(this.cin).subscribe({
-      next: (employee: Employee) => {
-        this.employeeForm.patchValue(employee);
+  loadEmployeeData(): void {
+    this.employeeService.getEmployeeByCIN(this.employeeCin).subscribe({
+      next: (employee) => {
+        this.employeeForm.patchValue({
+          cin: employee.cin,
+          reference: employee.reference,
+          fullName: employee.fullName,
+          birthDate: this.formatDate(employee.birthDate),
+          email: employee.email,
+          phoneNumber: employee.phoneNumber,
+          address: employee.address,
+          gender: employee.gender,
+          hireDate: this.formatDate(employee.hireDate),
+          department: employee.department,
+          occupation: employee.occupation,
+          status: employee.status,
+          exitDate: employee.exitDate ? this.formatDate(employee.exitDate) : null,
+          username: employee.username,
+          password: employee.password
+        });
         this.occupations = OCCUPATIONS_BY_DEPARTMENT[employee.department as Department] || [];
-        this.isLoading = false;
+        this.onStatusChange(); // Ensure exitDate validation is set correctly
       },
-      error: () => {
-        this.errorMessage = 'Failed to load employee.';
-        this.isLoading = false;
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to load employee data.';
+        this.triggerSweetAlert('error', this.errorMessage);
       }
     });
   }
 
-  onSubmit(): void {
-    if (this.employeeForm.invalid) return;
+  private formatDate(date: string | Date): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    return `${d.getFullYear()}-${month}-${day}`;
+  }
 
-    const updatedEmployee: Employee = {
-      ...this.employeeForm.getRawValue(), // includes disabled CIN
+  onStatusChange(): void {
+    const exitDateControl = this.employeeForm.get('exitDate');
+    if (this.employeeForm.get('status')?.value === 'Inactif') {
+      exitDateControl?.setValidators([Validators.required]);
+    } else {
+      exitDateControl?.clearValidators();
+      exitDateControl?.setValue('');
+    }
+    exitDateControl?.updateValueAndValidity();
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  triggerSweetAlert(type: 'success' | 'error', message: string) {
+    const swalConfig: SweetAlertOptions = {
+      icon: type === 'success' ? 'success' : 'error',
+      title: type === 'success' ? 'Success!' : 'Error!',
+      text: message,
+      showConfirmButton: true,
+      timer: type === 'success' ? 3000 : 5000,
+      willOpen: () => {
+        const popup = Swal.getPopup();
+        if (popup) {
+          const popupElement = popup as HTMLElement;
+          popupElement.style.background = 'var(--bg-glass)';
+          popupElement.style.border = 'var(--border-whisper)';
+          popupElement.style.borderRadius = 'var(--radius-xl)';
+          popupElement.style.backdropFilter = 'blur(16px)';
+          popupElement.style.boxShadow = 'var(--shadow-medium)';
+          const title = document.querySelector('.swal2-title');
+          if (title) {
+            const titleElement = title as HTMLElement;
+            titleElement.style.color = type === 'success' ? 'var(--emerald)' : 'var(--ruby)';
+            titleElement.style.fontFamily = "'Playfair Display', serif";
+            titleElement.style.fontSize = '1.5rem';
+          }
+        }
+      }
     };
 
-    this.employeeService.updateEmployee(this.cin, updatedEmployee).subscribe({
-      next: () => this.router.navigate(['/employees']),
-      error: () => this.errorMessage = 'Update failed. Please try again.'
+    Swal.fire(swalConfig).then(() => {
+      if (type === 'success') {
+        this.router.navigate(['/employees']);
+      }
+      this.showSuccessAlert = false;
+      this.showErrorAlert = false;
     });
+  }
+
+  onSubmit(): void {
+    if (this.employeeForm.invalid) {
+      this.employeeForm.markAllAsTouched();
+      this.triggerSweetAlert('error', 'Please fill all required fields correctly.');
+      return;
+    }
+
+    const employeeData = this.employeeForm.getRawValue(); // Use getRawValue to include disabled fields
+    if (employeeData.status === 'Actif') {
+      employeeData.exitDate = null;
+    }
+
+    this.employeeService.updateEmployee(this.employeeCin, employeeData).subscribe({
+      next: () => {
+        this.triggerSweetAlert('success', 'Employee updated successfully.');
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Failed to update employee. Please try again.';
+        this.triggerSweetAlert('error', this.errorMessage);
+      }
+    });
+  }
+
+  navigateTo(path: string): void {
+    this.router.navigate([path]);
   }
 }

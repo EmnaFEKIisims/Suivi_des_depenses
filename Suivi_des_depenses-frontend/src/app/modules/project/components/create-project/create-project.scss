@@ -1,18 +1,20 @@
-.create-project-container {
-  background-color: #fff;
-  border-radius: 10px;
-  padding: 2rem;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+@import '../../../../shared/styles/executive-form-template.scss';
+
+.team-member-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
 }
 
-h2 {
-  font-weight: 600;
+.team-member-item ng-select {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-.form-label {
-  font-weight: 500;
-}
-
-.invalid-feedback {
-  display: block;
+.team-member-item .remove-member {
+  height: 40px;
+  min-width: 40px;
+  font-size: 1.2rem;
+  margin-left: 0.5rem;
 }

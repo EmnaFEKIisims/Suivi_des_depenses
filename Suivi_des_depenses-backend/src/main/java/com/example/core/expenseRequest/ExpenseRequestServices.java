@@ -1,5 +1,6 @@
 package com.example.core.expenseRequest;
 
+import com.example.core.employee.Employee;
 import com.example.core.exceptions.BusinessException;
 
 import java.util.List;
@@ -9,7 +10,6 @@ public interface ExpenseRequestServices {
 
     ExpenseRequest createExpenseRequest(ExpenseRequest expenseRequest);
     ExpenseRequest updateExpenseRequest(Long id, ExpenseRequest updatedRequest);
-    void deleteExpenseRequest(Long id);
     ExpenseRequest getExpenseRequestById(Long id);
     List<ExpenseRequest> getAllExpenseRequests();
 
@@ -20,10 +20,9 @@ public interface ExpenseRequestServices {
     ExpenseDetails updateExpenseDetail(Long detailId, ExpenseDetails updatedDetail);
     List<ExpenseDetails> getDetailsByRequestId(Long requestId);
 
-    Map<String, Double> calculateTotalAmountsByCurrency(Long requestId);
+    Map<Currency, Double> calculateTotalAmountsByCurrency(Long requestId);
     void validateCurrencyLimit(Long requestId, int maxCurrencies) throws BusinessException;
-    ExpenseRequest submitForApproval(Long requestId);
-    ExpenseRequest approveRequest(Long requestId, String approverComments);
+    ExpenseRequest approveRequest(Long requestId);
     ExpenseRequest rejectRequest(Long requestId, String rejectionReason);
 
 
@@ -31,5 +30,9 @@ public interface ExpenseRequestServices {
     List<ExpenseRequest> getRequestsByEmployee(String employeeCin);
     List<ExpenseRequest> getRequestsByProject(Long projectId);
     List<ExpenseRequest> getRequestsByStatus(ExpenseStatus status);
+
+    List<ExpenseRequest> getRequestsByCurrency(Currency currency);
+
+    String generateReference();
 
 }

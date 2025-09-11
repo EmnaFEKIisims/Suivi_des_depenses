@@ -1,0 +1,164 @@
+/* Complete styling for history-list */
+
+.list-container {
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-3xl);
+    padding-bottom: var(--space-xl);
+    border-bottom: 2px solid rgba(184, 134, 11, 0.1);
+
+    .header-left {
+      flex: 1;
+
+      h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .header-subtitle {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin: 0.25rem 0 0 0;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: var(--space-md);
+      align-items: flex-start;
+
+      .btn-home {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--bronze) 100%);
+        color: var(--ivory);
+        border: none;
+        padding: var(--space-md) var(--space-lg);
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        transition: all 0.3s ease;
+        cursor: pointer;
+
+        &:hover {
+          background: linear-gradient(135deg, var(--amber) 0%, var(--accent) 100%);
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-medium);
+        }
+
+        &:focus {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.3);
+        }
+      }
+    }
+  }
+}
+
+.btn-back {
+  background: var(--bg-elevated) !important;
+  color: var(--text-secondary) !important;
+  border: var(--border-subtle) !important;
+  padding: var(--space-md) !important;
+  border-radius: var(--radius-lg) !important;
+  font-size: 1.2rem !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+.btn-back:hover {
+  background: var(--accent) !important;
+  color: var(--ivory) !important;
+  border-color: var(--accent) !important;
+  transform: translateY(-2px) !important;
+}
+.btn-back:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.3) !important;
+}
+.btn-back i {
+  font-size: 1.3em !important;
+}
+
+/* Card and table styling */
+.card {
+  background-color: var(--content-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  transition: box-shadow 0.2s ease;
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 2rem auto !important;
+  border-radius: 0.75rem !important;
+  box-shadow: var(--shadow-large) !important;
+  background: #fff !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card .table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  background: linear-gradient(135deg, var(--ivory) 0%, var(--slate-100) 100%) !important;
+  border: 2px solid var(--border-whisper) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: 0 6px 12px rgba(30, 58, 138, 0.1), 0 3px 6px rgba(30, 58, 138, 0.08) !important;
+  font-family: 'Inter', sans-serif !important;
+  overflow: visible !important;
+}
+
+.card .table thead th {
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent) 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  padding: var(--space-md) var(--space-lg) !important;
+  text-align: center !important;
+  border-bottom: 3px solid rgba(184, 134, 11, 0.3) !important;
+  font-size: 1rem !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.card .table tbody {
+  background-color: var(--bg-elevated) !important;
+}
+
+.card .table tbody tr {
+  height: 2.5cm !important;
+  vertical-align: middle !important;
+}
+
+.card .table tbody td {
+  padding: var(--space-md) var(--space-lg) !important;
+  text-align: center !important;
+  font-size: 1rem !important;
+  color: var(--text-primary) !important;
+  word-wrap: break-word !important;
+  max-width: 0 !important;
+  line-height: 1.4 !important;
+  /* No font-weight: 700 to avoid bold */
+}

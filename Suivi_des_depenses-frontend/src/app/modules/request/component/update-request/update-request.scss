@@ -1,0 +1,141 @@
+@import '../../../../shared/styles/executive-form-template';
+
+// Ensure validation styling for ng-select and input-group
+ng-select.ng-invalid.ng-touched .ng-select-container {
+  border-color: var(--ruby);
+  box-shadow: 0 0 0 0.2rem rgba(var(--ruby-rgb), 0.25);
+}
+
+.input-group .form-control.ng-invalid.ng-touched {
+  border-color: var(--ruby);
+  box-shadow: 0 0 0 0.2rem rgba(var(--ruby-rgb), 0.25);
+}
+
+// Style for Expense Details section
+.detail-row {
+  .form-grid.grid-4 {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: stretch !important;
+    gap: var(--spacing-md);
+
+    .form-group {
+      flex: 1 1 0;
+      margin-bottom: 0;
+      height: 100%;
+
+      // Standardize input and select to fill column, same height
+      input.form-control,
+      ng-select {
+        height: var(--input-height) !important; // Consistent height
+        width: 100% !important; // Fill column width
+        min-width: 0;
+        max-width: 100%;
+        display: flex;
+        align-items: center;
+        padding: var(--spacing-sm); // Standard padding
+        box-sizing: border-box; // Include padding
+        margin: 0;
+        border-radius: 0.375rem !important; // Explicit round corners
+      }
+    }
+
+    // Moderately larger trash button with round corners
+    .remove-member {
+      flex: 0 0 var(--input-height);
+      width: var(--input-height) !important;
+      height: var(--input-height) !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: var(--spacing-md);
+      padding: 0;
+      border-radius: 0.375rem !important; // Round corners
+      font-size: var(--font-size-lg); // Larger icon
+      line-height: 1;
+      background-color: transparent; // Transparent background
+      border: 2px solid var(--ruby); // Red outline
+      i.bi-trash {
+        color: var(--ruby); // Red logo/icon
+        margin: 0;
+      }
+
+      &:hover {
+        background-color: var(--ruby); // Full red on hover
+        border-color: var(--ruby); // Maintain red outline
+        i.bi-trash {
+          color: var(--white); // White icon on hover
+        }
+      }
+    }
+  }
+}
+
+// Spacing and divider for Expense Details title
+.form-group.full-width .d-flex.justify-content-between {
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-whisper);
+}
+
+// Style for Total Amounts section (unchanged, retained for consistency)
+.total-amounts-card {
+  background: linear-gradient(135deg, var(--bg-light) 0%, var(--emerald-light) 100%);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  color: var(--text-dark);
+
+  .total-amounts-header {
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+
+    i.bi-calculator {
+      color: var(--emerald);
+      margin-right: var(--spacing-md);
+    }
+  }
+
+  .total-amounts-body {
+    display: flex;
+    gap: var(--spacing-lg);
+    justify-content: center;
+    font-size: var(--font-size-lg);
+
+    .total-amount-item {
+      display: flex;
+      align-items: baseline;
+      gap: var(--spacing-sm);
+
+      .currency-label {
+        font-weight: 500;
+        color: var(--text-dark);
+      }
+
+      .currency-value {
+        font-weight: 700;
+        color: var(--emerald-dark);
+      }
+    }
+  }
+}
+
+// Fallback variables if not defined in executive-form-template
+:root {
+  --emerald-light: #d1e7dd;
+  --emerald-dark: #065d46;
+  --white: #ffffff;
+  --text-dark: #1a202c;
+  --ruby: #dc3545; // Fallback for ruby color
+  --input-height: 2.375rem; // Fallback if undefined
+  --radius-md: 0.375rem; // Fallback for round corners
+  --font-size-lg: 1.25rem; // Fallback for larger icon
+}

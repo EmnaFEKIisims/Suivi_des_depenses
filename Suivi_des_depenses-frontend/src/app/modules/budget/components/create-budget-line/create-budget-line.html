@@ -1,0 +1,106 @@
+<div class="form-container">
+  <!-- Alerts Section - Top Center Position -->
+  <div class="alert-container">
+    <div *ngIf="showSuccessAlert" class="sweet-alert-placeholder" #successAlert></div>
+    <div *ngIf="showErrorAlert" class="sweet-alert-placeholder" #errorAlert></div>
+  </div>
+
+  <!-- Main Card Container -->
+  <div class="main-card">
+    <!-- Form Header -->
+    <div class="form-header">
+      <h1>Add Budget Line</h1>
+      <p class="form-subtitle">Please fill in the details below</p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mb-4">
+      <button class="btn btn-outline-secondary" (click)="navigateTo('/budget')">
+        <i class="bi bi-arrow-left"></i>
+      </button>
+      <button class="btn btn-outline-primary" (click)="navigateTo('/home')">
+        <i class="bi bi-house-fill"></i>
+      </button>
+    </div>
+
+    <!-- Form Wrapper -->
+    <div class="form-wrapper">
+      <div class="form-card">
+        <div class="form-card-header">
+          <h2><i class="bi bi-wallet-fill"></i> Budget Line Details</h2>
+        </div>
+        <div class="form-card-body">
+          <form #budgetForm="ngForm" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
+            <div class="form-section">
+              <div class="form-grid grid-2">
+                <!-- Line 1: Employee CIN/Reference + Search + Full Name -->
+                <div class="form-group">
+                  <label for="employeeInput" class="form-label">Employee CIN or Reference <span class="required">*</span></label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="employeeInput" [(ngModel)]="employeeInput" name="employeeInput" required #employeeInputRef="ngModel">
+                    <button type="button" class="btn btn-primary" (click)="searchEmployee()">Search</button>
+                  </div>
+                  <div class="form-text text-danger" *ngIf="(employeeInputRef.invalid && (employeeInputRef.touched || budgetForm.submitted))">Employee CIN or Reference is required!</div>
+                </div>
+                <div class="form-group">
+                  <label for="employeeFullName" class="form-label">Full Name</label>
+                  <input type="text" class="form-control" id="employeeFullName" [value]="employeeFullName" readonly>
+                </div>
+                <!-- Line 2: Type (Cash/Bank) + Currency Select/Search (single zone) -->
+                <div class="form-group">
+                  <label class="form-label">Type <span class="required">*</span></label>
+                  <div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="type" [(ngModel)]="selectedType" [value]="BudgetType.CASH" id="cashRadio" required #typeCashRef="ngModel">
+                      <label class="form-check-label" for="cashRadio">Cash</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="type" [(ngModel)]="selectedType" [value]="BudgetType.BANK" id="bankRadio" required #typeBankRef="ngModel">
+                      <label class="form-check-label" for="bankRadio">Bank</label>
+                    </div>
+                  </div>
+                  <div class="form-text text-danger" *ngIf="((typeCashRef.invalid && (typeCashRef.touched || budgetForm.submitted)) && (typeBankRef.invalid && (typeBankRef.touched || budgetForm.submitted)))">Type is required!</div>
+                </div>
+                <div class="form-group">
+                  <label for="currency" class="form-label">Currency <span class="required">*</span></label>
+                  <ng-select
+                    [items]="currencyList"
+                    bindLabel="description"
+                    bindValue="code"
+                    [(ngModel)]="selectedCurrency"
+                    name="selectedCurrency"
+                    placeholder="Search a currency"
+                    required
+                    (change)="updateCurrencyDescription()"
+                    #currencyRef="ngModel">
+                  </ng-select>
+                  <div class="form-text text-danger" *ngIf="currencyRef.invalid && (currencyRef.touched || budgetForm.submitted)">Currency is required!</div>
+                </div>
+                <!-- Line 3: Amount + Currency Code -->
+                <div class="form-group">
+                  <label for="amount" class="form-label">Amount <span class="required">*</span></label>
+                  <input type="number" class="form-control" id="amount" [(ngModel)]="amount" name="amount" required #amountRef="ngModel">
+                  <div class="form-text text-danger" *ngIf="amountRef.invalid && (amountRef.touched || budgetForm.submitted)">Amount is required!</div>
+                </div>
+                <div class="form-group">
+                  <label for="currencyDescription" class="form-label">Currency Code</label>
+                  <input type="text" class="form-control" id="currencyDescription" [value]="selectedCurrency" readonly>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="form-card-footer">
+          <div class="form-actions">
+            <div class="secondary-actions">
+              <button type="button" class="btn btn-cancel" (click)="navigateTo('/budget')">Cancel</button>
+            </div>
+            <div class="primary-actions">
+              <button type="submit" class="btn btn-submit" [disabled]="budgetForm.invalid" (click)="onSubmit()">Add Budget Line</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

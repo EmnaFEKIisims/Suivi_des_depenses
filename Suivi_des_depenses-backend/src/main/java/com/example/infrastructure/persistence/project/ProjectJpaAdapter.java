@@ -1,5 +1,6 @@
-package com.example.infrastructure.persistence;
+package com.example.infrastructure.persistence.project;
 
+import com.example.core.client.Client;
 import com.example.core.project.Project;
 import com.example.core.project.ProjectRepoPort;
 import jakarta.transaction.Transactional;
@@ -31,19 +32,11 @@ public class ProjectJpaAdapter implements ProjectRepoPort {
 
     @Override
     public Project updateProject(Long id, Project project) {
-
         if (!projectRepository.existsById(id)) {
             throw new RuntimeException("Project with id " + id + " not found");
         }
-
         project.setIdProject(id);
         return projectRepository.save(project);
-    }
-
-    @Override
-    @Transactional
-    public void deleteProject(Long id) {
-        projectRepository.deleteById(id);
     }
 
     @Override
@@ -52,17 +45,36 @@ public class ProjectJpaAdapter implements ProjectRepoPort {
     }
 
     @Override
-    public List<Project> getProjectByProjectLeader_CIN(String cin) {
-        return projectRepository.findByProjectLeader_CIN(cin);
+    public List<Project> getProjectByProjectLeader_Reference(String reference) {
+        return projectRepository.findByProjectLeader_Reference(reference);
     }
 
     @Override
     public List<Project> getProjectByClientNameContainingIgnoreCase(String clientName) {
-        return projectRepository.findByClientNameContainingIgnoreCase(clientName);
+        return projectRepository.searchByClientName(clientName);
     }
 
     @Override
-    public Optional<Project> getProjectByIdProject(Long idProject) {
-        return projectRepository.findByIdProject(idProject);
+    public Optional<Project> getProjectById(Long id) {
+        return projectRepository.findById(id);
     }
+
+    @Override
+    public List<Project> getProjectsByClient(Client client) {
+        return projectRepository.findByClient(client);
+    }
+
+    @Override
+    public Optional<Project> getProjectByReference(String reference) {
+        return projectRepository.findByReference(reference);
+    }
+
+    @Override
+    public Optional<Project> getLastProjectByReferencePrefix(String prefix) {
+        return projectRepository.findTopByReferenceStartingWithOrderByReferenceDesc(prefix);
+    }
+
+
+
+
 }

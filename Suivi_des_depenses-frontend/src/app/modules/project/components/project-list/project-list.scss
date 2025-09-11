@@ -1,18 +1,34 @@
-.action-buttons {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  gap: 0.5rem;
+/* PROJECT LIST - ONLY IMPORT SHARED STYLES */
+@import '../../../../shared/styles/executive-list-template';
 
-  .btn {
-    flex: 0 0 auto; /* Prevent buttons from stretching or shrinking */
-    white-space: nowrap;
-    padding: 0.25rem 0.5rem; /* Ensure consistent button size */
-  }
+.project-status {
+  display: block;
+  margin: auto;
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  min-width: 60px;
+  text-align: center;
 }
 
-td.actions-cell {
-  white-space: nowrap;
-  min-width: 120px; /* Ensure enough space for all buttons */
-  text-align: center; /* Center the flex container */
+.project-status-planned {
+  background: linear-gradient(90deg, #fbbf24 0%, #f59e42 100%);
+  color: #fff;
+}
+
+.project-status-inprogress {
+  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+}
+
+.project-status-completed {
+  background: linear-gradient(90deg, #34d399 0%, #059669 100%);
+  color: #fff;
+}
+
+.project-status-cancelled {
+  background: linear-gradient(90deg, #f87171 0%, #b91c1c 100%);
+  color: #fff;
 }

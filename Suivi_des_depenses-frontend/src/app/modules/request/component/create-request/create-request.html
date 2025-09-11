@@ -1,255 +1,278 @@
-<div class="create-request-container container my-5">
-  <h2 class="mb-4 text-primary text-center">Create New Expense Request</h2>
-
-  <!-- Error Alert -->
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
+<div class="form-container">
+  <!-- Alerts Section - Top Center Position -->
+  <div class="alert-container">
+    <div *ngIf="showSuccessAlert" class="sweet-alert-placeholder" #successAlert></div>
+    <div *ngIf="showErrorAlert" class="sweet-alert-placeholder" #errorAlert></div>
   </div>
 
-  <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" novalidate>
-    <div class="row g-3">
-      
-      <!-- CIN Input -->
-      <div class="col-md-6">
-        <label for="cinInput" class="form-label">Employee CIN</label>
-        <div class="input-group">
-          <input 
-            id="cinInput" 
-            type="text" 
-            formControlName="cinInput" 
-            class="form-control" 
-            [class.is-invalid]="requestForm.get('cinInput')?.invalid && requestForm.get('cinInput')?.touched"
-          />
-          <button 
-            type="button" 
-            class="btn btn-primary" 
-            (click)="fetchEmployeeByCin()" 
-            [disabled]="!requestForm.get('cinInput')?.valid"
-          >
-            Search
-          </button>
-          <div *ngIf="requestForm.get('cinInput')?.invalid && requestForm.get('cinInput')?.touched" class="invalid-feedback">
-            CIN is required
+  <!-- Main Card Container -->
+  <div class="main-card">
+    <!-- Form Header -->
+    <div class="form-header">
+      <h1>Create New Expense Request</h1>
+      <p class="form-subtitle">Please fill in the details below</p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mb-4">
+      <button class="btn btn-outline-secondary" (click)="navigateTo('/requests')">
+        <i class="bi bi-arrow-left"></i> 
+      </button>
+      <button class="btn btn-outline-primary" (click)="navigateTo('/home')">
+        <i class="bi bi-house-fill"></i> 
+      </button>
+    </div>
+
+    <!-- Form Wrapper -->
+    <div class="form-wrapper">
+      <div class="form-card">
+        <div class="form-card-header">
+          <h2><i class="bi bi-wallet2"></i> Request Details</h2>
+        </div>
+        <div class="form-card-body">
+          <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
+            <div class="form-section">
+              <div class="form-grid grid-2">
+                <!-- Row 1: Reference + Status -->
+                <div class="form-group">
+                  <label for="reference" class="form-label">Reference <span class="required">*</span></label>
+                  <input class="form-control" id="reference" formControlName="reference" readonly>
+                  <div class="form-text text-danger" *ngIf="requestForm.get('reference')?.invalid && requestForm.get('reference')?.touched">
+                    Reference is required!
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="status" class="form-label">Status</label>
+                  <input class="form-control" id="status" value="SUBMITTED" readonly>
+                </div>
+                <!-- Row 2: Employee Lookup -->
+                <div class="form-group full-width">
+                  <div class="form-card">
+                    <div class="form-card-header">
+                      <h3><i class="bi bi-person-fill"></i> Employee Selection</h3>
+                    </div>
+                    <div class="form-card-body">
+                      <div class="form-grid grid-2">
+                        <div class="form-group">
+                          <label for="employeeCIN" class="form-label">Employee CIN <span class="required">*</span></label>
+                          <div class="input-group">
+                            <input class="form-control" id="employeeCIN" [(ngModel)]="employeeCIN" name="cin" [ngModelOptions]="{standalone: true}"
+                              [ngClass]="{'ng-invalid ng-touched': !fullEmployee && employeeCIN && employeeCIN.trim() !== '' && employeeCINTouched}">
+                            <button type="button" class="btn btn-primary" (click)="fetchEmployee()">
+                              <i class="bi bi-search"></i>
+                            </button>
+                          </div>
+                          <div class="form-text text-danger" *ngIf="!fullEmployee && employeeCIN && employeeCIN.trim() !== '' && employeeCINTouched">
+                            Please fetch a valid employee!
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label for="employeeFullName" class="form-label">Full Name</label>
+                          <input class="form-control" id="employeeFullName" [value]="employeeFullName" readonly>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Row 3: Project Selection -->
+                <div class="form-group full-width">
+                  <div class="form-card">
+                    <div class="form-card-header">
+                      <h3><i class="bi bi-briefcase-fill"></i> Project Selection</h3>
+                    </div>
+                    <div class="form-card-body">
+                      <div class="form-grid grid-2">
+                        <div class="form-group">
+                          <label for="projectReference" class="form-label">Search by Reference</label>
+                          <div class="input-group">
+                            <input class="form-control" id="projectReference" [(ngModel)]="projectReference" name="projectRef" [ngModelOptions]="{standalone: true}">
+                            <button type="button" class="btn btn-outline-primary" (click)="fetchProjectByReference()">
+                              <i class="bi bi-search"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label for="projectSelect" class="form-label">Search and Select Project <span class="required">*</span></label>
+                          <ng-select
+                            [items]="projects"
+                            bindLabel="name"
+                            bindValue="idProject"
+                            [(ngModel)]="selectedProjectId"
+                            [ngModelOptions]="{standalone: true}"
+                            placeholder="Search or select project"
+                            [searchable]="true"
+                            [clearable]="false"
+                            [typeahead]="projectSearchTerm$"
+                            [ngClass]="{'ng-invalid ng-touched': !fullProject && (selectedProjectId || projectReference) && projectSelectTouched}"
+                            (change)="selectProject($event)"
+                            (search)="projectSearchTerm$.next($event.term)">
+                          </ng-select>
+                          <div class="form-text text-danger" *ngIf="!fullProject && (selectedProjectId || projectReference) && projectSelectTouched">
+                            Please select a valid project!
+                          </div>
+                        </div>
+                        <div class="form-group full-width">
+                          <label for="projectName" class="form-label">Selected Project</label>
+                          <input class="form-control" id="projectName" [value]="projectName" readonly
+                            [ngClass]="{'ng-invalid ng-touched': !fullProject && (selectedProjectId || projectReference) && projectSelectTouched}">
+                          <div class="form-text text-danger" *ngIf="!fullProject && (selectedProjectId || projectReference) && projectSelectTouched">
+                            A valid project must be selected!
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Row 4: Mission + Mission Location -->
+                <div class="form-group">
+                  <label for="mission" class="form-label">Mission <span class="required">*</span></label>
+                  <input class="form-control" id="mission" formControlName="mission"
+                    [ngClass]="{'ng-invalid ng-touched': requestForm.get('mission')?.invalid && requestForm.get('mission')?.touched}">
+                  <div class="form-text text-danger" *ngIf="requestForm.get('mission')?.invalid && requestForm.get('mission')?.touched">
+                    Mission is required!
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="missionLocation" class="form-label">Mission Location <span class="required">*</span></label>
+                  <input class="form-control" id="missionLocation" formControlName="missionLocation"
+                    [ngClass]="{'ng-invalid ng-touched': requestForm.get('missionLocation')?.invalid && requestForm.get('missionLocation')?.touched}">
+                  <div class="form-text text-danger" *ngIf="requestForm.get('missionLocation')?.invalid && requestForm.get('missionLocation')?.touched">
+                    Mission location is required!
+                  </div>
+                </div>
+                <!-- Row 5: Start Date + Return Date -->
+                <div class="form-group">
+                  <label for="start_date" class="form-label">Start Date <span class="required">*</span></label>
+                  <input type="date" class="form-control" id="start_date" formControlName="start_date"
+                    [ngClass]="{'ng-invalid ng-touched': requestForm.get('start_date')?.invalid && requestForm.get('start_date')?.touched}">
+                  <div class="form-text text-danger" *ngIf="requestForm.get('start_date')?.invalid && requestForm.get('start_date')?.touched">
+                    Start date is required!
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="return_date" class="form-label">Return Date <span class="required">*</span></label>
+                  <input type="date" class="form-control" id="return_date" formControlName="return_date"
+                    [ngClass]="{'ng-invalid ng-touched': requestForm.get('return_date')?.invalid && requestForm.get('return_date')?.touched}">
+                  <div class="form-text text-danger" *ngIf="requestForm.get('return_date')?.invalid && requestForm.get('return_date')?.touched">
+                    <span *ngIf="requestForm.get('return_date')?.errors?.['required']">Return date is required!</span>
+                    <span *ngIf="requestForm.get('return_date')?.errors?.['invalidReturnDate']">Return date must be after start date!</span>
+                  </div>
+                </div>
+                <!-- Row 6: Reimbursement Method -->
+                <div class="form-group full-width">
+                  <label class="form-label">Reimbursement Method <span class="required">*</span></label>
+                  <div class="card" [ngClass]="{'border-danger': requestForm.get('reimbursementMethod')?.invalid && requestForm.get('reimbursementMethod')?.touched}">
+                    <div class="card-body p-3">
+                      <div class="d-flex gap-5">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" value="CASH_DESK" formControlName="reimbursementMethod" id="cash">
+                          <label class="form-check-label" for="cash">Cash</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" value="BANK_TRANSFER" formControlName="reimbursementMethod" id="bank">
+                          <label class="form-check-label" for="bank">Bank Transfer</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-text text-danger" *ngIf="requestForm.get('reimbursementMethod')?.invalid && requestForm.get('reimbursementMethod')?.touched">
+                    Reimbursement method is required!
+                  </div>
+                </div>
+                <!-- Row 7: Expense Details -->
+                <div class="form-group full-width">
+                  <div class="d-flex justify-content-between align-items-center mb-5">
+                    <label class="form-label mb-0">Expense Details <span class="required">*</span></label>
+                    <button type="button" class="btn btn-outline-success btn-sm" (click)="addDetail()">
+                      <i class="bi bi-plus-lg"></i>
+                    </button>
+                  </div>
+                  <div *ngFor="let detail of detailRows; let i = index; trackBy: trackByIndex" class="detail-row mb-3">
+                    <div class="form-grid grid-4">
+                      <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Description*"
+                          [(ngModel)]="detail.description" [ngModelOptions]="{standalone: true}"
+                          (ngModelChange)="setDetailValue(i, 'description', $event)"
+                          (blur)="markDetailTouched(i, 'description')"
+                          [ngClass]="{'ng-invalid ng-touched': isAnyDetailFieldTouched(i) && isDetailFieldInvalid(i, 'description')}">
+                        <div class="form-text text-danger" *ngIf="isAnyDetailFieldTouched(i) && isDetailFieldInvalid(i, 'description')">
+                          Description is required!
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <input type="number" class="form-control" placeholder="Amount*"
+                          [(ngModel)]="detail.amount" [ngModelOptions]="{standalone: true}"
+                          (ngModelChange)="setDetailValue(i, 'amount', $event); updateCurrencyTotals()"
+                          (blur)="markDetailTouched(i, 'amount')"
+                          [ngClass]="{'ng-invalid ng-touched': isAnyDetailFieldTouched(i) && isDetailFieldInvalid(i, 'amount')}">
+                        <div class="form-text text-danger" *ngIf="isAnyDetailFieldTouched(i) && isDetailFieldInvalid(i, 'amount')">
+                          Amount must be greater than 0!
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <ng-select
+                          [items]="getFilteredCurrencies(i)"
+                          bindLabel="description"
+                          bindValue="code"
+                          placeholder="Select currency*"
+                          [(ngModel)]="detail.currency"
+                          [ngModelOptions]="{standalone: true}"
+                          [clearable]="false"
+                          [searchable]="true"
+                          [disabled]="getFilteredCurrencies(i).length === 0"
+                          [ngClass]="{'ng-invalid ng-touched': isAnyDetailFieldTouched(i) && isDetailFieldInvalid(i, 'currency')}"
+                          (ngModelChange)="onCurrencyChange(i, $event)"
+                          (blur)="markDetailTouched(i, 'currency')">
+                        </ng-select>
+                        <div class="form-text text-danger" *ngIf="isAnyDetailFieldTouched(i) && isDetailFieldInvalid(i, 'currency')">
+                          Currency is required!
+                        </div>
+                      </div>
+                      <div class="form-group align-self-end">
+                        <button type="button" class="btn btn-outline-danger remove-member w-100" (click)="removeDetail(i)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Row 8: Total Amounts -->
+                <div class="form-group full-width" *ngIf="usedCurrencies.length > 0">
+                  <div class="total-amounts-container">
+                    <div class="total-header">
+                      <i class="bi bi-calculator me-2"></i>
+                      <span>Total Amounts</span>
+                    </div>
+                    <div class="total-amounts-body">
+                      <div *ngFor="let currency of usedCurrencies; let i = index" class="total-amount-item">
+                        <span class="currency-description">{{ getCurrencyDescription(currency) }} :</span>
+                        <span class="amount-value">{{ formatted(totalAmounts[currency]) }}</span>
+                        <span class="currency-code">{{ currency }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="form-card-footer">
+          <div class="form-actions">
+            <div class="secondary-actions">
+              <button type="button" class="btn btn-cancel" (click)="navigateTo('/requests')">Cancel</button>
+            </div>
+            <div class="primary-actions">
+              <button type="submit" class="btn btn-submit" [disabled]="requestForm.invalid || !hasValidDetails() || !fullEmployee || !fullProject" (click)="onSubmit()">Create Request</button>
+              <div class="form-text text-danger mt-1" *ngIf="!hasValidDetails() && detailRows.length > 0">
+                <i class="bi bi-exclamation-triangle"></i> At least one valid detail line is required
+              </div>
+              <div class="form-text text-muted mt-1" *ngIf="detailRows.length === 0">
+                <i class="bi bi-info-circle"></i> Add expense details to continue
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      <!-- Employee Display -->
-      <div class="col-md-6">
-        <label class="form-label">Employee</label>
-        <input 
-          type="text" 
-          class="form-control" 
-          [value]="requestForm.get('employee')?.value?.fullName || 'Not selected'" 
-          readonly
-        />
-      </div>
-
-      <!-- Project Selection -->
-      <div class="col-md-6">
-        <label for="projectId" class="form-label">Project</label>
-        <select 
-          id="projectId" 
-          formControlName="projectId" 
-          class="form-select"
-          [class.is-invalid]="requestForm.get('projectId')?.invalid && requestForm.get('projectId')?.touched"
-        >
-          <option value="" disabled>Select Project</option>
-          <option *ngFor="let project of projects" [value]="project.idProject">
-            {{ project.name }}
-          </option>
-        </select>
-        <div *ngIf="requestForm.get('projectId')?.invalid && requestForm.get('projectId')?.touched" class="invalid-feedback">
-          Project is required
-        </div>
-      </div>
-
-      <!-- Mission Details -->
-      <div class="col-md-6">
-        <label for="mission" class="form-label">Mission</label>
-        <input 
-          id="mission" 
-          type="text" 
-          formControlName="mission" 
-          class="form-control"
-          [class.is-invalid]="requestForm.get('mission')?.invalid && requestForm.get('mission')?.touched"
-        />
-        <div *ngIf="requestForm.get('mission')?.invalid && requestForm.get('mission')?.touched" class="invalid-feedback">
-          Mission is required
-        </div>
-      </div>
-
-      <!-- Dates -->
-      <div class="col-md-6">
-        <label for="startDate" class="form-label">Start Date</label>
-        <input 
-          id="startDate" 
-          type="date" 
-          formControlName="startDate" 
-          class="form-control"
-          [class.is-invalid]="requestForm.get('startDate')?.invalid && requestForm.get('startDate')?.touched"
-        />
-      </div>
-
-      <div class="col-md-6">
-        <label for="returnDate" class="form-label">Return Date</label>
-        <input 
-          id="returnDate" 
-          type="date" 
-          formControlName="returnDate" 
-          class="form-control"
-          [class.is-invalid]="requestForm.get('returnDate')?.invalid && requestForm.get('returnDate')?.touched"
-        />
-      </div>
-
-      <!-- Location -->
-      <div class="col-md-6">
-        <label for="missionLocation" class="form-label">Location</label>
-        <input 
-          id="missionLocation" 
-          type="text" 
-          formControlName="missionLocation" 
-          class="form-control"
-          [class.is-invalid]="requestForm.get('missionLocation')?.invalid && requestForm.get('missionLocation')?.touched"
-        />
-        <div *ngIf="requestForm.get('missionLocation')?.invalid && requestForm.get('missionLocation')?.touched" class="invalid-feedback">
-          Location is required
-        </div>
-      </div>
-
-      <!-- Reimbursement Method -->
-      <div class="col-md-6">
-        <label class="form-label">Reimbursement Method</label>
-        <div class="form-check">
-          <input 
-            type="radio" 
-            id="cash" 
-            class="form-check-input" 
-            formControlName="reimbursementMethod" 
-            value="CASH_DESK"
-          />
-          <label for="cash" class="form-check-label">Cash Desk</label>
-        </div>
-        <div class="form-check">
-          <input 
-            type="radio" 
-            id="ava" 
-            class="form-check-input" 
-            formControlName="reimbursementMethod" 
-            value="AVA"
-          />
-          <label for="ava" class="form-check-label">AVA</label>
-        </div>
-      </div>
-
-      <!-- Expense Details Table -->
-      <div class="col-12 mt-4">
-        <h4>Expense Details</h4>
-        <div class="table-responsive">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Currency</th>
-                <th>Currency Description</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody formArrayName="expenseDetails">
-              <tr *ngFor="let detail of expenseDetails.controls; let i = index" [formGroupName]="i">
-                <td>
-                  <input 
-                    type="text" 
-                    formControlName="description" 
-                    class="form-control"
-                    [class.is-invalid]="detail.get('description')?.invalid && detail.get('description')?.touched"
-                  />
-                </td>
-                <td>
-                  <input 
-                    type="number" 
-                    formControlName="amount" 
-                    class="form-control"
-                    [class.is-invalid]="detail.get('amount')?.invalid && detail.get('amount')?.touched"
-                  />
-                </td>
-                <td>
-                  <select 
-                    formControlName="currency" 
-                    class="form-select"
-                    [disabled]="isCurrencyDisabled(detail.get('currency')?.value)"
-                  >
-                    <option value="" disabled>Select Currency</option>
-                    <option 
-                      *ngFor="let curr of currencies" 
-                      [value]="curr.code"
-                      [disabled]="isCurrencyDisabled(curr.code)"
-                    >
-                      {{ curr.code }}
-                    </option>
-                  </select>
-                </td>
-                <td>
-                  <input 
-                    type="text" 
-                    [value]="getCurrencyDescription(detail.get('currency')?.value)" 
-                    class="form-control" 
-                    readonly
-                  />
-                </td>
-                <td>
-                  <button 
-                    type="button" 
-                    class="btn btn-outline-danger btn-sm" 
-                    (click)="removeExpenseDetail(i)"
-                  >
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <!-- Currency Limit Error Message -->
-        <div *ngIf="errorMessage" class="alert alert-danger mt-2">
-          {{ errorMessage }}
-        </div>
-        
-        <button 
-          type="button" 
-          class="btn btn-outline-primary mt-2" 
-          (click)="addExpenseDetail()"
-        >
-          Add Expense
-        </button>
-      </div>
-
-      <!-- Totals Display -->
-      <div class="col-12 mt-3">
-        <h5>Total Amounts</h5>
-        <div *ngIf="getCurrencyKeys().length > 0" class="alert alert-info">
-          <div *ngFor="let currency of getCurrencyKeys()">
-            {{ currency }} {{ totalByCurrency[currency] | number:'1.2-2' }}
-          </div>
-        </div>
-        <div *ngIf="getCurrencyKeys().length === 0" class="alert alert-warning">
-          No expenses added
-        </div>
-      </div>
-
-      <!-- Submit Button -->
-      <div class="col-12 text-center mt-4">
-        <button 
-          type="submit" 
-          class="btn btn-primary px-5" 
-          [disabled]="requestForm.invalid || isLoading"
-        >
-          <span *ngIf="!isLoading">Submit Request</span>
-          <span *ngIf="isLoading" class="spinner-border spinner-border-sm"></span>
-        </button>
       </div>
     </div>
-  </form>
+  </div>
 </div>

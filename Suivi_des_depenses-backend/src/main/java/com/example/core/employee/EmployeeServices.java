@@ -13,7 +13,7 @@ public interface EmployeeServices {
 
     Optional<Employee> getEmployeeByCIN(String cin);
 
-    Optional<Employee> getEmployeeByUserName(String username);
+    Optional<Employee> getEmployeeByFullName(String fullName);
 
     Optional<Employee> getEmployeeByPhoneNumber(String phoneNumber);
 
@@ -22,12 +22,14 @@ public interface EmployeeServices {
 
     Optional<Employee> getEmployeeByReference(String reference);
 
-    List<Employee> getEmployeesByStatus(String status);
+    List<Employee> getEmployeesByStatus(EmployeeStatus status);
 
     List<Department> getAllDepartments();
 
     List<String> getOccupationsByDepartment(Department department);
 
     List<Employee> getEmployeesByDepartment(Department department);
+
+    String generateReference();
 
 }

@@ -1,6 +1,10 @@
 package com.example.infrastructure.web;
 
 
+import com.example.core.employee.Employee;
+import com.example.core.employee.EmployeeServices;
+import com.example.core.exceptions.BusinessException;
+import com.example.core.exceptions.InsufficientFundsException;
 import com.example.core.expenseRequest.ExpenseRequest;
 import com.example.core.expenseRequest.ExpenseStatus;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +25,10 @@ import java.util.List;
 public class ExpenseRequestCotroller {
 
     private final ExpenseRequestServices expenseRequestServices;
+    private final EmployeeServices employeeServices;
 
-    // ============= ExpenseRequest Endpoints =============
-    @PostMapping
+
+    @PostMapping("/createExpenseRequest")
     public ResponseEntity<ExpenseRequest> createExpenseRequest(@RequestBody @Valid ExpenseRequest request) {
         System.out.println("ExpenseRequest reçu: " + request);
         ExpenseRequest created = expenseRequestServices.createExpenseRequest(request);
@@ -31,7 +36,7 @@ public class ExpenseRequestCotroller {
     }
 
 
-    @PutMapping("/{id}")
+    @PutMapping("/updateExpenseRequest/{id}")
     public ResponseEntity<ExpenseRequest> updateExpenseRequest(
             @PathVariable Long id,
             @RequestBody @Valid ExpenseRequest request) {
@@ -39,13 +44,8 @@ public class ExpenseRequestCotroller {
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpenseRequest(@PathVariable Long id) {
-        expenseRequestServices.deleteExpenseRequest(id);
-        return ResponseEntity.noContent().build();
-    }
 
-    @GetMapping("/{id}")
+    @GetMapping("/getExpenseRequestById/{id}")
     public ResponseEntity<ExpenseRequest> getExpenseRequestById(@PathVariable Long id) {
         ExpenseRequest request = expenseRequestServices.getExpenseRequestById(id);
         return ResponseEntity.ok(request);
@@ -58,7 +58,7 @@ public class ExpenseRequestCotroller {
     }
 
     // ============= ExpenseDetails Endpoints =============
-    @PostMapping("/{requestId}/details")
+    @PostMapping("/details/addExpenseDetail/{requestId}")
     public ResponseEntity<ExpenseDetails> addExpenseDetail(
             @PathVariable Long requestId,
             @RequestBody @Valid ExpenseDetails detail) {
@@ -66,13 +66,13 @@ public class ExpenseRequestCotroller {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @DeleteMapping("/details/{detailId}")
+    @DeleteMapping("/details/removeExpenseDetail/{detailId}")
     public ResponseEntity<Void> removeExpenseDetail(@PathVariable Long detailId) {
         expenseRequestServices.removeExpenseDetail(detailId);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/details/{detailId}")
+    @PutMapping("/details/updateExpenseDetail/{detailId}")
     public ResponseEntity<ExpenseDetails> updateExpenseDetail(
             @PathVariable Long detailId,
             @RequestBody @Valid ExpenseDetails detail) {
@@ -80,7 +80,7 @@ public class ExpenseRequestCotroller {
         return ResponseEntity.ok(updated);
     }
 
-    @GetMapping("/{requestId}/details")
+    @GetMapping("/details/getDetailsByRequestId/{requestId}")
     public ResponseEntity<List<ExpenseDetails>> getDetailsByRequestId(
             @PathVariable Long requestId) {
         List<ExpenseDetails> details = expenseRequestServices.getDetailsByRequestId(requestId);
@@ -89,25 +89,23 @@ public class ExpenseRequestCotroller {
 
     // ============= Business Operations =============
     @GetMapping("/{requestId}/currency-totals")
-    public ResponseEntity<Map<String, Double>> calculateCurrencyTotals(
+    public ResponseEntity<Map<Currency, Double>> calculateCurrencyTotals(
             @PathVariable Long requestId) {
-        Map<String, Double> totals = expenseRequestServices.calculateTotalAmountsByCurrency(requestId);
+        Map<Currency, Double> totals = expenseRequestServices.calculateTotalAmountsByCurrency(requestId);
         return ResponseEntity.ok(totals);
     }
 
-    @PostMapping("/{requestId}/submit")
-    public ResponseEntity<ExpenseRequest> submitForApproval(@PathVariable Long requestId) {
-        ExpenseRequest submitted = expenseRequestServices.submitForApproval(requestId);
-        return ResponseEntity.ok(submitted);
-    }
+
 
     @PostMapping("/{requestId}/approve")
-    public ResponseEntity<ExpenseRequest> approveRequest(
-            @PathVariable Long requestId,
-            @RequestParam(required = false) String approverComments) {
-        ExpenseRequest approved = expenseRequestServices.approveRequest(requestId, approverComments);
-        return ResponseEntity.ok(approved);
+    public ResponseEntity<?> approveRequest(@PathVariable Long requestId) {
+        try {
+            return ResponseEntity.ok(expenseRequestServices.approveRequest(requestId));
+        } catch (BusinessException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
 
     @PostMapping("/{requestId}/reject")
     public ResponseEntity<ExpenseRequest> rejectRequest(
@@ -117,7 +115,7 @@ public class ExpenseRequestCotroller {
         return ResponseEntity.ok(rejected);
     }
 
-    // ============= Reporting Endpoints =============
+    
     @GetMapping("/by-employee/{employeeCin}")
     public ResponseEntity<List<ExpenseRequest>> getRequestsByEmployee(
             @PathVariable String employeeCin) {
@@ -137,6 +135,18 @@ public class ExpenseRequestCotroller {
             @PathVariable ExpenseStatus status) {
         List<ExpenseRequest> requests = expenseRequestServices.getRequestsByStatus(status);
         return ResponseEntity.ok(requests);
+    }
+
+    @GetMapping("/by-currency/{currency}")
+    public ResponseEntity<List<ExpenseRequest>> getRequestsByCurrency(@PathVariable Currency currency) {
+        List<ExpenseRequest> requests = expenseRequestServices.getRequestsByCurrency(currency);
+        return ResponseEntity.ok(requests);
+    }
+
+    @GetMapping("/generate-reference")
+    public ResponseEntity<String> generateReference() {
+        String reference = expenseRequestServices.generateReference();
+        return ResponseEntity.ok(reference);
     }
 
 }

@@ -1,0 +1,40 @@
+@import '../../../../shared/styles/executive-list-template';
+
+// All button styles now come from the shared template for consistency.
+// If you want to tweak colors or add hover effects, do it in the shared SCSS.
+
+.btn-history {
+  background: #f59e0b !important;
+  color: #fff !important;
+  border-radius: 0.5rem !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 0.5rem 0.9rem;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.btn-history:hover {
+  background: #d97706 !important;
+}
+
+.table-fixed {
+  table-layout: fixed;
+  width: 100%;
+  max-width: 1200px;
+}
+.table-fixed th, .table-fixed td {
+  width: 20%;
+  min-width: 120px;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.card .table-fixed {
+  margin: 0 auto;
+}

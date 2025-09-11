@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { EmployeeRoutingModule } from './employee-routing-module';
 import { CreateEmployee } from './components/create-employee/create-employee';
@@ -12,15 +13,16 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
-    CreateEmployee,
-    UpdateEmployee,
     EmployeeDetails,
     EmployeeList
   ],
   imports: [
+    FormsModule,
     CommonModule,
     EmployeeRoutingModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CreateEmployee,
+    UpdateEmployee
   ]
 })
 export class EmployeeModule { }

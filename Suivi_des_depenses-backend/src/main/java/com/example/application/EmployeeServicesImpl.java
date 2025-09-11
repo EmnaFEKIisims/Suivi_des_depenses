@@ -15,9 +15,7 @@ public class EmployeeServicesImpl implements EmployeeServices {
 
     @Override
     public Employee addEmployee(Employee employee) {
-        String newReference = generateReference();
-        employee.setReference(newReference);
-        employee.setStatus(EmployeeStatus.ACTIVE);
+        employee.setStatus(EmployeeStatus.Actif);
         employee.setExitDate(null);
         return employeeRepoPort.saveEmployee(employee);
     }
@@ -42,8 +40,8 @@ public class EmployeeServicesImpl implements EmployeeServices {
     }
 
     @Override
-    public Optional<Employee> getEmployeeByUserName(String username) {
-        return employeeRepoPort.findEmployeeByUsername(username);
+    public Optional<Employee> getEmployeeByFullName(String fullName) {
+        return employeeRepoPort.findEmployeeByFullName(fullName);
     }
 
     @Override
@@ -58,7 +56,9 @@ public class EmployeeServicesImpl implements EmployeeServices {
 
 
 
-    private String generateReference() {
+
+    @Override
+    public String generateReference() {
         Optional<Employee> lastEmployee = employeeRepoPort.findTopByOrderByReferenceDesc();
         int nextNumber = 1001;
         if (lastEmployee.isPresent()) {
@@ -69,19 +69,19 @@ public class EmployeeServicesImpl implements EmployeeServices {
     }
 
     @Override
-    public List<Employee> getEmployeesByStatus(String status) {
+    public List<Employee> getEmployeesByStatus(EmployeeStatus status) {
         return employeeRepoPort.findByStatus(status);
     }
 
 
     private static final Map<Department, List<String>> OCCUPATIONS_BY_DEPARTMENT = Map.of(
             Department.IT, List.of("FullStack Developer", "System Administrator", "IT Support Technician", "IT Project Manager", "Network Engineer", "Software Engineer"),
-            Department.MAINTENANCE, List.of("Maintenance Technician", "Maintenance Engineer", "Maintenance Manager", "Maintenance Planner", "Electrical Maintenance Agent"),
-            Department.COMMERCIAL, List.of("Sales Manager", "Client Officer", "Sales Engineer", "Sales Representative", "Commercial Assistant"),
-            Department.ACCOUNTING, List.of("Accountant", "Chief Accountant", "Management Controller", "Accounting Assistant", "Financial Auditor"),
+            Department.Maintenance, List.of("Maintenance Technician", "Maintenance Engineer", "Maintenance Manager", "Maintenance Planner", "Electrical Maintenance Agent"),
+            Department.Commercial, List.of("Sales Manager", "Client Officer", "Sales Engineer", "Sales Representative", "Commercial Assistant"),
+            Department.Accounting, List.of("Accountant", "Chief Accountant", "Management Controller", "Accounting Assistant", "Financial Auditor"),
             Department.HR, List.of("Recruitment Officer", "HR Manager", "Payroll Manager", "HR Assistant", "Internal Trainer"),
-            Department.PRODUCTION, List.of("Production Operator", "Team Leader", "Line Manager", "Production Engineer", "Production Planner"),
-            Department.BUILDING_INFRASTRUCTURE, List.of("Site Manager", "Building Engineer", "Infrastructure Technician", "Facility Manager", "Works Coordinator")
+            Department.Production, List.of("Production Operator", "Team Leader", "Line Manager", "Production Engineer", "Production Planner"),
+            Department.Building_Infrastructure, List.of("Site Manager", "Building Engineer", "Infrastructure Technician", "Facility Manager", "Works Coordinator")
     );
 
 

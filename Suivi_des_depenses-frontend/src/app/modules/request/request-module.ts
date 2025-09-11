@@ -12,11 +12,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
-
-// Pipes
+import { NgSelectModule } from '@ng-select/ng-select';
 import { DatePipe, CurrencyPipe, DecimalPipe } from '@angular/common';
-
-// Components
 import { RequestList } from './component/request-list/request-list';
 import { CreateRequest } from './component/create-request/create-request';
 import { UpdateRequest } from './component/update-request/update-request';
@@ -43,13 +40,13 @@ import { RequestDetails } from './component/request-details/request-details';
     MatDatepickerModule,
     MatNativeDateModule,
     MatIconModule,
-    RequestRoutingModule
+    RequestRoutingModule,
+    NgSelectModule
   ],
   providers: [
     DatePipe,
     CurrencyPipe,
-    DecimalPipe,
-    MatDatepickerModule
+    DecimalPipe
   ]
 })
 export class RequestModule { }

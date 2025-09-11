@@ -59,7 +59,7 @@ public class Employee {
 
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
-        private EmployeeStatus status = EmployeeStatus.ACTIVE;
+        private EmployeeStatus status = EmployeeStatus.Actif;
 
 
         @Column(name = "exit_date")
@@ -77,7 +77,7 @@ public class Employee {
         @PrePersist
         @PreUpdate
         private void validateExitDate() {
-                if (this.status == EmployeeStatus.INACTIVE && this.exitDate == null) {
+                if (this.status == EmployeeStatus.Inactif && this.exitDate == null) {
                         throw new IllegalStateException("Exit date is required when status is INACTIVE.");
                 }
         }
