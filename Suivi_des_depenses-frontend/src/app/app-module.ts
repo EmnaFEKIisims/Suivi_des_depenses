@@ -13,9 +13,10 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { ClientModule } from './modules/client/client-module';
 import { ClientList } from './modules/client/components/client-list/client-list';
 import { CreateClient } from './modules/client/components/create-client/create-client';
+import { Login } from './login/login';
 
 @NgModule({
-  declarations: [App, Home],
+  declarations: [App, Home, Login],
   imports: [
     BrowserModule,
     AppRoutingModule,

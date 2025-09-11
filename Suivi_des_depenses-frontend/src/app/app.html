@@ -1,5 +1,5 @@
 <!-- Modern Dashboard Layout -->
-<div class="app-layout">
+<div *ngIf="!isWelcomePage()" class="app-layout">
   <!-- Sidebar Navigation -->
   <nav class="sidebar">
     <!-- Brand Header -->
@@ -109,3 +109,6 @@
     </div>
   </main>
 </div>
+<ng-container *ngIf="isWelcomePage()">
+  <router-outlet></router-outlet>
+</ng-container>

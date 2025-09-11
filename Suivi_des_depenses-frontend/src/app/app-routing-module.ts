@@ -20,11 +20,13 @@ import { ClientDetails } from './modules/client/components/client-details/client
 import { BudgetList } from './modules/budget/components/budget-list/budget-list';
 import { HistoryList } from './modules/budget/components/history-list/history-list';
 import { CreateBudgetLine } from './modules/budget/components/create-budget-line/create-budget-line';
+import { WelcomeComponent } from './modules/welcome/welcome';
 
 
 
 const routes: Routes = [
-  { path: '', component: Home },
+  { path: '', component: WelcomeComponent },
+  { path: 'welcome_page', component: WelcomeComponent },
   { path: 'home', component: Home },
   { path: 'employees', component: EmployeeList },
   { path: 'update-employee/:CIN', component: UpdateEmployee },
