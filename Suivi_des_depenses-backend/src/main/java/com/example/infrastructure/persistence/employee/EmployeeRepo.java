@@ -19,6 +19,7 @@ public interface EmployeeRepo extends JpaRepository<Employee, Long> {
     Optional<Employee> findTopByOrderByReferenceDesc();
     List<Employee> findByStatus(EmployeeStatus status);
     List<Employee> findByDepartment(Department department);
+    Optional<Employee> findByEmail(String email);
 
 
 }

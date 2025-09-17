@@ -114,4 +114,10 @@ public class EmployeeServicesImpl implements EmployeeServices {
     }
 
 
+    @Override
+    public Optional<Employee> findByEmail(String email) {
+        return employeeRepoPort.findByEmail(email);
+    }
+
+
 }
