@@ -32,4 +32,6 @@ public interface EmployeeServices {
 
     String generateReference();
 
+    Optional<Employee> findByEmail(String email);
+
 }

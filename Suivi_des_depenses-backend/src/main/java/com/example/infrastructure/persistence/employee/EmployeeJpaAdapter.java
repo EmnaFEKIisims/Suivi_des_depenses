@@ -69,7 +69,10 @@ public class EmployeeJpaAdapter implements EmployeeRepoPort {
         return employeeRepo.findByDepartment(department);
     }
 
-
+    @Override
+    public Optional<Employee> findByEmail(String email) {
+        return employeeRepo.findByEmail(email);
+    }
 
     @Override
     public Employee updateEmployee(Employee employee) {

@@ -83,6 +83,15 @@ public class EmployeeController {
 
 
 
+    @GetMapping("/getEmployeesByEmail")
+    public ResponseEntity<Employee> findByEmail(@RequestParam String email) {
+        Optional<Employee> employee = employeeServices.findByEmail(email);
+        return employee.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
+
     @GetMapping("/getDepartments")
     public List<Department> getDepartments() {
         return employeeServices.getAllDepartments();

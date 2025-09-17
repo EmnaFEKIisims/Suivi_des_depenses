@@ -20,6 +20,7 @@ public interface EmployeeRepoPort {
     public List<Department> getAllDepartments();
     public List<String> getOccupationsByDepartment(Department department);
     List<Employee> findEmployeesByDepartment(Department department);
+    Optional<Employee> findByEmail(String email);
 
 
 }

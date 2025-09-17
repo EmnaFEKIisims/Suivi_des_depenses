@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "Employee")
@@ -71,6 +73,18 @@ public class Employee {
 
         @Column(name = "password", nullable = false)
         private String password;
+
+
+        @ElementCollection(fetch = FetchType.EAGER)
+        @CollectionTable(name = "employee_roles", joinColumns = @JoinColumn(name = "employee_reference"))
+        @Column(name = "role")
+        private Set<String> roles = new HashSet<>();
+
+        @Column(name = "mfa_secret")
+        private String mfaSecret;
+
+        @Column(name = "mfa_enabled")
+        private boolean mfaEnabled = false;
 
 
 
