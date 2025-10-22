@@ -1,11 +1,10 @@
 package com.example.infrastructure.web;
 
-import com.example.core.employee.Employee;
-import com.example.core.employee.EmployeeServices;
-import com.example.core.employee.EmployeeStatus;
+import com.example.core.employee.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import com.example.core.employee.Department;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,18 +18,22 @@ import java.util.Optional;
 public class EmployeeController {
 
     private final EmployeeServices employeeServices;
+    private final PasswordEncoder passwordEncoder;
 
-    public EmployeeController(EmployeeServices employeeServices) {
+    public EmployeeController(EmployeeServices employeeServices , PasswordEncoder passwordEncoder) {
         this.employeeServices = employeeServices;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/createEmployee")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
         Employee savedEmployee = employeeServices.addEmployee(employee);
         return ResponseEntity.ok(savedEmployee);
     }
 
     @PutMapping("/updateEmployee/{CIN}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Employee> updateEmployee(
             @PathVariable String CIN,
             @RequestBody Employee employee) {
@@ -43,27 +46,28 @@ public class EmployeeController {
 
 
     @GetMapping("/getEmployeeByCIN/{CIN}")
-    public ResponseEntity<Employee> getEmployeeByCIN(@PathVariable String CIN) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (authentication.principal.username == @employeeServices.findByCIN(#CIN)?.getEmail() ?: '')")    public ResponseEntity<Employee> getEmployeeByCIN(@PathVariable String CIN) {
         return employeeServices.getEmployeeByCIN(CIN)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/getEmployeeByUsername/{username}")
-    public ResponseEntity<Employee> getEmployeeByFullName(@PathVariable String fullName) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (authentication.principal.username == @employeeServices.findByUsername(#username)?.getEmail() ?: '')")    public ResponseEntity<Employee> getEmployeeByFullName(@PathVariable String fullName) {
         return employeeServices.getEmployeeByFullName(fullName)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/getEmployeeByPhone/{phoneNumber}")
-    public ResponseEntity<Employee> getEmployeeByPhoneNumber(@PathVariable String phoneNumber) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (authentication.principal.username == @employeeServices.findByPhoneNumber(#phoneNumber)?.getEmail() ?: '')")    public ResponseEntity<Employee> getEmployeeByPhoneNumber(@PathVariable String phoneNumber) {
         return employeeServices.getEmployeeByPhoneNumber(phoneNumber)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<Employee>> getAllEmployees() {
         List<Employee> employees = employeeServices.getAllEmployees();
         return ResponseEntity.ok(employees);
@@ -71,6 +75,7 @@ public class EmployeeController {
 
 
     @GetMapping("/getEmployeesByStatus/{status}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<Employee> getEmployeesByStatus(@PathVariable String status) {
         EmployeeStatus employeeStatus;
         try {
@@ -84,6 +89,7 @@ public class EmployeeController {
 
 
     @GetMapping("/getEmployeesByEmail")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (#email == authentication.principal.username)")
     public ResponseEntity<Employee> findByEmail(@RequestParam String email) {
         Optional<Employee> employee = employeeServices.findByEmail(email);
         return employee.map(ResponseEntity::ok)
@@ -93,11 +99,13 @@ public class EmployeeController {
 
 
     @GetMapping("/getDepartments")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<Department> getDepartments() {
         return employeeServices.getAllDepartments();
     }
 
     @GetMapping("/departments/{department}/occupations")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<String> getOccupationsByDepartment(@PathVariable Department department) {
         return employeeServices.getOccupationsByDepartment(department);
     }
@@ -108,6 +116,7 @@ public class EmployeeController {
 
 
     @GetMapping("/getEmployeeByReference/{reference}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (authentication.principal.username == @employeeServices.findByReference(#reference)?.getEmail() ?: '')")
     public ResponseEntity<Employee> getEmployeeByReference(@PathVariable String reference) {
         Optional<Employee> employeeOpt = employeeServices.getEmployeeByReference(reference);
         return employeeOpt.map(ResponseEntity::ok)
@@ -116,6 +125,7 @@ public class EmployeeController {
 
 
     @GetMapping("/getEmployeesByDepartment/{departmentName}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<Employee>> getEmployeesByDepartment(@PathVariable String departmentName) {
         Department department;
         try {
@@ -137,6 +147,26 @@ public class EmployeeController {
     public ResponseEntity<String> generateReference() {
         String reference = employeeServices.generateReference();
         return ResponseEntity.ok(reference);
+    }
+
+
+    @PostMapping("/{reference}/roles")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Employee> addRole(@PathVariable String reference, @RequestBody Role role) {
+        Employee updated = employeeServices.addRole(reference, role);
+        return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/testPassword")
+    public String testPassword(@RequestParam String rawPassword, @RequestParam String storedHash) {
+        boolean matches = passwordEncoder.matches(rawPassword, storedHash);
+        return "Password matches: " + matches;
+    }
+
+
+    @GetMapping("/hashPassword")
+    public String hashPassword(@RequestParam String password) {
+        return passwordEncoder.encode(password);
     }
 
 

@@ -13,6 +13,7 @@ import com.example.core.expenseRequest.ExpenseRequestServices;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -37,16 +38,19 @@ public class BudgetController {
     }
 
     @GetMapping("/cash")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Budget> getCashBudget() {
         return ResponseEntity.ok(budgetServices.getCashBudget());
     }
 
     @GetMapping("/bank")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Budget> getBankBudget() {
         return ResponseEntity.ok(budgetServices.getBankBudget());
     }
 
     @PostMapping("/{type}/operations")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Budget> modifyBudget(
             @PathVariable BudgetType type,
             @RequestParam BigDecimal amount,
@@ -70,17 +74,20 @@ public class BudgetController {
     }
 
     @GetMapping("/history")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<History>> getHistory() {
         return ResponseEntity.ok(budgetServices.getHistory());
     }
 
     @GetMapping("/history/{type}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<History>> getHistoryByType(
             @PathVariable BudgetType type) {
         return ResponseEntity.ok(budgetServices.getHistoryByType(type));
     }
 
     @GetMapping("/balance")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<BigDecimal> getBalance(
             @RequestParam BudgetType type,
             @RequestParam Currency currency) {

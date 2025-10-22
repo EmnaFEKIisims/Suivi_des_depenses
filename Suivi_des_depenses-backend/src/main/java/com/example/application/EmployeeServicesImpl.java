@@ -1,6 +1,7 @@
 package com.example.application;
 
 import com.example.core.employee.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
@@ -8,15 +9,22 @@ import java.util.*;
 public class EmployeeServicesImpl implements EmployeeServices {
 
     private final EmployeeRepoPort employeeRepoPort;
+    private final PasswordEncoder passwordEncoder;
 
-    public EmployeeServicesImpl(EmployeeRepoPort employeeRepoPort) {
+    public EmployeeServicesImpl(EmployeeRepoPort employeeRepoPort , PasswordEncoder passwordEncoder) {
         this.employeeRepoPort = employeeRepoPort;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public Employee addEmployee(Employee employee) {
+        employee.setPassword(passwordEncoder.encode(employee.getPassword()));
         employee.setStatus(EmployeeStatus.Actif);
         employee.setExitDate(null);
+        if (employee.getRoles() == null || employee.getRoles().isEmpty()) {
+            employee.setRoles(new HashSet<>());
+            employee.getRoles().add(Role.ROLE_EMPLOYEE);
+        }
         return employeeRepoPort.saveEmployee(employee);
     }
 
@@ -29,6 +37,8 @@ public class EmployeeServicesImpl implements EmployeeServices {
         if(employee.getStatus().equals("INACTIVE") && employee.getExitDate() == null){
             throw new IllegalArgumentException("Exit Date is required when status is INACTIVE");
         }
+        employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+
         return employeeRepoPort.updateEmployee(employee);
     }
 
@@ -120,4 +130,14 @@ public class EmployeeServicesImpl implements EmployeeServices {
     }
 
 
+    @Override
+    public Employee addRole(String reference, Role role) {
+        Employee employee = employeeRepoPort.findByReference(reference)
+                .orElseThrow(() -> new RuntimeException("Employee not found with reference: " + reference));
+        if (employee.getRoles() == null) {
+            employee.setRoles(new HashSet<>());
+        }
+        employee.getRoles().add(role);
+        return employeeRepoPort.saveEmployee(employee);
+    }
 }

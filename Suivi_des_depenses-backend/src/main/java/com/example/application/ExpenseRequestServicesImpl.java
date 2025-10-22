@@ -13,6 +13,7 @@ import com.example.core.project.Project;
 import com.example.core.project.ProjectServices;
 import com.example.infrastructure.persistence.ExpenseRequest.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.core.expenseRequest.*;
@@ -222,7 +223,18 @@ public class ExpenseRequestServicesImpl implements ExpenseRequestServices {
 
     @Override
     public List<ExpenseRequest> getRequestsByStatus(ExpenseStatus status) {
-        return requestRepoPort.findByStatus(status);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+        List<ExpenseRequest> requests = requestRepoPort.findByStatus(status);
+        if (!isAdmin) {
+            // Filter for EMPLOYEE's own requests
+            return requests.stream()
+                    .filter(request -> request.getEmployee().getEmail().equals(email))
+                    .collect(Collectors.toList());
+        }
+        return requests;
     }
 
     @Override

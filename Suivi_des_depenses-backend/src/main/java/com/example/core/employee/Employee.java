@@ -76,15 +76,16 @@ public class Employee {
 
 
         @ElementCollection(fetch = FetchType.EAGER)
-        @CollectionTable(name = "employee_roles", joinColumns = @JoinColumn(name = "employee_reference"))
+        @CollectionTable(name = "employee_roles", joinColumns = @JoinColumn(name = "cin"))
+        @Enumerated(EnumType.STRING)
         @Column(name = "role")
-        private Set<String> roles = new HashSet<>();
+        private Set<Role> roles = new HashSet<>();
 
         @Column(name = "mfa_secret")
         private String mfaSecret;
 
         @Column(name = "mfa_enabled")
-        private boolean mfaEnabled = false;
+        private Boolean mfaEnabled = false;
 
 
 

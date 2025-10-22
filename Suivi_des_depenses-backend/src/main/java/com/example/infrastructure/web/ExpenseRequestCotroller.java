@@ -10,6 +10,7 @@ import com.example.core.expenseRequest.ExpenseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.example.core.expenseRequest.*;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class ExpenseRequestCotroller {
 
 
     @PostMapping("/createExpenseRequest")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
     public ResponseEntity<ExpenseRequest> createExpenseRequest(@RequestBody @Valid ExpenseRequest request) {
         System.out.println("ExpenseRequest reçu: " + request);
         ExpenseRequest created = expenseRequestServices.createExpenseRequest(request);
@@ -37,6 +39,8 @@ public class ExpenseRequestCotroller {
 
 
     @PutMapping("/updateExpenseRequest/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (authentication.principal.username == @expenseRequestServices.getExpenseRequestById(#id)?.employee?.getEmail() ?: '')")
+
     public ResponseEntity<ExpenseRequest> updateExpenseRequest(
             @PathVariable Long id,
             @RequestBody @Valid ExpenseRequest request) {
@@ -46,12 +50,14 @@ public class ExpenseRequestCotroller {
 
 
     @GetMapping("/getExpenseRequestById/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (authentication.principal.username == @expenseRequestServices.getExpenseRequestById(#id)?.employee?.getEmail() ?: '')")
     public ResponseEntity<ExpenseRequest> getExpenseRequestById(@PathVariable Long id) {
         ExpenseRequest request = expenseRequestServices.getExpenseRequestById(id);
         return ResponseEntity.ok(request);
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<ExpenseRequest>> getAllExpenseRequests() {
         List<ExpenseRequest> requests = expenseRequestServices.getAllExpenseRequests();
         return ResponseEntity.ok(requests);
@@ -59,6 +65,7 @@ public class ExpenseRequestCotroller {
 
     // ============= ExpenseDetails Endpoints =============
     @PostMapping("/details/addExpenseDetail/{requestId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (authentication.principal.username == @expenseRequestServices.getExpenseRequestById(#requestId)?.employee?.getEmail() ?: '')")
     public ResponseEntity<ExpenseDetails> addExpenseDetail(
             @PathVariable Long requestId,
             @RequestBody @Valid ExpenseDetails detail) {
@@ -67,12 +74,14 @@ public class ExpenseRequestCotroller {
     }
 
     @DeleteMapping("/details/removeExpenseDetail/{detailId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (authentication.principal.username == @expenseRequestServices.getExpenseDetailById(#detailId)?.expenseRequest?.employee?.getEmail() ?: '')")
     public ResponseEntity<Void> removeExpenseDetail(@PathVariable Long detailId) {
         expenseRequestServices.removeExpenseDetail(detailId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/details/updateExpenseDetail/{detailId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (authentication.principal.username == @expenseRequestServices.getExpenseDetailById(#detailId)?.expenseRequest?.employee?.getEmail() ?: '')")
     public ResponseEntity<ExpenseDetails> updateExpenseDetail(
             @PathVariable Long detailId,
             @RequestBody @Valid ExpenseDetails detail) {
@@ -81,6 +90,7 @@ public class ExpenseRequestCotroller {
     }
 
     @GetMapping("/details/getDetailsByRequestId/{requestId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (authentication.principal.username == @expenseRequestServices.getExpenseRequestById(#requestId)?.employee?.getEmail() ?: '')")
     public ResponseEntity<List<ExpenseDetails>> getDetailsByRequestId(
             @PathVariable Long requestId) {
         List<ExpenseDetails> details = expenseRequestServices.getDetailsByRequestId(requestId);
@@ -98,6 +108,7 @@ public class ExpenseRequestCotroller {
 
 
     @PostMapping("/{requestId}/approve")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> approveRequest(@PathVariable Long requestId) {
         try {
             return ResponseEntity.ok(expenseRequestServices.approveRequest(requestId));
@@ -108,6 +119,7 @@ public class ExpenseRequestCotroller {
 
 
     @PostMapping("/{requestId}/reject")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ExpenseRequest> rejectRequest(
             @PathVariable Long requestId,
             @RequestParam String rejectionReason) {
@@ -117,6 +129,7 @@ public class ExpenseRequestCotroller {
 
     
     @GetMapping("/by-employee/{employeeCin}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (authentication.principal.username == @employeeServices.findByCIN(#employeeCin)?.getEmail() ?: '')")
     public ResponseEntity<List<ExpenseRequest>> getRequestsByEmployee(
             @PathVariable String employeeCin) {
         List<ExpenseRequest> requests = expenseRequestServices.getRequestsByEmployee(employeeCin);
@@ -124,6 +137,7 @@ public class ExpenseRequestCotroller {
     }
 
     @GetMapping("/by-project/{projectId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<ExpenseRequest>> getRequestsByProject(
             @PathVariable Long projectId) {
         List<ExpenseRequest> requests = expenseRequestServices.getRequestsByProject(projectId);
@@ -131,6 +145,7 @@ public class ExpenseRequestCotroller {
     }
 
     @GetMapping("/by-status/{status}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
     public ResponseEntity<List<ExpenseRequest>> getRequestsByStatus(
             @PathVariable ExpenseStatus status) {
         List<ExpenseRequest> requests = expenseRequestServices.getRequestsByStatus(status);
@@ -138,6 +153,7 @@ public class ExpenseRequestCotroller {
     }
 
     @GetMapping("/by-currency/{currency}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<ExpenseRequest>> getRequestsByCurrency(@PathVariable Currency currency) {
         List<ExpenseRequest> requests = expenseRequestServices.getRequestsByCurrency(currency);
         return ResponseEntity.ok(requests);
