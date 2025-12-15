@@ -4,9 +4,11 @@ import { ExpenseRequestService } from '../../expense-request-service';
 import { BudgetServices } from '../../../budget/budget-services';
 import { ExpenseRequest, ExpenseStatus, calculateTotals, getFormattedTotals } from '../../models/expense-request.model';
 import { CURRENCY_LIST } from '../../models/expense-details.model';
-import { BudgetType } from '../../../budget/models/budget.model'; // Import BudgetType
+import { BudgetType } from '../../../budget/models/budget.model'; 
 import Swal, { SweetAlertOptions } from 'sweetalert2';
-import { lastValueFrom } from 'rxjs'; // Import lastValueFrom for promise conversion
+import { lastValueFrom } from 'rxjs';
+import { AuthService } from '../../../auth/auth-service';
+import { AlertService } from '../../../../shared/services/alert.service';
 
 // Define CurrencyCode as a union of all currency codes
 type CurrencyCode = typeof CURRENCY_LIST[number]['code'];
@@ -36,10 +38,17 @@ export class RequestList implements OnInit {
   successMessage: string = '';
   showSuccessMessage: boolean = false;
 
+  // Modal states
+  showApprovalModal = false;
+  showRejectionModal = false;
+  selectedRequest: ExpenseRequest | null = null;
+
   constructor(
     private expenseRequestService: ExpenseRequestService,
     private budgetService: BudgetServices,
-    private router: Router
+    private authService: AuthService,
+    private router: Router,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
@@ -49,35 +58,43 @@ export class RequestList implements OnInit {
     this.selectedStatus = this.statuses.length > 0 ? this.statuses[0] : ""; 
   }
 
-  fetchRequests(): void {
+fetchRequests(): void {
+  const isAdmin = this.authService.hasRole('ADMIN'); // From your AuthService
+
+  if (isAdmin) {
     this.expenseRequestService.getAllExpenseRequests().subscribe({
-      next: (requests) => {
-        const updatedRequests = requests.map((req) => {
-          calculateTotals(req);
-
-          const totalAmount = Object.values(req.amountByCurrency || {}).reduce((a, b) => a + b, 0);
-          const currencies = Object.keys(req.amountByCurrency || {});
-          const currency = currencies.length > 0 ? currencies[0] : null;
-
-          const id = (req as any).id ?? (req as any).idRequest;
-
-          return {
-            ...req,
-            id,
-            totalAmount,
-            currency,
-          };
-        });
-
-        this.expenseRequests = updatedRequests;
-        this.applyFilters();
-      },
-      error: () => {
-        this.expenseRequests = [];
-        this.filteredRequests = [];
-      }
+      next: (requests) => this.processRequests(requests),
+      error: () => this.handleError()
+    });
+  } else {
+    this.expenseRequestService.getMyRequests().subscribe({
+      next: (requests) => this.processRequests(requests),
+      error: () => this.handleError()
     });
   }
+}
+
+// Extracted logic to avoid duplication
+private processRequests(requests: ExpenseRequest[]): void {
+  const updatedRequests = requests.map((req) => {
+    calculateTotals(req);
+
+    const totalAmount = Object.values(req.amountByCurrency || {}).reduce((a, b) => a + b, 0);
+    const currencies = Object.keys(req.amountByCurrency || {});
+    const currency = currencies.length > 0 ? currencies[0] : null;
+    const id = (req as any).id ?? (req as any).idRequest;
+
+    return { ...req, id, totalAmount, currency };
+  });
+
+  this.expenseRequests = updatedRequests;
+  this.applyFilters();
+}
+
+private handleError(): void {
+  this.expenseRequests = [];
+  this.filteredRequests = [];
+}
 
   // Helper to format amount: 2100.00 => 2 100, 2100.50 => 2 100.5
   formatAmount(amount: number): string {
@@ -95,6 +112,31 @@ export class RequestList implements OnInit {
   getAmountsByCurrency(request: ExpenseRequest): Array<{currency: string, amount: number}> {
     if (!request.amountByCurrency) return [];
     return Object.entries(request.amountByCurrency).map(([currency, amount]) => ({ currency, amount }));
+  }
+
+  getApprovedAmountsByCurrency(request: ExpenseRequest): { currency: string; amount: number }[] {
+    if (!request.approvedAmounts) {
+      return [];
+    }
+
+    try {
+      let amounts: { [key: string]: number };
+      
+      // Handle both string and object formats
+      if (typeof request.approvedAmounts === 'string') {
+        amounts = JSON.parse(request.approvedAmounts);
+      } else {
+        amounts = request.approvedAmounts;
+      }
+
+      return Object.entries(amounts).map(([currency, amount]) => ({
+        currency,
+        amount: Number(amount)
+      }));
+    } catch (error) {
+      console.error('Failed to parse approved amounts:', error);
+      return [];
+    }
   }
 
   applyFilters(): void {
@@ -116,56 +158,66 @@ export class RequestList implements OnInit {
   }
 
   approveRequest(requestId: number): void {
+    // Check if user has admin permissions
+    if (!this.isAdmin()) {
+      this.alertService.showAccessDenied(
+        'Only administrators can approve expense requests.'
+      );
+      return;
+    }
+
     const request = this.expenseRequests.find(r => r.id === requestId);
     if (!request || request.status !== 'SUBMITTED') {
       this.triggerSweetAlert('error', 'Approval is only allowed for SUBMITTED requests.');
       return;
     }
 
-    if (!request.amountByCurrency) {
-      this.triggerSweetAlert('error', 'Request data unavailable. Please try again.');
-      return;
-    }
-
-    // Check budget availability for up to two currencies
-    (async () => {
-      const insufficientFunds = await this.checkBudgetAvailability(request);
-      if (insufficientFunds) {
-        this.triggerSweetAlert('error', insufficientFunds.message);
-        return;
-      }
-
-      // Proceed with approval if funds are sufficient for both currencies
-      this.expenseRequestService.approveRequest(requestId).subscribe({
-        next: () => {
-          this.triggerSweetAlert('success', 'Request approved successfully!');
-          this.fetchRequests();
-        },
-        error: (err) => {
-          this.triggerSweetAlert('error', 'Approval failed. Please try again.');
-          console.error('Approval failed', err);
-        }
-      });
-    })();
+    // Open approval modal instead of direct approval
+    this.selectedRequest = request;
+    this.showApprovalModal = true;
   }
 
   rejectRequest(requestId: number): void {
+    // Check if user has admin permissions
+    if (!this.isAdmin()) {
+      this.alertService.showAccessDenied(
+        'Only administrators can reject expense requests.'
+      );
+      return;
+    }
+
     const request = this.expenseRequests.find(r => r.id === requestId);
     if (!request || request.status !== 'SUBMITTED') {
       this.triggerSweetAlert('error', 'Rejection is only allowed for SUBMITTED requests.');
       return;
     }
 
-    this.expenseRequestService.rejectRequest(requestId, 'Rejected by admin').subscribe({
-      next: () => {
-        this.triggerSweetAlert('success', 'Request rejected successfully!');
-        this.fetchRequests();
-      },
-      error: (err) => {
-        this.triggerSweetAlert('error', 'Rejection failed. Please try again.');
-        console.error('Rejection failed', err);
-      }
-    });
+    // Open rejection modal instead of direct rejection
+    this.selectedRequest = request;
+    this.showRejectionModal = true;
+  }
+
+  // Modal event handlers
+  onApprovalCompleted(): void {
+    this.showApprovalModal = false;
+    this.selectedRequest = null;
+    this.fetchRequests(); // Reload data
+  }
+
+  onApprovalCancelled(): void {
+    this.showApprovalModal = false;
+    this.selectedRequest = null;
+  }
+
+  onRejectionCompleted(): void {
+    this.showRejectionModal = false;
+    this.selectedRequest = null;
+    this.fetchRequests(); // Reload data
+  }
+
+  onRejectionCancelled(): void {
+    this.showRejectionModal = false;
+    this.selectedRequest = null;
   }
 
   onSearchChange(): void {
@@ -279,5 +331,16 @@ export class RequestList implements OnInit {
       return { message };
     }
     return null; // Both currencies have sufficient funds in at least one type
+  }
+
+  // Helper method to check if user is admin
+  isAdmin(): boolean {
+    return this.authService.hasRole('ADMIN');
+  }
+
+  // Helper method to check if request was created by current user
+  isRequestCreatedByCurrentUser(request: ExpenseRequest): boolean {
+    const currentUserEmail = this.authService.getEmail();
+    return !!(currentUserEmail && request.employee.email === currentUserEmail);
   }
 }

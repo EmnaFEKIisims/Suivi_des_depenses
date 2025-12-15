@@ -53,4 +53,9 @@ export class ProjectService {
   generateReference(): Observable<string> {
     return this.http.get(`${this.apiUrl}/generate-reference`, { responseType: 'text' });
   }
+
+  getProjectsByEmployee(): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.apiUrl}/getProjectsByEmployee`);
+  }
+
 }

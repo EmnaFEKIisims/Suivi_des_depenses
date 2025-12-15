@@ -1,0 +1,627 @@
+// Profile Page Styles
+// ==========================================
+
+// Variables (matching dashboard)
+$primary-color: #1a365d;
+$primary-dark: #2d3748;
+$accent-gold: #d4af37;
+$accent-silver: #c0c0c0;
+$accent-bronze: #cd7f32;
+$accent-emerald: #10b981;
+$accent-purple: #7c3aed;
+$accent-ruby: #ef4444;
+$white: #ffffff;
+$light-bg: #f8fafc;
+$dark-text: #2d3748;
+$medium-text: #4a5568;
+$light-text: #718096;
+$border-color: #e2e8f0;
+$success: #38a169;
+$warning: #ecc94b;
+$error: #e53e3e;
+
+// Shadows
+$shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.04);
+$shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-heavy: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+// Gradients
+$gradient-primary: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+$gradient-gold: linear-gradient(135deg, #d4af37 0%, #fef08a 100%);
+$gradient-silver: linear-gradient(135deg, #c0c0c0 0%, #f1f5f9 100%);
+$gradient-bronze: linear-gradient(135deg, #cd7f32 0%, #fed7aa 100%);
+$gradient-emerald: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+$gradient-purple: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+
+// Spacing
+$space-xs: 0.5rem;
+$space-sm: 1rem;
+$space-md: 1.5rem;
+$space-lg: 2rem;
+$space-xl: 3rem;
+$space-2xl: 4rem;
+
+// Border radius
+$radius-sm: 0.5rem;
+$radius-md: 0.75rem;
+$radius-lg: 1rem;
+$radius-xl: 1.5rem;
+
+// Profile Container
+.profile-container {
+    max-width: 900px; // Reduced from 1200px
+    margin: 0 auto;
+    padding: $space-lg $space-sm; // Reduced from $space-xl $space-md (3rem 1.5rem -> 2rem 1rem)
+}
+
+// Loading State
+.loading-section {
+    text-align: center;
+    padding: $space-2xl;
+    
+    .loading-spinner {
+        font-size: 3rem;
+        color: $accent-gold;
+        margin-bottom: $space-md;
+    }
+    
+    p {
+        color: $medium-text;
+        font-size: 1.1rem;
+    }
+}
+
+// Error State
+.error-section {
+    text-align: center;
+    padding: $space-2xl;
+    background: $white;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-soft;
+    
+    .error-icon {
+        font-size: 4rem;
+        color: $accent-ruby;
+        margin-bottom: $space-md;
+    }
+    
+    h3 {
+        color: $dark-text;
+        margin-bottom: $space-sm;
+        font-size: 1.5rem;
+    }
+    
+    p {
+        color: $medium-text;
+        margin-bottom: $space-lg;
+    }
+    
+    .btn-retry {
+        background: $gradient-primary;
+        color: $white;
+        border: none;
+        padding: $space-sm $space-lg;
+        border-radius: $radius-md;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: $shadow-medium;
+        }
+        
+        i {
+            margin-right: $space-xs;
+        }
+    }
+}
+
+// Profile Header
+.profile-header {
+    background: $white;
+    border-radius: $radius-lg;
+    padding: $space-lg; // Reduced from $space-xl (3rem -> 2rem)
+    margin-bottom: $space-lg; // Reduced from $space-xl (3rem -> 2rem)
+    box-shadow: $shadow-soft;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #1a365d 0%, #d69e2e 100%);
+    }
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: $space-lg;
+}
+
+.avatar-section {
+    position: relative;
+    
+    .avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: $gradient-gold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: $white;
+        position: relative;
+        overflow: hidden;
+        
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        // Blue to gold gradient for avatar
+        &.avatar-gradient {
+            background: linear-gradient(135deg, #1a365d 0%, #d69e2e 100%);
+        }
+    }
+    
+    .avatar-badge {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: $gradient-gold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $white;
+        font-size: 0.8rem;
+        border: 3px solid $white;
+        
+        &.admin {
+            background: $gradient-emerald;
+        }
+    }
+}
+
+.header-info {
+    .employee-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem; // Reduced from 2.2rem
+        font-weight: 700;
+        color: $dark-text;
+        margin-bottom: $space-xs;
+        background: $gradient-gold;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        
+        // Blue to gold gradient for name
+        &.employee-name-gradient {
+            background: linear-gradient(135deg, #1a365d 0%, #d69e2e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    }
+    
+    .employee-occupation {
+        font-size: 1rem; // Reduced from 1.2rem
+        color: $medium-text;
+        margin-bottom: $space-sm;
+    }
+    
+    .employee-status {
+        display: flex;
+        gap: $space-sm;
+        align-items: center;
+    }
+}
+
+.status-badge, .department-badge {
+    padding: $space-xs $space-sm;
+    border-radius: $radius-sm;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge {
+    &.active {
+        background: rgba(16, 185, 129, 0.1);
+        color: $accent-emerald;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    &.inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: $accent-ruby;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+}
+
+.department-badge {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+// Profile Grid
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); // Force 3 equal columns for alignment
+    gap: $space-sm; // Even smaller gap
+    max-width: 100%;
+}
+
+// Profile Cards
+.profile-card {
+    background: $white;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-soft;
+    transition: all 0.3s ease;
+    border: 1px solid $border-color;
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+    }
+    
+    &.card-personal::before {
+        background: $gradient-gold;
+    }
+    
+    &.card-professional::before {
+        background: $gradient-emerald;
+    }
+    
+    &.card-account::before {
+        background: $gradient-purple;
+    }
+    
+    &.card-stats::before {
+        background: $gradient-bronze;
+    }
+    
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: $shadow-heavy;
+    }
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: $space-xs; // Even smaller gap
+    padding: $space-sm; // Further reduced padding
+    border-bottom: 1px solid $border-color;
+    
+    .card-icon {
+        width: 28px; // Even smaller
+        height: 28px; // Even smaller
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $white;
+        font-size: 0.85rem; // Even smaller
+    }
+    
+    .card-personal & .card-icon {
+        background: $gradient-gold;
+    }
+    
+    .card-professional & .card-icon {
+        background: $gradient-emerald;
+    }
+    
+    .card-account & .card-icon {
+        background: $gradient-purple;
+    }
+    
+    .card-stats & .card-icon {
+        background: $gradient-bronze;
+    }
+    
+    h3 {
+        font-size: 0.95rem; // Even smaller
+        font-weight: 600;
+        color: $dark-text;
+        margin: 0;
+    }
+}
+
+.card-content {
+    padding: $space-sm; // Further reduced from $space-md
+}
+
+// Information Grid
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-md;
+    
+    .info-item {
+        &.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        label {
+            display: block;
+            font-size: 0.75rem; // Reduced from 0.8rem
+            font-weight: 600;
+            color: $light-text;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: $space-xs;
+        }
+        
+        .info-value {
+            font-size: 0.9rem; // Reduced from 1rem
+            color: $dark-text;
+            font-weight: 500;
+        }
+    }
+}
+
+.status-display {
+    padding: $space-xs $space-sm;
+    border-radius: $radius-sm;
+    font-size: 0.8rem; // Reduced from 0.9rem
+    font-weight: 600;
+    
+    &.active {
+        background: rgba(16, 185, 129, 0.1);
+        color: $accent-emerald;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    &.inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: $accent-ruby;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+}
+
+// Roles List
+.roles-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-xs;
+}
+
+.role-badge {
+    padding: $space-xs $space-sm;
+    border-radius: $radius-sm;
+    font-size: 0.8rem;
+    font-weight: 600;
+    
+    &.admin {
+        background: rgba(16, 185, 129, 0.1);
+        color: $accent-emerald;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    &:not(.admin) {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+}
+
+// MFA Status
+.mfa-status {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-xs;
+    font-weight: 500;
+    
+    &.enabled {
+        color: $accent-emerald;
+    }
+    
+    &:not(.enabled) {
+        color: $accent-ruby;
+    }
+}
+
+// Stats Grid
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-xs; // Even smaller gap
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: $space-xs; // Even smaller gap
+    padding: $space-xs; // Much smaller padding
+    background: $light-bg;
+    border-radius: $radius-md;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        transform: translateX(5px);
+        background: lighten($light-bg, 1%);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: $gradient-gold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $white;
+        font-size: 1rem; // Reduced from 1.2rem
+        flex-shrink: 0;
+    }
+    
+    .stat-info {
+        flex: 1;
+        
+        .stat-value {
+            display: block;
+            font-size: 0.85rem; // Even smaller
+            font-weight: 600; // Reduced from 700
+            color: $dark-text;
+            margin-bottom: $space-xs;
+        }
+        
+        .stat-label {
+            font-size: 0.7rem; // Even smaller
+            color: $light-text;
+            font-weight: 500;
+        }
+    }
+}
+
+// Password display styling
+.password-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.password-note {
+    font-size: 0.65rem;
+    color: $light-text;
+    font-style: italic;
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+    .profile-grid {
+        grid-template-columns: repeat(2, 1fr); // 2 columns for medium screens
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-grid {
+        grid-template-columns: 1fr; // 1 column for small screens
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        gap: $space-lg;
+        text-align: center;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        padding: $space-lg $space-sm;
+    }
+    
+    .profile-header {
+        padding: $space-lg;
+    }
+    
+    .employee-name {
+        font-size: 1.8rem !important;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .avatar {
+        width: 80px !important;
+        height: 80px !important;
+        font-size: 2rem !important;
+    }
+    
+    .employee-name {
+        font-size: 1.5rem !important;
+    }
+    
+    .card-content {
+        padding: $space-md;
+    }
+}
+
+// New styles for password display and role badges
+.password-display {
+    display: flex;
+    align-items: center;
+    gap: $space-xs;
+}
+
+.password-toggle {
+    background: none;
+    border: none;
+    color: $accent-gold;
+    cursor: pointer;
+    padding: $space-xs;
+    border-radius: $radius-sm;
+    transition: all 0.2s ease;
+    
+    &:hover {
+        background: rgba(212, 175, 55, 0.1);
+    }
+}
+
+.roles-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-xs;
+}
+
+.role-badge-stat {
+    padding: 2px 8px;
+    border-radius: $radius-sm;
+    font-size: 0.7rem;
+    font-weight: 600;
+    
+    &.admin {
+        background: rgba(16, 185, 129, 0.1);
+        color: $accent-emerald;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    &:not(.admin) {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+}
+
+.stat-item-full {
+    grid-column: 1 / -1;
+}

@@ -1,74 +1,299 @@
-<div class="home-container">
-  <div class="welcome-section">
-    <h1 class="welcome-title">Welcome to Employee Tracking System</h1>
-    <p class="welcome-subtitle">Comprehensive management solution for your organization</p>
-  </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Tracking System Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1 class="welcome-title">Welcome to <span>Employee Tracking System</span></h1>
+            <p class="welcome-subtitle">Comprehensive management solution for your organization</p>
+            <div class="welcome-decoration">
+                <div class="decoration-line"></div>
+                <div class="decoration-dot"></div>
+                <div class="decoration-line"></div>
+            </div>
+        </div>
 
-  <div class="dashboard-grid">
-    <div class="dashboard-card">
-      <div class="card-icon">
-        <i class="bi bi-people-fill"></i>
-      </div>
-      <div class="card-content">
-        <h3>Employees</h3>
-        <p>Manage employee information, departments, and roles</p>
-        <a href="/employees" class="card-link">View Employees →</a>
-      </div>
+        <!-- Dashboard Cards -->
+        <div class="dashboard-grid">
+            <div class="dashboard-card card-employees">
+                <div class="card-icon">
+                    <i class="fas fa-users"></i>
+                    <div class="icon-background"></div>
+                </div>
+                <div class="card-content">
+                    <h3>Employees</h3>
+                    <p>Manage employee information, departments, and roles</p>
+                    <a href="/employees" class="card-link">
+                        <span>View Employees</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-highlight"></div>
+            </div>
+
+            <div class="dashboard-card card-clients">
+                <div class="card-icon">
+                    <i class="fas fa-user-tie"></i>
+                    <div class="icon-background"></div>
+                </div>
+                <div class="card-content">
+                    <h3>Clients</h3>
+                    <p>Maintain client relationships and contact details</p>
+                    <a href="/clients" class="card-link">
+                        <span>View Clients</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-highlight"></div>
+            </div>
+
+            <div class="dashboard-card card-projects">
+                <div class="card-icon">
+                    <i class="fas fa-project-diagram"></i>
+                    <div class="icon-background"></div>
+                </div>
+                <div class="card-content">
+                    <h3>Projects</h3>
+                    <p>Track project progress and deliverables</p>
+                    <a href="/projects" class="card-link">
+                        <span>View Projects</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-highlight"></div>
+            </div>
+
+            <div class="dashboard-card card-requests">
+                <div class="card-icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <div class="icon-background"></div>
+                </div>
+                <div class="card-content">
+                    <h3>Expense Requests</h3>
+                    <p>Process and manage expense submissions</p>
+                    <a href="/requests" class="card-link">
+                        <span>View Requests</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-highlight"></div>
+            </div>
+
+            <!-- New Budget Card -->
+            <div class="dashboard-card card-budget">
+                <div class="card-icon">
+                    <i class="fas fa-chart-pie"></i>
+                    <div class="icon-background"></div>
+                </div>
+                <div class="card-content">
+                    <h3>Budget</h3>
+                    <p>Manage and track organizational budgets and expenses</p>
+                    <a href="/budget" class="card-link">
+                        <span>View Budget</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-highlight"></div>
+            </div>
+
+            <!-- New Historic Card -->
+            <div class="dashboard-card card-historic">
+                <div class="card-icon">
+                    <i class="fas fa-history"></i>
+                    <div class="icon-background"></div>
+                </div>
+                <div class="card-content">
+                    <h3>Historic</h3>
+                    <p>Access historical data and archived records</p>
+                    <a href="/historic" class="card-link">
+                        <span>View History</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-highlight"></div>
+            </div>
+
+            <!-- Profile Card -->
+            <div class="dashboard-card card-profile">
+                <div class="card-icon">
+                    <i class="fas fa-user-circle"></i>
+                    <div class="icon-background"></div>
+                </div>
+                <div class="card-content">
+                    <h3>Profile</h3>
+                    <p>View and manage your personal profile information</p>
+                    <a href="/profile" class="card-link">
+                        <span>View Profile</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-highlight"></div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <h2>System Overview</h2>
+            <div class="section-divider">
+                <div class="divider-line"></div>
+                <div class="divider-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="divider-line"></div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <span class="stat-number">150+</span>
+                    <span class="stat-label">Active Employees</span>
+                    <div class="stat-progress">
+                        <div class="progress-bar" style="width: 85%"></div>
+                    </div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <span class="stat-number">50+</span>
+                    <span class="stat-label">Active Clients</span>
+                    <div class="stat-progress">
+                        <div class="progress-bar" style="width: 70%"></div>
+                    </div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <span class="stat-number">25+</span>
+                    <span class="stat-label">Active Projects</span>
+                    <div class="stat-progress">
+                        <div class="progress-bar" style="width: 60%"></div>
+                    </div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <span class="stat-number">100+</span>
+                    <span class="stat-label">Processed Requests</span>
+                    <div class="stat-progress">
+                        <div class="progress-bar" style="width: 90%"></div>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <span class="stat-number">$1.2M</span>
+                    <span class="stat-label">Total Budget</span>
+                    <div class="stat-progress">
+                        <div class="progress-bar" style="width: 75%"></div>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Archived Records</span>
+                    <div class="stat-progress">
+                        <div class="progress-bar" style="width: 65%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section">
+            <h2>Recent Activity</h2>
+            <div class="section-divider">
+                <div class="divider-line"></div>
+                <div class="divider-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="divider-line"></div>
+            </div>
+            
+            <div class="activity-list">
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4>New employee registered</h4>
+                        <p>Sarah Johnson joined the Marketing team</p>
+                        <span class="activity-time">2 hours ago</span>
+                    </div>
+                </div>
+                
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4>Expense request approved</h4>
+                        <p>Project Alpha budget request was approved</p>
+                        <span class="activity-time">5 hours ago</span>
+                    </div>
+                </div>
+                
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4>Project milestone completed</h4>
+                        <p>Project Beta reached 75% completion</p>
+                        <span class="activity-time">Yesterday</span>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4>Budget updated</h4>
+                        <p>Q3 budget allocation has been finalized</p>
+                        <span class="activity-time">2 days ago</span>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4>Historical data archived</h4>
+                        <p>2022 financial records moved to historical archive</p>
+                        <span class="activity-time">3 days ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="dashboard-card">
-      <div class="card-icon">
-        <i class="bi bi-person-badge-fill"></i>
-      </div>
-      <div class="card-content">
-        <h3>Clients</h3>
-        <p>Maintain client relationships and contact details</p>
-        <a href="/clients" class="card-link">View Clients →</a>
-      </div>
+    <!-- Animated Background Elements -->
+    <div class="background-elements">
+        <div class="element element-1"></div>
+        <div class="element element-2"></div>
+        <div class="element element-3"></div>
+        <div class="element element-4"></div>
     </div>
-
-    <div class="dashboard-card">
-      <div class="card-icon">
-        <i class="bi bi-folder-fill"></i>
-      </div>
-      <div class="card-content">
-        <h3>Projects</h3>
-        <p>Track project progress and deliverables</p>
-        <a href="/projects" class="card-link">View Projects →</a>
-      </div>
-    </div>
-
-    <div class="dashboard-card">
-      <div class="card-icon">
-        <i class="bi bi-receipt-cutoff"></i>
-      </div>
-      <div class="card-content">
-        <h3>Expense Requests</h3>
-        <p>Process and manage expense submissions</p>
-        <a href="/requests" class="card-link">View Requests →</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="stats-section">
-    <h2>System Overview</h2>
-    <div class="stats-grid">
-      <div class="stat-item">
-        <span class="stat-number">150+</span>
-        <span class="stat-label">Active Employees</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number">50+</span>
-        <span class="stat-label">Active Clients</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number">25+</span>
-        <span class="stat-label">Active Projects</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number">100+</span>
-        <span class="stat-label">Processed Requests</span>
-      </div>
-    </div>
-  </div>
-</div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Industrial Projects Services</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="brand-text">IPS</span>
+            <span class="brand-subtitle">Industrial Projects Services</span>
+        </div>
+        <div class="nav-menu">
+            <a class="nav-link" routerLink="/welcome#departments">Departments</a>
+            <a class="nav-link" routerLink="/welcome#clients">Clients</a>
+            <a class="nav-link" routerLink="/welcome#projects">Projects</a>
+            <a class="nav-link" routerLink="/welcome#contact">Contact</a>
+            <button class="btn-login">
+                <i class="fas fa-user"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Back Button -->
+    <a routerLink="/welcome" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <div class="login-background"></div>
+        
+        <!-- Decorative Elements -->
+        <i class="industrial-element gear-1 fas fa-cog"></i>
+        <i class="industrial-element gear-2 fas fa-cog"></i>
+        <div class="industrial-element blueprint-line line-1"></div>
+        <div class="industrial-element blueprint-line line-2"></div>
+        <div class="industrial-element blueprint-line line-3"></div>
+        <div class="industrial-element circle-1"></div>
+        <div class="industrial-element circle-2"></div>
+        
+        <div class="login-content">
+            <div class="login-visual">
+                <div class="industrial-circle">
+                    <div class="inner-circle">
+                        <h2 class="visual-title">Secure Access Portal</h2>
+                        <p class="visual-subtitle">Exclusive access for IPS employees</p>
+                        <div class="security-features">
+                            <div class="security-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Enterprise Security</span>
+                            </div>
+                            <div class="security-item">
+                                <i class="fas fa-lock"></i>
+                                <span>Encrypted Connection</span>
+                            </div>
+                            <div class="security-item">
+                                <i class="fas fa-user-check"></i>
+                                <span>Multi-factor Auth</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="login-card">
+                <div class="login-header">
+                    <h1 class="login-title">Employee Login</h1>
+                    <p class="login-subtitle">Access the management dashboard</p>
+                </div>
+                
+                <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                    <div class="form-group">
+                        <label class="form-label" for="email">
+                            <i class="fas fa-envelope"></i> Corporate Email
+                        </label>
+                        <input type="email" class="form-control" id="email" formControlName="email" placeholder="name@ips-industrial.com" required>
+                        <div *ngIf="isFieldInvalid('email')" class="error-message">{{ getErrorMessage('email') }}</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="password">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <div class="password-container">
+                            <input [type]="showPassword ? 'text' : 'password'" class="form-control" id="password" formControlName="password" placeholder="Enter your secure password" required>
+                            <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+                                <i class="fas" [ngClass]="{'fa-eye': !showPassword, 'fa-eye-slash': showPassword}"></i>
+                            </button>
+                        </div>
+                        <div *ngIf="isFieldInvalid('password')" class="error-message">{{ getErrorMessage('password') }}</div>
+                    </div>
+                    
+                    <div class="login-options">
+                        <div class="remember-me">
+                            <input type="checkbox" id="remember" formControlName="rememberMe">
+                            <label for="remember">Remember this device</label>
+                        </div>
+                        <a href="#" class="forgot-password" (click)="onForgotPassword()">Forgot password?</a>
+                    </div>
+                    
+                    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+                    
+                    <button type="submit" class="btn-login-submit" [disabled]="loginForm.invalid || isLoading">
+                        <i *ngIf="!isLoading" class="fas fa-sign-in-alt"></i>
+                        <i *ngIf="isLoading" class="fas fa-spinner fa-spin"></i>
+                        {{ isLoading ? 'Signing In...' : 'Access Dashboard' }}
+                    </button>
+                </form>
+                
+                <div class="login-divider">
+                    <span>Or authenticate with</span>
+                </div>
+                
+                <div class="social-login">
+                    <button class="social-btn">
+                        <i class="fab fa-microsoft"></i>
+                    </button>
+                    <button class="social-btn">
+                        <i class="fab fa-google"></i>
+                    </button>
+                    <button class="social-btn">
+                        <i class="fas fa-fingerprint"></i>
+                    </button>
+                    <button class="social-btn">
+                        <i class="fas fa-id-card"></i>
+                    </button>
+                </div>
+                
+                <div class="login-footer">
+                    <p>Need access? <a href="#" class="signup-link">Request credentials</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

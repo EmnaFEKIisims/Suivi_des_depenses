@@ -31,6 +31,109 @@
     </div>
   </div>
 
+  <!-- Expense Details Section -->
+  <div class="details-section card">
+    <div class="details-section-title">
+      <i class="bi bi-list-ul"></i> 
+      <span *ngIf="request?.status === 'SUBMITTED'">Expense Details</span>
+      <span *ngIf="request?.status === 'APPROVED'">Approved Details</span>
+      <span *ngIf="request?.status === 'REJECTED'">Rejection Information</span>
+    </div>
+    
+    <!-- For SUBMITTED and APPROVED - show details -->
+    <div *ngIf="request?.status === 'SUBMITTED' || request?.status === 'APPROVED'">
+      <ng-container *ngIf="request?.details; else noDetailsTemplate">
+        <div *ngIf="request!.details.length > 0; else noDetailsTemplate">
+          <div class="expense-detail" *ngFor="let detail of request!.details; trackBy: trackByDetailId">
+            <div class="detail-info">
+              <div class="detail-description">
+                <i class="bi bi-receipt"></i>
+                {{ detail.description }}
+              </div>
+              <div class="detail-amount">
+                {{ detail.amount | number:'1.2-2' }} {{ detail.currency }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+      
+      <ng-template #noDetailsTemplate>
+        <div class="no-details">
+          <i class="bi bi-info-circle"></i>
+          No expense details available.
+        </div>
+      </ng-template>
+    </div>
+    
+    <!-- For REJECTED - show rejection info instead of details -->
+    <div *ngIf="request?.status === 'REJECTED'">
+      <div class="rejection-info">
+        <div class="details-row" *ngIf="request?.rejectionReason">
+          <div class="details-label"><i class="bi bi-exclamation-triangle"></i> Rejection Reason</div>
+          <div class="details-value rejection-reason">{{ request?.rejectionReason }}</div>
+        </div>
+        <div class="details-row" *ngIf="request?.approvedBy">
+          <div class="details-label"><i class="bi bi-person-x"></i> Rejected By</div>
+          <div class="details-value">{{ request?.approvedBy }}</div>
+        </div>
+        <div class="details-row" *ngIf="request?.approvedAt">
+          <div class="details-label"><i class="bi bi-calendar-x"></i> Rejected At</div>
+          <div class="details-value">{{ request?.approvedAt | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approval/Rejection Information -->
+  <div class="details-section card" *ngIf="hasApprovalInfo()">
+    <div class="details-section-title">
+      <i class="bi" [class.bi-check-circle]="request?.status === 'APPROVED'" 
+                   [class.bi-x-circle]="request?.status === 'REJECTED'"></i> 
+      {{ request?.status === 'APPROVED' ? 'Approval Information' : 'Rejection Information' }}
+    </div>
+    
+    <!-- Approved Information -->
+    <div *ngIf="request?.status === 'APPROVED'">
+      <div class="details-row" *ngIf="request?.requestedAmounts">
+        <div class="details-label"><i class="bi bi-currency-dollar"></i> Requested Amounts</div>
+        <div class="details-value">{{ formatAmountsForDisplay(request?.requestedAmounts) }}</div>
+      </div>
+      <div class="details-row" *ngIf="request?.approvedAmounts">
+        <div class="details-label"><i class="bi bi-check-square"></i> Approved Amounts</div>
+        <div class="details-value approved-amount">{{ formatAmountsForDisplay(request?.approvedAmounts) }}</div>
+      </div>
+      <div class="details-row" *ngIf="request?.approvalComment">
+        <div class="details-label"><i class="bi bi-chat-text"></i> Approval Comment</div>
+        <div class="details-value approval-comment">{{ request?.approvalComment }}</div>
+      </div>
+      <div class="details-row" *ngIf="request?.approvedBy">
+        <div class="details-label"><i class="bi bi-person-check"></i> Approved By</div>
+        <div class="details-value">{{ request?.approvedBy }}</div>
+      </div>
+      <div class="details-row" *ngIf="request?.approvedAt">
+        <div class="details-label"><i class="bi bi-calendar-event"></i> Approved At</div>
+        <div class="details-value">{{ request?.approvedAt | date:'dd/MM/yyyy HH:mm' }}</div>
+      </div>
+    </div>
+    
+    <!-- Rejected Information (moved from details section) -->
+    <div *ngIf="request?.status === 'REJECTED'">
+      <div class="details-row" *ngIf="request?.rejectionReason">
+        <div class="details-label"><i class="bi bi-exclamation-triangle"></i> Rejection Reason</div>
+        <div class="details-value rejection-reason">{{ request?.rejectionReason }}</div>
+      </div>
+      <div class="details-row" *ngIf="request?.approvedBy">
+        <div class="details-label"><i class="bi bi-person-x"></i> Rejected By</div>
+        <div class="details-value">{{ request?.approvedBy }}</div>
+      </div>
+      <div class="details-row" *ngIf="request?.approvedAt">
+        <div class="details-label"><i class="bi bi-calendar-x"></i> Rejected At</div>
+        <div class="details-value">{{ request?.approvedAt | date:'dd/MM/yyyy HH:mm' }}</div>
+      </div>
+    </div>
+  </div>
+
   <div class="details-actions" style="margin-top:2rem;">
     <button class="btn btn-primary" [disabled]="isEditDisabled()"  (click)="navigateToEdit()">
       <i class="bi bi-pencil"></i> Edit Request

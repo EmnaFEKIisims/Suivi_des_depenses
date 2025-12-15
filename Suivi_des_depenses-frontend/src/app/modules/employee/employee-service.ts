@@ -72,4 +72,11 @@ export class EmployeeService {
   generateReference(): Observable<string> {
     return this.http.get(`${this.apiUrl}/generate-reference`, { responseType: 'text' });
   }
+
+
+  getEmployeeByEmail(email: string): Observable<Employee> {
+  return this.http.get<Employee>(`${this.apiUrl}/getEmployeesByEmail?email=${email}`);
+}
+
+
 }

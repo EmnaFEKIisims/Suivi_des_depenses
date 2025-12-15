@@ -1,0 +1,123 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onCancel()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-check-circle"></i> Approve Expense Request</h2>
+      <button class="modal-close" (click)="onCancel()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <div class="request-summary" *ngIf="request">
+        <div class="summary-item">
+          <strong>Employee:</strong> {{ request.employee.fullName }}
+        </div>
+        <div class="summary-item">
+          <strong>Mission:</strong> {{ request.mission }}
+        </div>
+        <div class="summary-item">
+          <strong>Location:</strong> {{ request.missionLocation }}
+        </div>
+        <div class="summary-item">
+          <strong>Period:</strong> {{ request.startDate | date:'dd/MM/yyyy' }} - {{ request.returnDate | date:'dd/MM/yyyy' }}
+        </div>
+        
+        <!-- Original Requested Amounts -->
+        <div class="summary-item" *ngIf="request.requestedAmounts">
+          <strong>Originally Requested:</strong> {{ request.requestedAmounts }}
+        </div>
+      </div>
+
+      <form [formGroup]="approvalForm" class="approval-form">
+        
+        <!-- Expense Details Section -->
+        <div class="form-section">
+          <div class="section-header">
+            <h3><i class="fas fa-receipt"></i> Review & Edit Expense Details</h3>
+          </div>
+
+          <div class="details-container" formArrayName="details">
+            <div class="detail-item" 
+                 *ngFor="let detail of detailsArray.controls; let i = index" 
+                 [formGroupName]="i">
+              
+              <div class="detail-fields">
+                <div class="field-group">
+                  <label>Description *</label>
+                  <input type="text" 
+                         formControlName="description" 
+                         class="form-control"
+                         placeholder="e.g., Hotel accommodation">
+                </div>
+
+                <div class="field-group">
+                  <label>Amount *</label>
+                  <input type="number" 
+                         formControlName="amount" 
+                         class="form-control"
+                         step="0.01" 
+                         min="0">
+                </div>
+
+                <div class="field-group">
+                  <label>Currency *</label>
+                  <select formControlName="currency" class="form-control">
+                    <option *ngFor="let currency of currencies" [value]="currency.code">
+                      {{ currency.code }} - {{ currency.description }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="field-actions">
+                  <button type="button" 
+                          class="btn-remove-detail" 
+                          (click)="removeDetail(i)"
+                          [disabled]="detailsArray.length <= 1">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Totals Display -->
+          <div class="totals-display">
+            <h4>Total Amounts by Currency:</h4>
+            <div class="totals-grid">
+              <div class="total-item" *ngFor="let total of getTotalByCategory() | keyvalue">
+                <span class="currency">{{ total.key }}</span>
+                <span class="amount">{{ total.value | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Approval Comment Section -->
+        <div class="form-section">
+          <h3><i class="fas fa-comment"></i> Approval Comments (Optional)</h3>
+          <textarea formControlName="approvalComment" 
+                    class="form-control comment-textarea"
+                    placeholder="Explain any changes you made to the amounts or provide additional comments..."
+                    rows="4"></textarea>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" 
+              class="btn btn-cancel" 
+              (click)="onCancel()"
+              [disabled]="isLoading">
+        Cancel
+      </button>
+      <button type="button" 
+              class="btn btn-approve" 
+              (click)="onApprove()"
+              [disabled]="!approvalForm.valid || isLoading">
+        <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+        <i class="fas fa-check" *ngIf="!isLoading"></i>
+        {{ isLoading ? 'Processing...' : 'Approve Request' }}
+      </button>
+    </div>
+  </div>
+</div>

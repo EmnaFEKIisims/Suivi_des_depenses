@@ -18,17 +18,25 @@ export interface ExpenseRequest {
   reference?: string;
   employee: Employee;
   project: Project;
-  startDate: string;   
+  startDate: string;
   returnDate: string;
   mission: string;
   missionLocation: string;
   reimbursementMethod: ReimbursementMethod;
   status: ExpenseStatus;
   details: ExpenseDetails[];
+  requestedAmounts?: { [key: string]: number };  // Changed from string to JSON object      
+  approvedAmounts?: { [key: string]: number };   // Changed from string to JSON object       
+  approvalComment?: string;       
+  rejectionReason?: string;       
+  approvedBy?: string;            
+  approvedAt?: string;            
+
+  // Keep existing helper (still useful for display)
   amountByCurrency?: { [key: string]: number };
 }
 
-// Utility functions
+// Utility functions (unchanged)
 export function calculateTotals(request: ExpenseRequest): void {
   request.amountByCurrency = {};
   if (request.details) {
@@ -48,4 +56,3 @@ export function getFormattedTotals(request: ExpenseRequest): string {
     .map(([currency, amount]) => `${currency} ${amount}`)
     .join(', ');
 }
-
