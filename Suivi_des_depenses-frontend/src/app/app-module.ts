@@ -13,10 +13,14 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { ClientModule } from './modules/client/client-module';
 import { ClientList } from './modules/client/components/client-list/client-list';
 import { CreateClient } from './modules/client/components/create-client/create-client';
-import { Login } from './login/login';
+import { Login } from './modules/login/login';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthModule } from './modules/auth/auth-module';
+import { AuthInterceptor } from './modules/auth/interceptors/auth-interceptor';
+import { Profile } from './modules/profile/profile/profile';
 
 @NgModule({
-  declarations: [App, Home, Login],
+  declarations: [App, Home, Login, Profile],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -29,10 +33,20 @@ import { Login } from './login/login';
     ProjectModule,
     NgSelectModule,
     RequestModule,
+    AuthModule,
     ClientList,
-    CreateClient
+    CreateClient,
+    ReactiveFormsModule
   ],
-  providers: [],
+  providers: [
+
+  {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+
+  ],
   bootstrap: [App]
 })
 export class AppModule {}

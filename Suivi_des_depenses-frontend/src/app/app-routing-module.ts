@@ -21,34 +21,155 @@ import { BudgetList } from './modules/budget/components/budget-list/budget-list'
 import { HistoryList } from './modules/budget/components/history-list/history-list';
 import { CreateBudgetLine } from './modules/budget/components/create-budget-line/create-budget-line';
 import { WelcomeComponent } from './modules/welcome/welcome';
+import { Login } from './modules/login/login';
+import { Profile } from './modules/profile/profile/profile';
+import { AuthGuard } from './modules/auth/guards/auth-guard';
+import { RoleGuard } from './modules/auth/guards/role-guard';
+import { EmployeeDataGuard } from './modules/auth/guards/employee-data-guard';
 
 
 
 const routes: Routes = [
-  { path: '', component: WelcomeComponent },
-  { path: 'welcome_page', component: WelcomeComponent },
-  { path: 'home', component: Home },
-  { path: 'employees', component: EmployeeList },
-  { path: 'update-employee/:CIN', component: UpdateEmployee },
-  { path: 'update-employee', component: UpdateEmployee }, // Added route for navigation state
-  { path: 'add-employee', component: CreateEmployee },
-  { path: 'employees/details/:reference', component: EmployeeDetails },
-  { path: 'clients', component: ClientList },
-  { path: 'update-client/:idClient', component: UpdateClient },
-  { path: 'add-client', component: CreateClient },
-  { path: 'clients/details/:idClient', component: ClientDetails },
-  { path: 'projects', component: ProjectList },
-  { path: 'add-project', component: CreateProject }, 
-  { path: 'projects/edit/:id', component: UpdateProject }, 
-  { path: 'projects/:id', component: ProjectDetails },   
-  { path: 'requests', component: RequestList },
-  { path: 'requests/add', component: CreateRequest },        
-  { path: 'requests/edit/:id', component: UpdateRequest },    
-  { path: 'requests/:id', component: RequestDetails },
-  { path: 'budget', component: BudgetList },
-  { path: 'budget/history', component: HistoryList },
-  { path: 'budget/create-line', component: CreateBudgetLine }        
+  // PUBLIC ROUTES
+  { path: '', redirectTo: '/welcome', pathMatch: 'full' },
+  { path: 'welcome', component: WelcomeComponent },
+  { path: 'login', component: Login },
+
+  // HOME - ALL LOGGED IN
+  { path: 'home', component: Home, canActivate: [AuthGuard] },
+
+  // PROFILE PAGE - ALL LOGGED IN
+  { path: 'profile', component: Profile, canActivate: [AuthGuard] },
+
+  // EMPLOYEE PROFILE - ONLY HIS DATA
+  { 
+    path: 'employees/details/:reference', 
+    component: EmployeeDetails,
+    canActivate: [AuthGuard, EmployeeDataGuard]
+  },
+
+  // ADMIN ONLY: EMPLOYEE MODULE
+  { 
+    path: 'employees', 
+    component: EmployeeList,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'add-employee', 
+    component: CreateEmployee,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'update-employee/:CIN', 
+    component: UpdateEmployee,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'update-employee', 
+    component: UpdateEmployee,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+
+  // ADMIN ONLY: CLIENT MODULE
+  { 
+    path: 'clients', 
+    component: ClientList,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'add-client', 
+    component: CreateClient,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'update-client/:idClient', 
+    component: UpdateClient,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'clients/details/:idClient', 
+    component: ClientDetails,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+
+  // ADMIN ONLY: BUDGET MODULE
+  { 
+    path: 'budget', 
+    component: BudgetList,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'budget/history', 
+    component: HistoryList,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'budget/create-line', 
+    component: CreateBudgetLine,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+
+  // PROJECTS: ALL LOGGED IN (Backend filters by teamMember/projectLeader)
+  { 
+    path: 'projects', 
+    component: ProjectList,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'add-project', 
+    component: CreateProject,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'projects/edit/:id', 
+    component: UpdateProject,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'projects/:id', 
+    component: ProjectDetails,
+    canActivate: [AuthGuard]
+  },
+
+  // REQUESTS: ALL LOGGED IN (Backend filters by creator)
+  { 
+    path: 'requests', 
+    component: RequestList,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'requests/add', 
+    component: CreateRequest,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'requests/edit/:id', 
+    component: UpdateRequest,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'requests/:id', 
+    component: RequestDetails,
+    canActivate: [AuthGuard]
+  },
+
+  // CATCH ALL
+  { path: '**', redirectTo: '/welcome' }
 ];
+
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

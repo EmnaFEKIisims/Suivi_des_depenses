@@ -1,11 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient , HttpParams} from '@angular/common/http';
-import { 
-  ExpenseRequest, 
-  ExpenseStatus,
-  ReimbursementMethod 
-} from './models/expense-request.model'; 
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ExpenseRequest, ExpenseStatus, ReimbursementMethod } from './models/expense-request.model';
 import { ExpenseDetails } from './models/expense-details.model';
 
 @Injectable({
@@ -15,65 +11,69 @@ export class ExpenseRequestService {
 
   private baseUrl = 'http://localhost:8080/api/expense-requests';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  // ========== CRUD Operations ==========
-
+  // CREATE - FIXED: was /createExpenseRequest → now /create
   createExpenseRequest(request: ExpenseRequest): Observable<ExpenseRequest> {
-    return this.http.post<ExpenseRequest>(`${this.baseUrl}/createExpenseRequest`, request);
+    return this.http.post<ExpenseRequest>(`${this.baseUrl}/create`, request);
   }
 
+  // UPDATE - You already had this correct
   updateExpenseRequest(id: number, request: ExpenseRequest): Observable<ExpenseRequest> {
-    return this.http.put<ExpenseRequest>(`${this.baseUrl}/updateExpenseRequest/${id}`, request);
+    return this.http.put<ExpenseRequest>(`${this.baseUrl}/update/${id}`, request);
   }
 
+  // GET BY ID
   getExpenseRequestById(id: number): Observable<ExpenseRequest> {
-    return this.http.get<ExpenseRequest>(`${this.baseUrl}/getExpenseRequestById/${id}`);
+    return this.http.get<ExpenseRequest>(`${this.baseUrl}/${id}`);
   }
 
+  // GET ALL (Admin only)
   getAllExpenseRequests(): Observable<ExpenseRequest[]> {
     return this.http.get<ExpenseRequest[]>(this.baseUrl);
   }
 
-  // ========== Expense Details ==========
+  // GET MY REQUESTS
+  getMyRequests(): Observable<ExpenseRequest[]> {
+    return this.http.get<ExpenseRequest[]>(`${this.baseUrl}/my-requests`);
+  }
 
+  // ADD DETAIL
   addExpenseDetail(requestId: number, detail: ExpenseDetails): Observable<ExpenseDetails> {
-    return this.http.post<ExpenseDetails>(`${this.baseUrl}/details/addExpenseDetail/${requestId}`, detail);
+    return this.http.post<ExpenseDetails>(`${this.baseUrl}/details/add/${requestId}`, detail);
   }
 
-  removeExpenseDetail(detailId: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/details/removeExpenseDetail/${detailId}`);
-  }
-
+  // UPDATE DETAIL
   updateExpenseDetail(detailId: number, detail: ExpenseDetails): Observable<ExpenseDetails> {
-    return this.http.put<ExpenseDetails>(`${this.baseUrl}/details/updateExpenseDetail/${detailId}`, detail);
+    return this.http.put<ExpenseDetails>(`${this.baseUrl}/details/update/${detailId}`, detail);
   }
 
+  // REMOVE DETAIL
+  removeExpenseDetail(detailId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/details/remove/${detailId}`);
+  }
+
+  // APPROVE
+  approveRequest(requestId: number, approvalData: { comment?: string; approvedAmounts?: { [key: string]: number } } = {}): Observable<ExpenseRequest> {
+    return this.http.post<ExpenseRequest>(`${this.baseUrl}/${requestId}/approve`, approvalData);
+  }
+
+  // REJECT
+  rejectRequest(requestId: number, rejectionData: { reason: string }): Observable<ExpenseRequest> {
+    return this.http.post<ExpenseRequest>(`${this.baseUrl}/${requestId}/reject`, rejectionData);
+  }
+
+  // GET DETAILS BY REQUEST ID
   getDetailsByRequestId(requestId: number): Observable<ExpenseDetails[]> {
-    return this.http.get<ExpenseDetails[]>(`${this.baseUrl}/details/getDetailsByRequestId/${requestId}`);
+    return this.http.get<ExpenseDetails[]>(`${this.baseUrl}/details/${requestId}`);
   }
 
-  // ========== Business Operations ==========
-
+  // GET TOTALS BY CURRENCY
   calculateTotalAmountsByCurrency(requestId: number): Observable<Map<string, number>> {
-    return this.http.get<Map<string, number>>(`${this.baseUrl}/${requestId}/currency-totals`);
+    return this.http.get<Map<string, number>>(`${this.baseUrl}/${requestId}/totals`);
   }
 
-  approveRequest(requestId: number, approverComments?: string): Observable<ExpenseRequest> {
-    let params = new HttpParams();
-    if (approverComments) {
-      params = params.set('approverComments', approverComments);
-    }
-    return this.http.post<ExpenseRequest>(`${this.baseUrl}/${requestId}/approve`, {}, { params });
-  }
-
-  rejectRequest(requestId: number, rejectionReason: string): Observable<ExpenseRequest> {
-    const params = new HttpParams().set('rejectionReason', rejectionReason);
-    return this.http.post<ExpenseRequest>(`${this.baseUrl}/${requestId}/reject`, {}, { params });
-  }
-
-  // ========== Filters ==========
-
+  // FILTERS
   getRequestsByEmployee(employeeCin: string): Observable<ExpenseRequest[]> {
     return this.http.get<ExpenseRequest[]>(`${this.baseUrl}/by-employee/${employeeCin}`);
   }
@@ -90,14 +90,12 @@ export class ExpenseRequestService {
     return this.http.get<ExpenseRequest[]>(`${this.baseUrl}/by-currency/${currency}`);
   }
 
-  // ========== Utility Methods ==========
-
+  // GENERATE REFERENCE
   generateReference(): Observable<string> {
     return this.http.get(`${this.baseUrl}/generate-reference`, { responseType: 'text' });
   }
 
-  // ========== Enum Support Methods (Optional UI Helpers) ==========
-
+  // ENUM HELPERS
   getAllExpenseStatuses(): ExpenseStatus[] {
     return Object.values(ExpenseStatus);
   }
@@ -105,7 +103,4 @@ export class ExpenseRequestService {
   getAllReimbursementMethods(): ReimbursementMethod[] {
     return Object.values(ReimbursementMethod);
   }
-
-
-  
 }

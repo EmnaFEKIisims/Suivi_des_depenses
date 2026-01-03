@@ -34,4 +34,6 @@ public interface EmployeeServices {
 
     Optional<Employee> findByEmail(String email);
 
+    Employee addRole(String reference, Role role);
+
 }

@@ -92,8 +92,32 @@ export class RequestDetails implements OnInit {
   }
 
 
-    isEditDisabled(): boolean {
+  isEditDisabled(): boolean {
     return !this.request || this.request.status !== 'SUBMITTED';
+  }
+
+  hasApprovalInfo(): boolean {
+    return !!(this.request && (
+      this.request.approvedBy || 
+      this.request.approvedAt || 
+      this.request.approvalComment || 
+      this.request.rejectionReason ||
+      this.request.requestedAmounts ||
+      this.request.approvedAmounts
+    ));
+  }
+
+  // Helper method to format amounts JSON object for display
+  formatAmountsForDisplay(amounts: { [key: string]: number } | undefined): string {
+    if (!amounts || typeof amounts !== 'object') return '';
+    
+    return Object.entries(amounts)
+      .map(([currency, amount]) => `${currency}: ${amount.toFixed(2)}`)
+      .join(', ');
+  }
+
+  trackByDetailId(index: number, detail: ExpenseDetails): number {
+    return detail.id || index;
   }
 
 }

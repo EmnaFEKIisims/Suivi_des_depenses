@@ -79,7 +79,8 @@
             <th>Reference</th>
             <th>Employee</th>
             <th>Project</th>
-            <th>Total Amount</th>
+            <th>Requested Amount</th>
+            <th>Approved Amount</th>
             <th>Status</th>
             <th>Actions</th>
             <th>Decision</th>
@@ -95,19 +96,33 @@
                 <span>"{{ formatAmount(pair.amount) }} {{ getCurrencySymbol(pair.currency) }}"</span><br *ngIf="i < getAmountsByCurrency(request).length - 1" />
               </ng-container>
             </td>
+            <td>
+              <ng-container *ngIf="request.status === 'APPROVED' && request.approvedAmounts">
+                <ng-container *ngFor="let pair of getApprovedAmountsByCurrency(request); let i = index">
+                  <span class="approved-amount-display">"{{ formatAmount(pair.amount) }} {{ getCurrencySymbol(pair.currency) }}"</span><br *ngIf="i < getApprovedAmountsByCurrency(request).length - 1" />
+                </ng-container>
+              </ng-container>
+              <span *ngIf="request.status !== 'APPROVED'" class="text-muted">-</span>
+            </td>
             <td>{{ formatStatus(request.status) }}</td>
             <td>
-              <div class="btn-group" role="group">
-                <button class="btn btn-sm btn-outline-primary"  (click)="viewRequest(request.id)">
+              <div class="d-flex gap-1">
+                <!-- View and Edit buttons (disabled for admin who didn't create the request) -->
+                <button class="btn btn-sm btn-outline-primary" 
+                        [disabled]="isAdmin() && !isRequestCreatedByCurrentUser(request)" 
+                        (click)="viewRequest(request.id)">
                   <i class="bi bi-eye"></i> View
                 </button>
-                <button class="btn btn-sm btn-outline-secondary" [disabled]="request.status !== 'SUBMITTED'" (click)="editRequest(request.id)">
+                <button class="btn btn-sm btn-outline-secondary" 
+                        [disabled]="(isAdmin() && !isRequestCreatedByCurrentUser(request)) || request.status !== 'SUBMITTED'" 
+                        (click)="editRequest(request.id)">
                   <i class="bi bi-pencil"></i> Edit
                 </button>
               </div>
             </td>
             <td>
-              <div class="btn-group" role="group">
+              <!-- Admin approval/rejection buttons (only visible for admin) -->
+              <div *ngIf="isAdmin()" class="d-flex gap-1">
                 <button
                   class="btn btn-sm btn-outline-success"
                   [disabled]="request.status !== 'SUBMITTED'"
@@ -121,10 +136,15 @@
                   <i class="bi bi-x-circle"></i> Reject
                 </button>
               </div>
+              
+              <!-- Employee message (only visible for employees) -->
+              <div *ngIf="!isAdmin()" class="text-muted small d-flex align-items-center">
+                <i class="bi bi-shield-lock me-1"></i> Admin access required
+              </div>
             </td>
           </tr>
           <tr *ngIf="filteredRequests.length === 0">
-            <td colspan="7" class="text-center text-muted">
+            <td colspan="8" class="text-center text-muted">
               <i class="bi bi-receipt-cutoff me-2"></i>
               No expense requests found matching your criteria
             </td>
@@ -134,3 +154,19 @@
     </div>
   </div>
 </div>
+
+<!-- Approval Modal -->
+<app-approval-modal 
+  [visible]="showApprovalModal"
+  [request]="selectedRequest"
+  (approved)="onApprovalCompleted()"
+  (cancelled)="onApprovalCancelled()">
+</app-approval-modal>
+
+<!-- Rejection Modal -->
+<app-rejection-modal 
+  [visible]="showRejectionModal"
+  [request]="selectedRequest"
+  (rejected)="onRejectionCompleted()"
+  (cancelled)="onRejectionCancelled()">
+</app-rejection-modal>

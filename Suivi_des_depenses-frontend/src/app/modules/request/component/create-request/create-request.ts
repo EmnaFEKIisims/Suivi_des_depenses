@@ -20,7 +20,7 @@ interface DetailRow {
 @Component({
   selector: 'app-create-request',
   templateUrl: './create-request.html',
-  styleUrls: ['./create-request.scss'],
+  styleUrls: ['./create-request.scss', './total-amounts-styles.scss'],
   encapsulation: ViewEncapsulation.None,
   standalone: false
 })

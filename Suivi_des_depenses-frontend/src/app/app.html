@@ -18,7 +18,7 @@
       <div class="nav-section">
         <div class="nav-section-title">Main Menu</div>
         <div class="nav-item">
-          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <a class="nav-link" routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
             <i class="bi bi-house-door nav-icon"></i>
             <span>Dashboard</span>
           </a>
@@ -87,7 +87,7 @@
           </a>
         </div>
         <div class="nav-item">
-          <a class="nav-link" href="#" (click)="$event.preventDefault()">
+          <a class="nav-link" routerLink="/profile" routerLinkActive="active" (click)="navigateToProfile()">
             <i class="bi bi-person-circle nav-icon"></i>
             <span>Profile</span>
           </a>

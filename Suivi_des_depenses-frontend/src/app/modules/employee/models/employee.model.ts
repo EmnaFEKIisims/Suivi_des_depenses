@@ -16,6 +16,9 @@ export interface Employee {
   exitDate : Date | string; 
   username: string;
   password: string;
+  roles: Role[]; // Array of roles (maps to Set<Role> in backend)
+  mfaSecret?: string; // Optional, as it can be null
+  mfaEnabled: boolean;
 }
 
 
@@ -38,6 +41,12 @@ export enum Department {
   HR = 'HR',
   Production = 'Production',
   Building_Infrastructure = 'Building_Infrastructure'
+}
+
+
+export enum Role {
+  ADMIN = 'ROLE_ADMIN',
+  EMPLOYEE = 'ROLE_EMPLOYEE'
 }
 
 

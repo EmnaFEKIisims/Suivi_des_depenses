@@ -1,0 +1,77 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onCancel()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-times-circle"></i> Reject Expense Request</h2>
+      <button class="modal-close" (click)="onCancel()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <div class="request-summary" *ngIf="request">
+        <div class="summary-item">
+          <strong>Employee:</strong> {{ request.employee.fullName }}
+        </div>
+        <div class="summary-item">
+          <strong>Mission:</strong> {{ request.mission }}
+        </div>
+        <div class="summary-item">
+          <strong>Location:</strong> {{ request.missionLocation }}
+        </div>
+        <div class="summary-item">
+          <strong>Period:</strong> {{ request.startDate | date:'dd/MM/yyyy' }} - {{ request.returnDate | date:'dd/MM/yyyy' }}
+        </div>
+      </div>
+
+      <form [formGroup]="rejectionForm" class="rejection-form">
+        <div class="form-section">
+          <h3><i class="fas fa-comment-slash"></i> Reason for Rejection</h3>
+          <div class="field-group">
+            <label for="rejectionReason">Please provide a detailed explanation for rejecting this request *</label>
+            <textarea 
+              id="rejectionReason"
+              formControlName="rejectionReason" 
+              class="form-control rejection-textarea"
+              placeholder="Explain why this request is being rejected. Be specific about which expenses are problematic or what policy violations occurred..."
+              rows="6"></textarea>
+            
+            <div class="field-feedback">
+              <div class="character-count">
+                {{ rejectionReason?.value?.length || 0 }} characters (minimum 10 required)
+              </div>
+              <div class="error-message" *ngIf="rejectionReason?.invalid && rejectionReason?.touched">
+                <span *ngIf="rejectionReason?.errors?.['required']">Rejection reason is required</span>
+                <span *ngIf="rejectionReason?.errors?.['minlength']">Please provide at least 10 characters</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="warning-notice">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>
+            <strong>Important:</strong> This action will permanently reject the request. 
+            The employee will be notified and will need to create a new request if needed.
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" 
+              class="btn btn-cancel" 
+              (click)="onCancel()"
+              [disabled]="isLoading">
+        Cancel
+      </button>
+      <button type="button" 
+              class="btn btn-reject" 
+              (click)="onReject()"
+              [disabled]="!rejectionForm.valid || isLoading">
+        <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+        <i class="fas fa-ban" *ngIf="!isLoading"></i>
+        {{ isLoading ? 'Processing...' : 'Reject Request' }}
+      </button>
+    </div>
+  </div>
+</div>

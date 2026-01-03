@@ -23,6 +23,11 @@ export class App {
 
   isWelcomePage(): boolean {
     const url = this.router.url.split('?')[0].split('#')[0];
-    return url === '/' || url === '/welcome_page';
+    return url === '/' || url === '/welcome' || url === '/login';
+  }
+
+  navigateToProfile() {
+    console.log('Navigating to profile...');
+    this.router.navigate(['/profile']);
   }
 }

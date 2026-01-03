@@ -4,6 +4,7 @@ import { Project } from '../../models/project.model';
 import { Status, Priority } from '../../models/project.enums';
 import { Router } from '@angular/router';
 import { EmployeeService } from '../../../employee/employee-service';
+import { AuthService } from '../../../auth/auth-service';
 declare const bootstrap: any;
 
 
@@ -26,20 +27,43 @@ export class ProjectList implements OnInit {
   selectedStatus: string = 'IN_PROGRESS';
   searchTerm: string = '';
 
-  constructor(private projectService: ProjectService,
+  constructor(
+    private projectService: ProjectService,
     private employeeService: EmployeeService,
-     private router: Router) { }
+    private authService: AuthService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.loadProjects();
   }
 
-  loadProjects(): void {
-    this.projectService.getAllProjects().subscribe((data) => {
-      this.projects = data;
-      this.applyFilters();
+loadProjects(): void {
+  const isAdmin = this.authService.hasRole('ADMIN'); // From your AuthService
+
+  if (isAdmin) {
+    this.projectService.getAllProjects().subscribe({
+      next: (data) => {
+        this.projects = data;
+        this.applyFilters();
+      },
+      error: (err) => {
+        console.error('Failed to load all projects:', err);
+      }
+    });
+  } else {
+    this.projectService.getProjectsByEmployee().subscribe({
+      next: (data) => {
+        this.projects = data;
+        this.applyFilters();
+      },
+      error: (err) => {
+        console.error('Failed to load your projects:', err);
+        alert('Could not load your projects.');
+      }
     });
   }
+}
 
   formatStatus(status: string): string {
   // Convert enum value to display-friendly format

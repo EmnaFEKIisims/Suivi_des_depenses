@@ -18,13 +18,17 @@ import { RequestList } from './component/request-list/request-list';
 import { CreateRequest } from './component/create-request/create-request';
 import { UpdateRequest } from './component/update-request/update-request';
 import { RequestDetails } from './component/request-details/request-details';
+import { ApprovalModal } from './component/approval-modal/approval-modal';
+import { RejectionModal } from './component/rejection-modal/rejection-modal';
 
 @NgModule({
   declarations: [
     RequestList,
     CreateRequest,
     UpdateRequest,
-    RequestDetails
+    RequestDetails,
+    ApprovalModal,
+    RejectionModal
   ],
   imports: [
     CommonModule,
