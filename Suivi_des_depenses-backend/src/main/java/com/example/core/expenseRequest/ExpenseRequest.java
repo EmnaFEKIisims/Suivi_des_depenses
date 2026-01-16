@@ -1,5 +1,6 @@
 package com.example.core.expenseRequest;
 
+import com.example.core.budget.BudgetType;
 import com.example.core.employee.Employee;
 import com.example.core.project.Project;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -11,8 +12,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
+import org.hibernate.annotations.Type;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +62,10 @@ public class ExpenseRequest {
     @Column(name = "missionLocation", nullable = false)
     private String missionLocation;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "reimbursementMethod", nullable = false)
-    private String reimbursementMethod;
+    private BudgetType reimbursementMethod;
+
 
 
     @Enumerated(EnumType.STRING)
@@ -74,6 +80,31 @@ public class ExpenseRequest {
     @Transient
     @JsonIgnore
     private Map<Currency, Double> amountByCurrency;
+
+
+
+    @Column(columnDefinition = "jsonb")
+    @Type(JsonBinaryType.class)
+    private Map<String, Double> requestedAmounts;
+
+    @Column(columnDefinition = "jsonb")
+    @Type(JsonBinaryType.class)
+    private Map<String, Double> approvedAmounts;
+
+
+
+
+    @Column(length = 5000)
+    private String approvalComment;
+
+    @Column(length = 5000)
+    private String rejectionReason;
+
+    @Column(name = "approved_by")
+    private String approvedBy;
+
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
 
 
     @JsonProperty("totalAmounts")
@@ -96,6 +127,31 @@ public class ExpenseRequest {
             }
         }
     }
+
+
+    public Map<String, Double> getRequestedAmounts() {
+        if (requestedAmounts == null) {
+            requestedAmounts = new HashMap<>();
+        }
+        return requestedAmounts;
+    }
+
+    public void setRequestedAmounts(Map<String, Double> requestedAmounts) {
+        this.requestedAmounts = requestedAmounts;
+    }
+
+    public Map<String, Double> getApprovedAmounts() {
+        if (approvedAmounts == null) {
+            approvedAmounts = new HashMap<>();
+        }
+        return approvedAmounts;
+    }
+
+    public void setApprovedAmounts(Map<String, Double> approvedAmounts) {
+        this.approvedAmounts = approvedAmounts;
+    }
+
+
 
 
 }

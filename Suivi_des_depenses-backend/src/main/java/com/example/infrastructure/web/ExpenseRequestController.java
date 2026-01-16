@@ -26,7 +26,7 @@ public class ExpenseRequestController {
     private final EmployeeServices employeeServices;
 
     @PostMapping("/create")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ResponseEntity<ExpenseRequest> createExpenseRequest(@RequestBody @Valid ExpenseRequest request) {
         ExpenseRequest created = expenseRequestServices.createExpenseRequest(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -66,14 +66,28 @@ public class ExpenseRequestController {
         return ResponseEntity.noContent().build();
     }
 
-    public record ApprovalRequest(String comment) {}
+    // DTO pour approve (exactement comme ton front envoie)
+    public record ApprovalRequest(String comment, Map<String, Double> approvedAmounts) {}
 
     @PostMapping("/{requestId}/approve")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<ExpenseRequest> approveRequest(@PathVariable Long requestId, @RequestBody(required = false) ApprovalRequest body) {
+    public ResponseEntity<ExpenseRequest> approveRequest(
+            @PathVariable Long requestId,
+            @RequestBody(required = false) ApprovalRequest body) {
+
         checkRequestIsSubmitted(requestId);
-        String comment = (body != null && body.comment() != null && !body.comment().trim().isEmpty()) ? body.comment().trim() : null;
-        expenseRequestServices.saveApproval(requestId, comment, true);
+
+        String comment = (body != null && body.comment() != null && !body.comment().trim().isEmpty())
+                ? body.comment().trim()
+                : null;
+
+        Map<String, Double> approvedAmountsMap = (body != null && body.approvedAmounts() != null)
+                ? body.approvedAmounts()
+                : null;
+
+        // Appel corrigé : on passe le map au service
+        expenseRequestServices.saveApproval(requestId, comment, true, approvedAmountsMap);
+
         ExpenseRequest approved = expenseRequestServices.approveRequest(requestId);
         return ResponseEntity.ok(approved);
     }
@@ -84,7 +98,7 @@ public class ExpenseRequestController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ExpenseRequest> rejectRequest(@PathVariable Long requestId, @RequestBody @Valid RejectionRequest body) {
         checkRequestIsSubmitted(requestId);
-        expenseRequestServices.saveApproval(requestId, body.reason(), false);
+        expenseRequestServices.saveApproval(requestId, body.reason(), false, null); // pas de map pour reject
         ExpenseRequest rejected = expenseRequestServices.rejectRequest(requestId, body.reason());
         return ResponseEntity.ok(rejected);
     }

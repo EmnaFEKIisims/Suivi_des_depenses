@@ -32,6 +32,9 @@ public interface ExpenseRequestRepo extends JpaRepository<ExpenseRequest, Long> 
 
     Optional<ExpenseRequest> findTopByOrderByReferenceDesc();
 
+    @Query("SELECT r FROM ExpenseRequest r LEFT JOIN FETCH r.details WHERE r.idRequest = :id")
+    Optional<ExpenseRequest> findRequestByIdWithDetails(@Param("id") Long id);
+
 
 
 }

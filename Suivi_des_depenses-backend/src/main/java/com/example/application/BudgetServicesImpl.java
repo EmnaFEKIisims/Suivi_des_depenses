@@ -80,7 +80,9 @@ public class BudgetServicesImpl implements BudgetServices {
                 History deductHistory = History.createDeductionRecord(
                         request, type, amount, currency
                 );
+                deductHistory.setBudget(budget);
                 budget.addHistoryRecord(deductHistory);
+                historyRepoPort.save(deductHistory);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown operation: " + operation);
