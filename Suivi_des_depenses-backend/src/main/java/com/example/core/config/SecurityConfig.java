@@ -67,16 +67,35 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+
+                        // ✅ ENDPOINTS DE TEST (SANS AUTH)
+                        .requestMatchers(
+                                "/api/employees/testPassword",
+                                "/api/employees/hashPassword"
+                        ).permitAll()
+
+                        // Auth publique
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // Admin only
                         .requestMatchers("/api/admin/**", "/api/clients/**", "/api/budgets/**").hasRole("ADMIN")
-                        .requestMatchers("/api/employees/**", "/api/projects/**", "/api/expenses/**").authenticated()
+
+                        // Auth requise
+                        .requestMatchers(
+                                "/api/employees/**",
+                                "/api/projects/**",
+                                "/api/expenses/**"
+                        ).authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

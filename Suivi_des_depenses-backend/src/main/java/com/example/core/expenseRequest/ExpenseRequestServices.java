@@ -35,4 +35,9 @@ public interface ExpenseRequestServices {
 
     String generateReference();
 
+
+
+    void saveApproval(Long requestId, String comment, boolean isApproval, Map<String, Double> approvedAmountsMap);
+    Long getRequestIdFromDetail(Long detailId);
+
 }
